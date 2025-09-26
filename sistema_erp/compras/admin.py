@@ -1,3 +1,10 @@
 from django.contrib import admin
+from .models import OrdenCompra, DetalleOrdenCompra
 
-# Register your models here.
+@admin.register(OrdenCompra)
+class OrdenCompraAdmin(admin.ModelAdmin):
+    list_display = ('idOrdenCompra', 'fecha', 'estado', 'proveedor', 'usuario')
+
+@admin.register(DetalleOrdenCompra)
+class DetalleOrdenCompraAdmin(admin.ModelAdmin):
+    list_display = ('idDetalleOrdenCompra', 'cantidad', 'precioUnitario', 'ordenCompra', 'producto')
