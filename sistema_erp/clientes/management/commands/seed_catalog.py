@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from django.core.management import call_command
 from django.utils import timezone
 from clientes.models import Cliente
 from productos.models import Producto, Lote, Costo
@@ -10,7 +11,7 @@ from inventario.models import Bodega, Stock, Merma
 from produccion.models import OrdenProduccion, Consumo
 
 class Command(BaseCommand):
-    help = "Carga datos iniciales para todas las tablas del sistema ERP"
+    help = "Carga datos iniciales para todas las tablas del sistema ERP y genera un archivo JSON en fixtures"
 
     def handle(self, *args, **kwargs):
         # Crear usuarios
@@ -71,4 +72,9 @@ class Command(BaseCommand):
         orden_produccion1, _ = OrdenProduccion.objects.get_or_create(fechaInicio=timezone.make_aware(timezone.datetime(2025, 9, 22)), fechaFinalizacion=timezone.make_aware(timezone.datetime(2025, 9, 23)), estado="pendiente")
         Consumo.objects.get_or_create(ordenProduccion=orden_produccion1, producto=producto1, cantidad=10, merma=2)
 
-        self.stdout.write(self.style.SUCCESS("Datos iniciales cargados correctamente para todas las tablas"))
+        # Generar archivo JSON en fixtures
+        output_file = "fixtures/seed_catalog.json"
+        with open(output_file, "w") as f:
+            call_command("dumpdata", indent=2, stdout=f)
+
+        self.stdout.write(self.style.SUCCESS(f"Datos iniciales cargados correctamente y archivo generado en {output_file}"))
