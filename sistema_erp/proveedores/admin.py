@@ -1,17 +1,27 @@
 from django.contrib import admin
-from .models import Proveedor, ProductoProveedor
+from .models import Proveedor
+from productos.models import Producto
+
+class ProductoInline(admin.TabularInline):
+    model = Producto
+    extra = 0
+    fields = ('nombre', 'categoria', 'precio', 'stock_actual', 'fecha_vencimiento')
+    show_change_link = True
+
+@admin.action(description="Marcar proveedores seleccionados como ACTIVOS")
+def marcar_activo(modeladmin, request, queryset):
+    queryset.update(estado='ACTIVO')
+
+@admin.action(description="Marcar proveedores seleccionados como INACTIVOS")
+def marcar_inactivo(modeladmin, request, queryset):
+    queryset.update(estado='INACTIVO')
 
 @admin.register(Proveedor)
 class ProveedorAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'rut', 'direccion', 'telefono', 'email')
-    search_fields = ('nombre', 'rut', 'email')
-    list_filter = ('direccion',)
+    list_display = ('nombre', 'rut', 'contacto', 'telefono', 'correo', 'estado')
+    search_fields = ('nombre', 'rut', 'correo')
+    list_filter = ('estado',)
+    list_per_page = 20
     ordering = ('nombre',)
-
-@admin.register(ProductoProveedor)
-class ProductoProveedorAdmin(admin.ModelAdmin):
-    list_display = ('producto', 'proveedor', 'precio', 'fechaRegistro')
-    search_fields = ('producto__nombre', 'proveedor__nombre')
-    list_filter = ('fechaRegistro',)
-    ordering = ('fechaRegistro',)
-    list_select_related = ('producto', 'proveedor')
+    inlines = [ProductoInline]
+    actions = [marcar_activo, marcar_inactivo]

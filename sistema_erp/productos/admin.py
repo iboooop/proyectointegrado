@@ -1,25 +1,31 @@
 from django.contrib import admin
-from .models import Producto, Lote, Costo
+from .models import Producto
+from .forms import ProductoForm
+from transacciones.models import MovimientoInventario
+
+
+
+class MovimientoInline(admin.TabularInline):
+    model = MovimientoInventario
+    extra = 0
+    fields = ('tipo', 'cantidad', 'usuario', 'proveedor')
+    show_change_link = True
+
+@admin.action(description="Marcar productos seleccionados como Stock ALTO")
+def marcar_alto(modeladmin, request, queryset):
+    queryset.update(stock='ALTO')
+
+@admin.action(description="Marcar productos seleccionados como INACTIVOS")
+def marcar_bajo(modeladmin, request, queryset):
+    queryset.update(stock='BAJO')
 
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'categoria', 'precioBase')
-    search_fields = ('nombre', 'categoria')
-    list_filter = ('categoria',)
+    form = ProductoForm  # <--- Usamos el form con validaciones
+    list_display = ('nombre', 'categoria', 'precio', 'stock_actual', 'fecha_vencimiento', 'lote', 'stock')
+    search_fields = ('nombre', 'categoria', 'lote')
+    list_filter = ('categoria', 'stock')
+    list_per_page = 20
     ordering = ('nombre',)
-
-@admin.register(Lote)
-class LoteAdmin(admin.ModelAdmin):
-    list_display = ('idLote', 'fechaIngreso', 'fechaVencimiento', 'producto', 'ubicacion')
-    search_fields = ('producto__nombre', 'ubicacion')
-    list_filter = ('fechaIngreso', 'fechaVencimiento')
-    ordering = ('fechaIngreso',)
-    list_select_related = ('producto',)
-
-@admin.register(Costo)
-class CostoAdmin(admin.ModelAdmin):
-    list_display = ('idCosto', 'monto', 'lote', 'producto', 'fechaCosto')
-    search_fields = ('producto__nombre', 'lote__idLote')
-    list_filter = ('fechaCosto',)
-    ordering = ('fechaCosto',)
-    list_select_related = ('lote', 'producto')
+    inlines = [MovimientoInline]
+    actions = [marcar_alto, marcar_bajo]
