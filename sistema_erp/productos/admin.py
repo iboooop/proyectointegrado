@@ -15,7 +15,7 @@ class MovimientoInline(admin.TabularInline):
 def marcar_alto(modeladmin, request, queryset):
     queryset.update(stock='ALTO')
 
-@admin.action(description="Marcar productos seleccionados como INACTIVOS")
+@admin.action(description="Marcar productos seleccionados como stock BAJO")
 def marcar_bajo(modeladmin, request, queryset):
     queryset.update(stock='BAJO')
 
