@@ -1,12 +1,19 @@
+# apps/usuarios/models.py
+from django.contrib.auth.models import User
 from django.db import models
 
-class Usuario(models.Model):
-    idUsuario = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=100)
-    email = models.EmailField(max_length=200, unique=True)
-    telefono = models.CharField(max_length=15, null=True, blank=True)
-    contrasena = models.CharField(max_length=255)
-    estado = models.BooleanField(default=True)
+class Perfil(models.Model):
+    ROLES = [
+        ('ADMIN', 'Administrador'),
+        ('BODEGA', 'Operador de Bodega'),
+        ('COMPRAS', 'Operador de Compras'),
+        ('VENTAS', 'Operador de Ventas'),
+        ('PRODUCCION', 'Jefe de Producción'),
+    ]
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE)
+    rol = models.CharField(max_length=20, choices=ROLES)
+    telefono = models.CharField(max_length=15, blank=True)
+    area = models.CharField(max_length=50, blank=True)
 
     def __str__(self):
-        return self.nombre
+        return f"{self.usuario.username} ({self.rol})"
