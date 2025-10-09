@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import Perfil
 from transacciones.models import MovimientoInventario
+from .forms import PerfilForm
 
 class MovimientoUsuarioInline(admin.TabularInline):
     model = MovimientoInventario
@@ -11,6 +12,7 @@ class MovimientoUsuarioInline(admin.TabularInline):
 
 @admin.register(Perfil)
 class PerfilAdmin(admin.ModelAdmin):
+    form = PerfilForm  # <--- Usamos el form con validaciones
     list_display = ('usuario', 'rol', 'telefono', 'area')
     search_fields = ('usuario__username', 'rol', 'area')
     list_filter = ('rol',)

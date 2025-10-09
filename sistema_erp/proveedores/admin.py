@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Proveedor
+from .forms import ProveedorForm
 from productos.models import Producto
 
 class ProductoInline(admin.TabularInline):
@@ -18,6 +19,7 @@ def marcar_inactivo(modeladmin, request, queryset):
 
 @admin.register(Proveedor)
 class ProveedorAdmin(admin.ModelAdmin):
+    form = ProveedorForm  # <--- Usamos el form con validaciones
     list_display = ('nombre', 'rut', 'contacto', 'telefono', 'correo', 'estado')
     search_fields = ('nombre', 'rut', 'correo')
     list_filter = ('estado',)
