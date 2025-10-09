@@ -11,7 +11,7 @@ Este proyecto utiliza **SQLite** como base de datos por defecto. No requiere con
 
 ## Cargar datos iniciales (semillas) con: 
 ```bash
-python manage.py seed_catalog
+python manage.py seed_sistema_erp
 ```
 Esto crea datos de prueba y genera archivos JSON en la carpeta fixtures/.
 
