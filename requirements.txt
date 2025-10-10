@@ -1,0 +1,20 @@
+# ===============================================================
+# SISTEMA ERP - Dependencias mínimas del proyecto
+# ===============================================================
+
+# Framework principal
+Django>=4.2,<5.0
+
+# Variables de entorno (.env)
+python-dotenv>=1.0.0
+
+# Base de datos MySQL (opción recomendada)
+mysqlclient>=2.1
+
+# Alternativa si mysqlclient falla en Windows
+# mysql-connector-python>=8.0
+
+# ===============================================================
+# Para regenerar este archivo después de instalar paquetes:
+# pip freeze > requirements.txt
+# ===============================================================
