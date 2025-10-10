@@ -8,12 +8,7 @@ Crear el entorno virtual (solo la primera vez)
 ```bash
    python -m venv venv
 ```
-Activar el entorno virtual
-En Bash (WSL, macOS, Linux):
-Ejecuta desde la raíz del proyecto
-```bash
-source venv/bin/activate
-```
+
 En Git Bash (Windows) *usa la ruta Scripts* del venv:
 Ejecuta desde la raíz del proyecto (Git Bash)
 ```bash
@@ -21,7 +16,6 @@ source venv/Scripts/activate
 ```
 Si PowerShell bloquea la ejecución de scripts, habilita la política temporalmente (ejecutar en PowerShell):
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-
 
 
 # 2️⃣ Actualizar pip y herramientas básicas
@@ -40,7 +34,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
    cd sistema_erp
    ```
 ```bash
-   python create_db.py
+   python create_db.py --force
    ```
 # 5️⃣ Aplicar migraciones y crear superusuario
 ```bash
@@ -67,9 +61,13 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 ```
 
 
-# 8️⃣ Acceso al panel de administración de Django
+# Acceso al panel de administración de Django
 
 Abre en tu navegador: http://127.0.0.1:8000/admin/
+
+# Acceso al panel de administración de MYSQL
+
+http://localhost/phpmyadmin/
 
 
 🚀 ¡Listo! Tu entorno de desarrollo está configurado y funcionando.
