@@ -10,13 +10,13 @@ Crear el entorno virtual (solo la primera vez)
 ```
 Activar el entorno virtual
 En Bash (WSL, macOS, Linux):
-```bash
 # Ejecuta desde la raíz del proyecto
+```bash
 source venv/bin/activate
 ```
 En Git Bash (Windows) *usa la ruta Scripts* del venv:
-```bash
 # Ejecuta desde la raíz del proyecto (Git Bash)
+```bash
 source venv/Scripts/activate
 ```
 Si PowerShell bloquea la ejecución de scripts, habilita la política temporalmente (ejecutar en PowerShell):
@@ -39,10 +39,16 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 # 4️⃣ Aplicar migraciones y crear superusuario
 ```bash
    cd sistema_erp
+   ```
+```bash
    python manage.py migrate
+   ```
+```bash
    python manage.py createsuperuser
+   ```
+```bash
    python manage.py makemigrations
-```
+   ```
 
 
 # 5️⃣ Cargar datos iniciales
