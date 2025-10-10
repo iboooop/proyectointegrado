@@ -10,12 +10,12 @@ Crear el entorno virtual (solo la primera vez)
 ```
 Activar el entorno virtual
 En Bash (WSL, macOS, Linux):
-# Ejecuta desde la raíz del proyecto
+Ejecuta desde la raíz del proyecto
 ```bash
 source venv/bin/activate
 ```
 En Git Bash (Windows) *usa la ruta Scripts* del venv:
-# Ejecuta desde la raíz del proyecto (Git Bash)
+Ejecuta desde la raíz del proyecto (Git Bash)
 ```bash
 source venv/Scripts/activate
 ```
