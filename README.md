@@ -14,10 +14,14 @@
 # ============================================================
 
 # Crear el entorno virtual (solo la primera vez)
-python -m venv venv
+```bash
+   python -m venv venv
+```
 
-# Activar el entorno virtual en PowerShell
-.\venv\Scripts\Activate.ps1
+# Activar el entorno virtual en GitBash
+```bash
+   source venv/Scripts/activate
+```
 
 # Si PowerShell bloquea la ejecución de scripts, habilita la política temporalmente:
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
@@ -26,34 +30,40 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 # ============================================================
 # 2️⃣ Actualizar pip y herramientas básicas
 # ============================================================
-pip install --upgrade pip setuptools wheel
-
+```bash
+   pip install --upgrade pip setuptools wheel
+   ```
 
 # ============================================================
 # 3️⃣ Instalar dependencias del proyecto
 # ============================================================
-pip install -r requirements.txt
-
+```bash
+   pip install -r requirements.txt
+   ```
 
 # ============================================================
 # 4️⃣ Aplicar migraciones y crear superusuario
 # ============================================================
-python manage.py makemigrations
-python manage.py migrate
-python manage.py createsuperuser
-
+```bash
+   cd sistema_erp
+   python manage.py migrate
+   python manage.py createsuperuser
+   python manage.py makemigrations
+```
 
 # ============================================================
-# 5️⃣ (Opcional) Cargar datos iniciales
+# 5️⃣ Cargar datos iniciales
 # ============================================================
-python manage.py seed_sistema_erp
-
+```bash
+   python manage.py seed_sistema_erp
+```
 
 # ============================================================
 # 6️⃣ Ejecutar el servidor de desarrollo
 # ============================================================
-python manage.py runserver
-
+```bash
+   python manage.py runserver
+```
 
 # ============================================================
 # 7️⃣ Acceso al panel de administración de Django
