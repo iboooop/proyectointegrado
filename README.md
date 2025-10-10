@@ -68,6 +68,7 @@ Abre en tu navegador: http://127.0.0.1:8000/admin/
 # Acceso al panel de administración de MYSQL
 
 http://localhost/phpmyadmin/
+usuario: root
 
 
 🚀 ¡Listo! Tu entorno de desarrollo está configurado y funcionando.
