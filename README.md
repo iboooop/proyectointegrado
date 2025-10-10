@@ -35,35 +35,39 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
    pip install -r requirements.txt
    ```
 
-
-# 4️⃣ Aplicar migraciones y crear superusuario
+# 4️⃣ Creae Base de Datos MySQL
 ```bash
    cd sistema_erp
+   ```
+```bash
+   python create_db.py
+   ```
+# 5️⃣ Aplicar migraciones y crear superusuario
+```bash
+   python manage.py makemigrations
    ```
 ```bash
    python manage.py migrate
    ```
 ```bash
+   #Opcional, vamos a cargar usuarios en seed
    python manage.py createsuperuser
    ```
-```bash
-   python manage.py makemigrations
-   ```
 
 
-# 5️⃣ Cargar datos iniciales
+# 6️⃣ Cargar datos iniciales
 ```bash
    python manage.py seed_sistema_erp
 ```
 
 
-# 6️⃣ Ejecutar el servidor de desarrollo
+# 7️⃣ Ejecutar el servidor de desarrollo
 ```bash
    python manage.py runserver
 ```
 
 
-# 7️⃣ Acceso al panel de administración de Django
+# 8️⃣ Acceso al panel de administración de Django
 
 Abre en tu navegador: http://127.0.0.1:8000/admin/
 
@@ -71,9 +75,9 @@ Abre en tu navegador: http://127.0.0.1:8000/admin/
 🚀 ¡Listo! Tu entorno de desarrollo está configurado y funcionando.
 
 
-# 8️⃣ Usuarios creados por el seed
+# Usuarios creados por el seed
 
 Credenciales por defecto que genera el seed:
-- admin / admin123  -> is_staff=True, is_superuser=True
-- compras / compras123 -> is_staff=True, is_superuser=False
-- bodega / bodega123 -> is_staff=True, is_superuser=False
+- admin / admin123
+- compras / compras123
+- bodega / bodega123
