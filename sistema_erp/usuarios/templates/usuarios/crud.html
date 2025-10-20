@@ -1,0 +1,42 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="crud-container">
+        <h1>Gestión de Usuarios</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for perfil in perfiles %}
+                <tr>
+                    <td>{{ perfil.username }}</td>
+                    <td>{{ perfil.email }}</td>
+                    <td>{{ perfil.rol }}</td>
+                    <td>{{ perfil.estado }}</td>
+                    <td>
+                        <a href="{% url 'usuarios_edit' perfil.id %}">Editar</a>
+                        <a href="{% url 'usuarios_delete' perfil.id %}" onclick="return confirm('¿Estás seguro de eliminar este usuario?')">Eliminar</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{% url 'usuarios_create' %}">Crear nuevo usuario</a>
+    </div>
+</body>
+</html>
