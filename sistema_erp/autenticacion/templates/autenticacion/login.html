@@ -1,0 +1,33 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="login-container">
+        <h1>Iniciar sesión</h1>
+        <!-- Mostrar mensajes flash -->
+        {% if messages %}
+            <div class="flash-error">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <!-- Botón para enviar el formulario -->
+            <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+        </form>
+        <p><a href="{% url 'recuperar_password' %}">¿Olvidaste tu contraseña?</a></p>
+        <!-- Botón para redirigir al registro -->
+        <p><a href="{% url 'registro' %}" class="btn btn-secondary">¿No tienes cuenta? Regístrate aquí</a></p>
+    </div>
+</body>
+</html>
