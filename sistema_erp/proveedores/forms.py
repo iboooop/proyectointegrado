@@ -6,6 +6,15 @@ class ProveedorForm(forms.ModelForm):
     class Meta:
         model = Proveedor
         fields = "__all__"
+        widgets = {
+            "nombre": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ingrese nombre del proveedor"}),
+            "rut": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ej: 12.345.678-9"}),
+            "contacto": forms.TextInput(attrs={"class": "form-control", "placeholder": "Nombre del contacto principal"}),
+            "telefono": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ej: +56912345678"}),
+            "correo": forms.EmailInput(attrs={"class": "form-control", "placeholder": "correo@ejemplo.com"}),
+            "direccion": forms.Textarea(attrs={"class": "form-control", "rows": 2, "placeholder": "Dirección comercial"}),
+            "estado": forms.Select(attrs={"class": "form-select"}),
+        }
 
     def clean_nombre(self):
         nombre = self.cleaned_data["nombre"]

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Sistema ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #f8f9fa; }
+        .dashboard-header { background: #212529; color: #fff; padding: 1rem 2rem; }
+        .card { box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-radius: 10px; }
+        .card-header { background: #f1f3f4; font-weight: 600; }
+        .footer { background: #212529; color: #fff; padding: 0.5rem 2rem; margin-top: 2rem; }
+        .pill {
+            background: #f1f3f4;
+            color: #212529;
+            border-radius: 1em;
+            padding: 0.3em 0.8em;
+            font-weight: 600;
+            font-size: 1em;
+            border: 1px solid #e0e0e0;
+            display: inline-block;
+        }
+        .list-item-centered {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6em 1.2em;
+            border-bottom: 1px solid #eee;
+        }
+        .list-item-centered:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="dashboard-header d-flex justify-content-between align-items-center">
+        <div>
+            <span class="fs-4 fw-bold">Sistema ERP</span>
+            {% comment %} <a href="/productos/" class="ms-4 text-white text-decoration-none">Productos</a>
+            <a href="/proveedores/" class="ms-4 text-white text-decoration-none">Proveedores</a>
+            <a href="/transacciones/" class="ms-4 text-white text-decoration-none">Transacciones</a> {% endcomment %}
+            {% comment %} <a href="/usuarios/" class="ms-4 text-white text-decoration-none">Usuarios</a> {% endcomment %}
+        </div>
+        <div>
+            <button class="btn btn-outline-light btn-sm">Cerrar sesión</button>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+
+        <!-- FILA PRINCIPAL -->
+        <div class="row g-3">
+            <!-- Productos -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header text-center">Productos</div>
+                    <div class="card-body text-center">
+                        <h3>{{ total_productos }}</h3>
+                        <p class="text-muted">registrados</p>
+                        <a href="/productos/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Proveedores -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header text-center">Proveedores</div>
+                    <div class="card-body text-center">
+                        <h3>{{ total_proveedores }}</h3>
+                        <p class="text-muted">activos</p>
+                        <a href="/proveedores/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transacciones -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header text-center">Inventario</div>
+                    <div class="card-body text-center">
+                        <h3>{{ total_transacciones }}</h3>
+                        <p class="text-muted">registradas</p>
+                        <a href="/transacciones/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Usuarios -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header text-center">Usuarios</div>
+                    <div class="card-body text-center">
+                        <h3>{{ total_usuarios }}</h3>
+                        <p class="text-muted">registrados</p>
+                        <a href="/usuarios/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                    </div>
+                </div>
+            </div> 
+        </div>
+
+        <!-- FILA SECUNDARIA (resúmenes visuales o listados) -->
+        <div class="row mt-4 g-3">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Últimos Productos Añadidos</span>
+                        <a href="/productos/" class="small">Ver todos</a>
+                    </div>
+                    <div class="card-body px-2">
+                        <ul class="list-unstyled mb-0">
+                            {% for producto in ultimos_productos %}
+                            <li class="list-item-centered">
+                                <span>{{ producto.nombre }}</span>
+                                <span class="pill">{{ producto.categoria }}</span>
+                            </li>
+                            {% empty %}
+                            <div class="alert alert-info mb-0">No hay productos recientes.</div>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Transacciones de Inventario recientes</span>
+                        <a href="/transacciones/" class="small">Ver todas</a>
+                    </div>
+                    <div class="card-body px-2">
+                        {% if ultimas_transacciones %}
+                            {% for transaccion in ultimas_transacciones %}
+                            <div class="mb-3 pb-2 border-bottom">
+                                <div class="fw-bold d-flex justify-content-between align-items-center">
+                                    <span>{{ transaccion.producto }}</span>
+                                    <span class="pill">{{ transaccion.tipo }}</span>
+                                </div>
+                                <div class="text-muted small">{{ transaccion.fecha|date:"d M Y H:i" }}</div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="alert alert-info mb-0">No hay transacciones recientes.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% comment %} <div class="footer d-flex justify-content-between align-items-center">
+        <span>&copy; 2025 Sistema ERP</span>
+        <span>Soporte</span>
+    </div> {% endcomment %}
+</body>
+</html>

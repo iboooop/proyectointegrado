@@ -7,6 +7,17 @@ class ProductoForm(forms.ModelForm):
     class Meta:
         model = Producto
         fields = "__all__"
+        widgets = {
+            "nombre": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ingrese nombre del producto"}),
+            "categoria": forms.Select(attrs={"class": "form-select"}),
+            "descripcion": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Descripción del producto"}),
+            "precio": forms.NumberInput(attrs={"class": "form-control", "min": "0", "step": "0.01"}),
+            "stock_actual": forms.NumberInput(attrs={"class": "form-control", "min": "0"}),
+            "fecha_vencimiento": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "lote": forms.TextInput(attrs={"class": "form-control", "placeholder": "Código de lote"}),
+            "proveedor": forms.Select(attrs={"class": "form-select"}),
+            "stock": forms.Select(attrs={"class": "form-select"}),
+        }
 
     def clean_nombre(self):
         nombre = self.cleaned_data["nombre"]
