@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'proveedores',
     'usuarios',
     'sistema_erp',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [

@@ -7,9 +7,16 @@ def lista_productos(request):
     productos = Producto.objects.select_related('proveedor').all()
     return render(request, 'productos/product_list.html', {'productos': productos})
 
-# def detalle_producto(request, id):
-#     producto = get_object_or_404(Producto.objects.select_related('proveedor'), id=id)
-#     return render(request, 'productos/product_detail.html', {'producto': producto})
+
+def crear_producto(request):
+    if request.method == 'POST':
+        form = ProductoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_productos')  # redirige al listado después de guardar
+    else:
+        form = ProductoForm()
+    return render(request, 'productos/product_add.html', {'form': form})
 
 def detalle_producto(request, id):
     producto = get_object_or_404(Producto.objects.select_related('proveedor'), id=id)
@@ -37,3 +44,4 @@ def eliminar_producto(request, id):
         producto.delete()
         return redirect('lista_productos')
     return redirect('detalle_producto', id=id)
+

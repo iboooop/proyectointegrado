@@ -2,9 +2,20 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import MovimientoInventario
 from .forms import MovimientoInventarioForm
 
+
 def lista_transacciones(request):
     transacciones = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario').order_by('-fecha')
     return render(request, 'transacciones/transaccion_list.html', {'transacciones': transacciones})
+
+def crear_transaccion(request):
+    if request.method == 'POST':
+        form = MovimientoInventarioForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_transacciones')
+    else:
+        form = MovimientoInventarioForm()
+    return render(request, 'transacciones/transaccion_add.html', {'form': form})
 
 def detalle_transaccion(request, id):
     transaccion = get_object_or_404(MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario'), id=id)

@@ -19,8 +19,9 @@
 
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">{{ transaccion.tipo }} - {{ transaccion.producto.nombre }}</h4>
+        <h4 class="mb-0">{{ transaccion.producto.nombre }}</h4>
         <span class="badge {% if transaccion.tipo == 'ENTRADA' %}bg-success{% elif transaccion.tipo == 'SALIDA' %}bg-danger{% else %}bg-secondary{% endif %}">
+            <strong>Estado: </strong>
           {{ transaccion.tipo }}
         </span>
       </div>

@@ -56,9 +56,15 @@ class ProductoForm(forms.ModelForm):
         return fecha_vencimiento
 
     def clean_lote(self):
-        lote = self.cleaned_data["lote"]
-        if lote and len(lote) > 50:
+        lote = str(self.cleaned_data.get("lote", "")).strip()
+
+        if not lote:
+            raise ValidationError("El campo Lote no puede estar en blanco.")
+        if lote == "0":
+            raise ValidationError("El lote no puede tener el valor 0.")
+        if len(lote) > 50:
             raise ValidationError("El lote no puede superar los 50 caracteres.")
+        
         return lote
 
     def clean_proveedor(self):

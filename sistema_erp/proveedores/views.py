@@ -8,6 +8,17 @@ def lista_proveedores(request):
     proveedores = Proveedor.objects.all().order_by('nombre')
     return render(request, 'proveedores/proveedor_list.html', {'proveedores': proveedores})
 
+
+def crear_proveedor(request):
+    if request.method == 'POST':
+        form = ProveedorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_proveedores')
+    else:
+        form = ProveedorForm()
+    return render(request, 'proveedores/proveedor_add.html', {'form': form})
+
 def detalle_proveedor(request, id):
     proveedor = get_object_or_404(Proveedor, id=id)
     productos = Producto.objects.filter(proveedor=proveedor)
