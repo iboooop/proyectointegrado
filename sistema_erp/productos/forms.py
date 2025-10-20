@@ -7,6 +7,17 @@ class ProductoForm(forms.ModelForm):
     class Meta:
         model = Producto
         fields = "__all__"
+        widgets = {
+            "nombre": forms.TextInput(attrs={"class": "form-control", "placeholder": "Ingrese nombre del producto"}),
+            "categoria": forms.Select(attrs={"class": "form-select"}),
+            "descripcion": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "Descripción del producto"}),
+            "precio": forms.NumberInput(attrs={"class": "form-control", "min": "0", "step": "0.01"}),
+            "stock_actual": forms.NumberInput(attrs={"class": "form-control", "min": "0"}),
+            "fecha_vencimiento": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+            "lote": forms.TextInput(attrs={"class": "form-control", "placeholder": "Código de lote"}),
+            "proveedor": forms.Select(attrs={"class": "form-select"}),
+            "stock": forms.Select(attrs={"class": "form-select"}),
+        }
 
     def clean_nombre(self):
         nombre = self.cleaned_data["nombre"]
@@ -45,9 +56,15 @@ class ProductoForm(forms.ModelForm):
         return fecha_vencimiento
 
     def clean_lote(self):
-        lote = self.cleaned_data["lote"]
-        if lote and len(lote) > 50:
+        lote = str(self.cleaned_data.get("lote", "")).strip()
+
+        if not lote:
+            raise ValidationError("El campo Lote no puede estar en blanco.")
+        if lote == "0":
+            raise ValidationError("El lote no puede tener el valor 0.")
+        if len(lote) > 50:
             raise ValidationError("El lote no puede superar los 50 caracteres.")
+        
         return lote
 
     def clean_proveedor(self):
