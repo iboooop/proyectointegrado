@@ -28,8 +28,8 @@ class MovimientoUsuarioInline(admin.TabularInline):
 @admin.register(Perfil)
 class PerfilAdmin(admin.ModelAdmin):
     form = PerfilForm
-    list_display = ('usuario', 'rol', 'telefono', 'area')
-    search_fields = ('usuario__username', 'rol', 'area')
+    list_display = ('usuario', 'rol', 'telefono')
+    search_fields = ('usuario__username', 'rol')
     list_filter = ('rol',)
     list_per_page = 20
     ordering = ('usuario',)

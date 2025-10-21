@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     login_view, registro_view, recuperar_password_view, restablecer_password_view,
-    cambiar_password_view
+    cambiar_password_view, logout_view
 )
 
 urlpatterns = [
@@ -10,5 +10,6 @@ urlpatterns = [
     path('recuperar/', recuperar_password_view, name='recuperar_password'),  # URL para recuperar contraseña
     path('restablecer/<uidb64>/<token>/', restablecer_password_view, name='restablecer_password'),  # URL para restablecer contraseña con token
     path('cambiar/', cambiar_password_view, name='cambiar_password'),  # URL para cambiar contraseña
+    path('logout/', logout_view, name='logout'),
 
 ]

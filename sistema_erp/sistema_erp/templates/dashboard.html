@@ -28,6 +28,11 @@
             border-bottom: 1px solid #eee;
         }
         .list-item-centered:last-child { border-bottom: none; }
+        .disabled-option {
+            color: gray;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -35,13 +40,12 @@
     <div class="dashboard-header d-flex justify-content-between align-items-center">
         <div>
             <span class="fs-4 fw-bold">Sistema ERP</span>
-            {% comment %} <a href="/productos/" class="ms-4 text-white text-decoration-none">Productos</a>
-            <a href="/proveedores/" class="ms-4 text-white text-decoration-none">Proveedores</a>
-            <a href="/transacciones/" class="ms-4 text-white text-decoration-none">Transacciones</a> {% endcomment %}
-            {% comment %} <a href="/usuarios/" class="ms-4 text-white text-decoration-none">Usuarios</a> {% endcomment %}
         </div>
         <div>
-            <button class="btn btn-outline-light btn-sm">Cerrar sesión</button>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-light btn-sm">Cerrar sesión</button>
+            </form>
         </div>
     </div>
 
@@ -56,7 +60,11 @@
                     <div class="card-body text-center">
                         <h3>{{ total_productos }}</h3>
                         <p class="text-muted">registrados</p>
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'VENTAS' or request.session.rol == 'BODEGA' %}
                         <a href="/productos/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                        {% else %}
+                        <span class="btn disabled-option w-100">No disponible</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -68,7 +76,11 @@
                     <div class="card-body text-center">
                         <h3>{{ total_proveedores }}</h3>
                         <p class="text-muted">activos</p>
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' %}
                         <a href="/proveedores/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                        {% else %}
+                        <span class="btn disabled-option w-100">No disponible</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -80,7 +92,11 @@
                     <div class="card-body text-center">
                         <h3>{{ total_transacciones }}</h3>
                         <p class="text-muted">registradas</p>
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'VENTAS' or request.session.rol == 'BODEGA' %}
                         <a href="/transacciones/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                        {% else %}
+                        <span class="btn disabled-option w-100">No disponible</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -92,7 +108,11 @@
                     <div class="card-body text-center">
                         <h3>{{ total_usuarios }}</h3>
                         <p class="text-muted">registrados</p>
+                        {% if request.session.rol == 'ADMIN' %}
                         <a href="/usuarios/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                        {% else %}
+                        <span class="btn disabled-option w-100">No disponible</span>
+                        {% endif %}
                     </div>
                 </div>
             </div> 
@@ -146,10 +166,5 @@
             </div>
         </div>
     </div>
-
-    {% comment %} <div class="footer d-flex justify-content-between align-items-center">
-        <span>&copy; 2025 Sistema ERP</span>
-        <span>Soporte</span>
-    </div> {% endcomment %}
 </body>
 </html>

@@ -11,23 +11,25 @@
 <body>
     <div class="login-container">
         <h1>Iniciar sesión</h1>
-        <!-- Mostrar mensajes flash -->
+        <!-- Mostrar solo mensajes de error/alerta (no éxito) -->
         {% if messages %}
-            <div class="flash-error">
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
-            </div>
+            {% for message in messages %}
+                {% if 'error' in message.tags or 'warning' in message.tags %}
+                <div class="flash-error"><p>{{ message }}</p></div>
+                {% endif %}
+            {% endfor %}
         {% endif %}
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <!-- Botón para enviar el formulario -->
-            <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+            <div style="display:flex; gap:12px; justify-content:center; align-items:center; margin-top:16px; flex-wrap:wrap;">
+                <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+                <a href="{% url 'registro' %}" class="btn btn-secondary">¿No tienes cuenta? Regístrate aquí</a>
+            </div>
         </form>
-        <p><a href="{% url 'recuperar_password' %}">¿Olvidaste tu contraseña?</a></p>
-        <!-- Botón para redirigir al registro -->
-        <p><a href="{% url 'registro' %}" class="btn btn-secondary">¿No tienes cuenta? Regístrate aquí</a></p>
+        <div style="text-align:center; margin-top:12px;">
+            <a href="{% url 'recuperar_password' %}">¿Olvidaste tu contraseña?</a>
+        </div>
     </div>
 </body>
 </html>

@@ -65,14 +65,6 @@ class RegistroForm(forms.Form):
             'invalid': "El teléfono debe contener solo números.",
         }
     )
-    area = forms.CharField(
-        required=False,
-        label="Área",
-        initial="",
-        error_messages={
-            'max_length': "El área no puede superar los 50 caracteres.",
-        }
-    )
 
     def clean_password(self):
         password = self.cleaned_data.get('password')

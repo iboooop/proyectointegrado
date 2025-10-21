@@ -4,6 +4,7 @@ from django.contrib.auth.models import User, Group
 # ------------------------------
 # PERFIL DE USUARIO
 # ------------------------------
+
 class Perfil(models.Model):
     ROLES = [
         ('ADMIN', 'Administrador'),
@@ -12,10 +13,18 @@ class Perfil(models.Model):
         ('COMPRAS', 'Operador de Compras'),
     ]
 
+    ESTADOS = [
+        ('ACTIVO', 'Activo'),
+        ('INACTIVO', 'Inactivo'),
+        ('BLOQUEADO', 'Bloqueado'),
+    ]
+
     usuario = models.OneToOneField(User, on_delete=models.CASCADE)
     rol = models.CharField(max_length=20, choices=ROLES)
     telefono = models.CharField(max_length=15, blank=True)
-    area = models.CharField(max_length=50, blank=True)
+    estado = models.CharField(max_length=10, choices=ESTADOS, default='ACTIVO')
+    mfa_habilitado = models.BooleanField(default=False)
+    sesiones_activas = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.usuario.username} ({self.rol})"

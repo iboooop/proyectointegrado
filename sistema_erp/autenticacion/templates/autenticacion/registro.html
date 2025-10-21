@@ -21,8 +21,10 @@
         <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Registrar</button>
-            <p><a href="{% url 'login' %}" class="btn btn-secondary">¿Ya tienes cuenta? Inicia sesión</a></p>
+            <div style="display:flex; gap:12px; justify-content:center; align-items:center; margin-top:16px;">
+                <button type="submit" class="btn btn-primary">Registrar</button>
+                <a href="{% url 'login' %}" class="btn btn-secondary">¿Ya tienes cuenta? Inicia sesión</a>
+            </div>
         </form>
     </div>
 </body>

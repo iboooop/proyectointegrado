@@ -1,88 +1,117 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Perfil, RoleModulePermission, Module
-from .forms import PerfilForm
-from django.contrib import messages  
-from functools import wraps
+from django.contrib import messages
+from django.db import transaction
+from django.core.exceptions import ValidationError
+from .forms import UsuarioForm, PerfilForm
+from .models import Perfil
 
-
-def custom_login_required(view_func):
-    @wraps(view_func)
-    def wrapper(request, *args, **kwargs):
-        if not request.session.get('usuario'):  # Verificar si hay un usuario en la sesión
-            return redirect('login')  # Redirigir al login si no hay sesión
-        return view_func(request, *args, **kwargs)
-    return wrapper
-
-
-@custom_login_required
+# ---------------- DASHBOARD ----------------
+@login_required
 def dashboard_view(request):
-    usuario = request.session.get('usuario')
-    rol = request.session.get('rol')
-    return render(request, 'usuarios/dashboard.html', {'usuario': usuario, 'rol': rol})
+    perfil = Perfil.objects.filter(usuario=request.user).first()
+    if not perfil:
+        return redirect('login')
 
-# Decorador para verificar el rol del usuario
-def role_required(roles):
-    def decorator(view_func):
-        def wrapper(request, *args, **kwargs):
-            perfil = Perfil.objects.filter(usuario=request.user).first()
-            if perfil and perfil.rol in roles:
-                return view_func(request, *args, **kwargs)
-            return JsonResponse({"error": "No tienes permiso para acceder a esta vista"}, status=403)
-        return wrapper
-    return decorator
+    if perfil.rol == 'ADMIN':
+        return render(request, 'dashboard.html', {
+            'total_productos': 100,
+            'total_proveedores': 50,
+            'total_transacciones': 200,
+            'total_usuarios': 10,
+            'ultimos_productos': [],
+            'ultimas_transacciones': []
+        })
+    else:
+        return render(request, 'usuarios/acceso_restringido.html', {'rol': perfil.rol})
 
-# Vista para listar usuarios (solo accesible para ADMIN)
-@custom_login_required
-@role_required(['ADMIN'])
+
+# ---------------- LISTADO ----------------
+@login_required
 def usuarios_list_view(request):
-    perfiles = Perfil.objects.all()  # Obtener todos los perfiles de usuarios
+    perfil = Perfil.objects.filter(usuario=request.user).first()
+    if not perfil or perfil.rol != 'ADMIN':
+        return redirect('dashboard')
+
+    perfiles = Perfil.objects.all()
     return render(request, 'usuarios/list.html', {'perfiles': perfiles})
 
-# Vista para crear un usuario (solo accesible para ADMIN)
-@custom_login_required
-@role_required(['ADMIN'])
+
+# ---------------- CREAR ----------------
+@login_required
 def usuarios_create_view(request):
     if request.method == 'POST':
-        form = PerfilForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Usuario creado exitosamente.")
-            return redirect('usuarios_list')
-        else:
-            for error in form.errors.values():
-                messages.error(request, error)
-    else:
-        form = PerfilForm()
-    return render(request, 'usuarios/create.html', {'form': form})
+        usuario_form = UsuarioForm(request.POST)
+        perfil_form = PerfilForm(request.POST)
 
-# Vista para editar un usuario (solo accesible para ADMIN)
-@custom_login_required
-@role_required(['ADMIN'])
+        if usuario_form.is_valid() and perfil_form.is_valid():
+            try:
+                with transaction.atomic():
+                    usuario = usuario_form.save()
+                    perfil = perfil_form.save(commit=False)
+                    perfil.usuario = usuario
+                    perfil.save()
+
+                messages.success(request, "Usuario creado exitosamente.")
+                return redirect('usuarios_list')
+            except ValidationError as e:
+                # Adjuntar el error no asociado a campo específico
+                usuario_form.add_error(None, e.message if hasattr(e, 'message') else str(e))
+                messages.error(request, "Hubo un error al crear el usuario. Verifique los datos ingresados.")
+        else:
+            print("Errores UsuarioForm:", usuario_form.errors)
+            print("Errores PerfilForm:", perfil_form.errors)
+            messages.error(request, "Hubo un error al crear el usuario. Verifique los datos ingresados.")
+    else:
+        usuario_form = UsuarioForm()
+        perfil_form = PerfilForm()
+
+    return render(request, 'usuarios/create.html', {
+        'usuario_form': usuario_form,
+        'perfil_form': perfil_form,
+        'show_messages': request.method == 'POST'
+    })
+
+
+# ---------------- EDITAR ----------------
+@login_required
 def usuarios_edit_view(request, id):
     perfil = get_object_or_404(Perfil, id=id)
+    usuario = perfil.usuario
+
     if request.method == 'POST':
-        form = PerfilForm(request.POST, instance=perfil)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Usuario actualizado exitosamente.")
+        usuario_form = UsuarioForm(request.POST, instance=usuario)
+        perfil_form = PerfilForm(request.POST, instance=perfil)
+
+        if usuario_form.is_valid() and perfil_form.is_valid():
+            usuario_form.save()
+            perfil_form.save()
+            messages.success(request, "Cambios guardados correctamente.")
             return redirect('usuarios_list')
         else:
-            for error in form.errors.values():
-                messages.error(request, error)
+            print("Errores UsuarioForm:", usuario_form.errors)
+            print("Errores PerfilForm:", perfil_form.errors)
+            messages.error(request, "No se pudieron guardar los cambios. Verifique los datos.")
     else:
-        form = PerfilForm(instance=perfil)
-    return render(request, 'usuarios/edit.html', {'form': form, 'perfil': perfil})
+        usuario_form = UsuarioForm(instance=usuario)
+        perfil_form = PerfilForm(instance=perfil)
 
-# Vista para eliminar un usuario (solo accesible para ADMIN)
-@custom_login_required
-@role_required(['ADMIN'])
+    return render(request, 'usuarios/edit.html', {
+        'usuario_form': usuario_form,
+        'perfil_form': perfil_form
+    })
+
+
+# ---------------- ELIMINAR ----------------
+@login_required
 def usuarios_delete_view(request, id):
     perfil = get_object_or_404(Perfil, id=id)
-    perfil.delete()
-    messages.success(request, "Usuario eliminado exitosamente.")
-    return redirect('usuarios_list')
+    usuario = perfil.usuario
 
-# Vista para listar módulos y permisos (solo accesible para ADMIN)
+    if request.method == 'POST':
+        usuario.delete()
+        perfil.delete()
+        messages.success(request, "Usuario eliminado correctamente.")
+        return redirect('usuarios_list')
+
+    return render(request, 'usuarios/delete.html', {'perfil': perfil})
