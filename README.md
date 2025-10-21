@@ -23,6 +23,10 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
    pip install --upgrade pip setuptools wheel
    ```
 
+```bash
+   pip install pyotp
+   ```
+
 
 # 3️⃣ Instalar dependencias del proyecto
 ```bash
