@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autenticación MFA</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="form-container">
+        <h1>Autenticación MFA</h1>
+        <form method="post">
+            {% csrf_token %}
+            <label for="codigo_totp">Código MFA:</label>
+            <input type="text" name="codigo_totp" id="codigo_totp" required>
+            <button type="submit" class="btn btn-primary">Verificar</button>
+        </form>
+        <p><a href="{% url 'dashboard' %}" class="btn btn-secondary">Volver al dashboard</a></p>
+    </div>
+</body>
+</html>
