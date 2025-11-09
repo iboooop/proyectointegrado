@@ -1,5 +1,6 @@
 from django.db import models
 from proveedores.models import Proveedor
+from bodegas.models import Bodega  # ← NUEVO IMPORT
 
 class Producto(models.Model):
     nombre = models.CharField(max_length=100)
@@ -15,6 +16,7 @@ class Producto(models.Model):
     fecha_vencimiento = models.DateField(null=True, blank=True)
     lote = models.CharField(max_length=50, blank=True)
     proveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE)
+    bodega = models.ForeignKey(Bodega, on_delete=models.SET_NULL, null=True, blank=True)  # ← NUEVO CAMPO
     
     STOCK_CHOICES = [
         ('ALTO', 'Alto'),
