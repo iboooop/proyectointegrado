@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Agregar Proveedor</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8f9fa; }
+    .card { border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .card-header { background: #212529; color: #fff; }
+    .form-label { font-weight: 500; }
+    .btn-success { background-color: #198754; border: none; }
+    .btn-success:hover { background-color: #157347; }
+    .btn-secondary { background-color: #6c757d; border: none; }
+  </style>
+</head>
+<body>
+  <div class="container my-5">
+    <a href="{% url 'lista_proveedores' %}" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
+
+    <div class="card">
+      <div class="card-header">
+        <h4 class="mb-0">Agregar nuevo proveedor</h4>
+      </div>
+
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          
+          {% for field in form %}
+          <div class="mb-3">
+            <label class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+              <div class="text-danger small mt-1">
+                {% for error in field.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+
+          <div class="d-flex justify-content-end mt-4">
+            <a href="{% url 'lista_proveedores' %}" class="btn btn-secondary me-2">Cancelar</a>
+            <button type="submit" class="btn btn-success">Guardar proveedor</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

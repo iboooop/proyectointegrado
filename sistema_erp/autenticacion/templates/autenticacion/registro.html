@@ -1,0 +1,31 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="registro-container">
+        <h1>Registro</h1>
+        {% if messages %}
+            <div class="flash-error">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div style="display:flex; gap:12px; justify-content:center; align-items:center; margin-top:16px;">
+                <button type="submit" class="btn btn-primary">Registrar</button>
+                <a href="{% url 'login' %}" class="btn btn-secondary">¿Ya tienes cuenta? Inicia sesión</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

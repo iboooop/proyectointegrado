@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalles del Producto - {{ producto.nombre }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8f9fa; }
+    .card { border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .card-header { background: #212529; color: #fff; }
+
+    .badge-alto { background-color: #198754; }
+    .badge-bajo { background-color: #dc3545; }
+
+    /* Botones fijos sin hover */
+    .btn-fixed {
+      font-size: 0.85rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+    .btn-warning-fixed {
+      background-color: #ffc107;
+      color: #212529;
+      border: none;
+    }
+    .btn-danger-fixed {
+      background-color: #dc3545;
+      color: #fff;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container my-5">
+    <a href="/productos/" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
+
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">{{ producto.nombre }}</h4>
+        <p></p>
+        <span class="badge {% if producto.stock == 'ALTO' %}badge-alto{% else %}badge-bajo{% endif %}">
+            <strong>Stock: </strong>
+          {{ producto.get_stock_display }}
+        </span>
+      </div>
+
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <p><strong>Categoría:</strong> {{ producto.get_categoria_display }}</p>
+            <p><strong>Precio:</strong> ${{ producto.precio }}</p>
+            <p>
+            <strong>Stock actual:</strong>
+            {{ producto.stock_actual }}
+            {% if producto.stock == 'ALTO' %}
+                <span class="badge bg-success ms-1">ALTO</span>
+            {% elif producto.stock == 'BAJO' %}
+                <span class="badge bg-danger ms-1">BAJO</span>
+            {% else %}
+                <span class="badge bg-secondary ms-1">N/A</span>
+            {% endif %}
+            </p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Proveedor:</strong> {{ producto.proveedor }}</p>
+            <p><strong>Lote:</strong> {{ producto.lote|default:"N/A" }}</p>
+            <p><strong>Fecha de vencimiento:</strong> 
+              {% if producto.fecha_vencimiento %}
+                {{ producto.fecha_vencimiento|date:"d/m/Y" }}
+              {% else %}
+                No registrada
+              {% endif %}
+            </p>
+          </div>
+        </div>
+        <hr>
+        <p><strong>Descripción:</strong></p>
+        <p>{{ producto.descripcion|default:"Sin descripción disponible." }}</p>
+
+        <!-- Botones de acción -->
+        <div class="mt-4 d-flex justify-content-end gap-2">
+          <!-- Editar -->
+          <a href="{% url 'editar_producto' producto.id %}" class="btn btn-warning-fixed btn-fixed">Editar</a>
+
+          <!-- Eliminar -->
+          <form action="{% url 'eliminar_producto' producto.id %}" method="post" onsubmit="return confirm('¿Seguro que deseas eliminar este producto?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger-fixed btn-fixed">Eliminar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <hr class="my-4">
+<h5 class="mb-3">Historial de Movimientos del Producto</h5>
+
+<div class="card mt-3">
+  
+  <div class="card-body p-0">
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Fecha</th>
+          <th>Tipo</th>
+          <th>Cantidad</th>
+          <th>Proveedor</th>
+          <th>Registrado por</th>
+          <th>Observaciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for mov in movimientos %}
+        <tr>
+          <td>{{ mov.fecha|date:"d/m/Y H:i" }}</td>
+          <td>
+            {% if mov.tipo == 'ENTRADA' %}
+              <span class="badge bg-success">Entrada</span>
+            {% elif mov.tipo == 'SALIDA' %}
+              <span class="badge bg-danger">Salida</span>
+            {% else %}
+              <span class="badge bg-secondary">Ajuste</span>
+            {% endif %}
+          </td>
+          <td>{{ mov.cantidad }}</td>
+          <td>{{ mov.proveedor|default:"—" }}</td>
+          <td>{{ mov.usuario.username|default:"—" }}</td>
+          <td>{{ mov.observaciones|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-3">
+            No hay movimientos registrados para este producto.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+  </div>
+  <div class="footer d-flex justify-content-between align-items-center">
+    <span>&copy; 2025 Sistema ERP</span>
+    <span>Soporte</span>
+  </div> 
+</body>
+</html>
