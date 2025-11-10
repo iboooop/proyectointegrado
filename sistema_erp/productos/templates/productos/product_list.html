@@ -52,7 +52,7 @@
           <button type="button" class="btn btn-outline-secondary tab-btn" data-target="#tab-relaciones">3. Relaciones y derivados</button>
         </div>
 
-        <form method="post" action="{% url 'producto_guardar' %}">
+  <form method="post" action="{% url 'producto_agregar' %}">
           {% csrf_token %}
           <div id="tab-identificacion" class="tab-content">
             <h6 class="mb-3">Identificación</h6>
