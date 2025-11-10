@@ -1,0 +1,213 @@
+/* ============ AVATAR COMPONENT ============ */
+.avatar-circle {
+    width: 110px;
+    height: 110px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-img,
+.modal-avatar-img {
+    width: 110px !important;
+    height: 110px !important;
+    min-width: 110px !important;
+    min-height: 110px !important;
+    max-width: 110px !important;
+    max-height: 110px !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+    border: 2px solid #dee2e6 !important;
+    background: #fff !important;
+    display: block !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.avatar-edit-btn {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    padding: 2px 16px;
+    border-radius: 20px;
+}
+
+.modal-body {
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* ============ GENERAL LAYOUT ============ */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Inter', sans-serif;
+}
+
+.container {
+    max-width: 1050px;
+    margin-top: 40px;
+}
+
+/* Padding lateral específico para páginas que lo necesiten */
+.container-padded {
+    padding-left: 32px;
+    padding-right: 32px;
+}
+
+.card {
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    padding: 40px 48px 32px 48px;
+    background-color: #fff;
+}
+
+.row.mb-3, .row.mb-4 {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Margen inferior de 2rem para secciones específicas */
+.mb-2rem {
+    margin-bottom: 2rem !important;
+}
+
+/* ============ FORMS & BUTTONS ============ */
+.form-control, .form-select {
+    border-radius: 10px;
+    border: 1px solid #ced4da;
+    font-size: 0.95rem;
+    padding: 8px 12px;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.15rem rgba(0,123,255,.25);
+}
+
+.btn-save {
+    background-color: #2563eb;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 10px;
+    border: none;
+    padding: 10px 18px;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+}
+
+.btn-save:hover {
+    background-color: #1d4ed8;
+}
+
+.btn-cancel {
+    background-color: #f87171;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 10px;
+    border: none;
+    padding: 10px 18px;
+    margin-left: 8px;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 8px rgba(248,113,113,0.08);
+}
+
+.btn-cancel:hover {
+    background-color: #dc2626;
+}
+
+/* ============ CARD / HEADER ============ */
+.card-header {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+/* ============ LABELS & TEXT ============ */
+.form-label {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.text-danger {
+    font-size: 0.85rem;
+}
+
+.alert-success {
+    font-size: 0.95rem;
+    border-radius: 10px;
+}
+
+/* ============ AVATAR MODAL INPUTS ============ */
+.avatar-file-input {
+    max-width: 250px;
+}
+
+/* Ocultar errores de avatar por defecto, visible al validar en JS */
+#avatarError {
+    display: none;
+}
+
+/* ============ DUPLICATED / REDUNDANCIA LIMPIA ============ */
+
+.card {
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    padding: 25px;
+    background-color: #fff;
+}
+
+/* Puedes ajustar padding/margins a gusto para el resto de tu app */
+
+/* ====== TABLAS GRANDES PARA LISTADOS ====== */
+.table-lg th, .table-lg td {
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+    font-size: 0.95rem;
+}
+
+/* Aumentar ancho del contenedor en listados para mejor visibilidad */
+body.usuarios-list .container {
+    max-width: 1250px;
+}
+
+/* ====== LISTA USUARIOS: ESTILOS ESPECÍFICOS ====== */
+body.usuarios-list {
+    background-color: #f8f9fa;
+}
+
+.card-header-dark {
+    background: #212529;
+    color: #fff;
+    font-weight: 600;
+}
+
+.btn-edit {
+    background-color: #0d6efd;
+    color: #fff;
+    border: none;
+}
+.btn-edit:hover { background-color: #0b5ed7; }
+
+.btn-delete {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+}
+.btn-delete:hover { background-color: #bb2d3b; }
+
+.btn-create {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+}
+.btn-create:hover { background-color: #218838; }
+
+.table-responsive { overflow-x: auto; }
+.table thead th { background-color: #f1f3f4; }
+.table-hover tbody tr:hover { background-color: #f8fafc; }

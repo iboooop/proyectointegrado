@@ -78,16 +78,15 @@ class UsuarioForm(forms.ModelForm):
         if not self.instance.pk and not password:
             raise ValidationError({'password': "Debe ingresar una contraseña para crear el usuario."})
 
+        # Validaciones mínimas para cambio de contraseña (solo si se intenta cambiar)
         if password or confirm:
             if password != confirm:
                 raise ValidationError({'confirm_password': "Las contraseñas no coinciden."})
-            if len(password) < 8:
+            if len(password or '') < 8:
                 raise ValidationError({'password': "La contraseña debe tener al menos 8 caracteres."})
-            if not re.search(r'[A-Z]', password):
+            if not re.search(r'[A-Z]', password or ''):
                 raise ValidationError({'password': "Debe incluir al menos una letra mayúscula."})
-            if not re.search(r'[a-z]', password):
-                raise ValidationError({'password': "Debe incluir al menos una letra minúscula."})
-            if not re.search(r'[0-9]', password):
+            if not re.search(r'[0-9]', password or ''):
                 raise ValidationError({'password': "Debe incluir al menos un número."})
         return cleaned_data
 
@@ -108,18 +107,33 @@ class UsuarioForm(forms.ModelForm):
 
 # ------------------ FORMULARIO PERFIL ------------------
 class PerfilForm(forms.ModelForm):
-    # sesiones_activas oculto; que no sea obligatorio para no bloquear edición si no se envía
+
+    avatar = forms.ImageField(
+        required=False,
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        label="Avatar (máx 2MB, JPG/PNG)"
+    )
     sesiones_activas = forms.IntegerField(widget=forms.HiddenInput(), initial=0, required=False)
 
     class Meta:
         model = Perfil
-        fields = ['telefono', 'rol', 'estado', 'mfa_habilitado', 'sesiones_activas']
+        fields = ['telefono', 'rol', 'estado', 'mfa_habilitado', 'avatar', 'sesiones_activas']
         widgets = {
             'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el teléfono'}),
             'rol': forms.Select(attrs={'class': 'form-select'}),
             'estado': forms.Select(attrs={'class': 'form-select'}),
             'mfa_habilitado': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
+    def clean_avatar(self):
+        avatar = self.cleaned_data.get('avatar')
+        if avatar:
+            if hasattr(avatar, 'content_type'):
+                main, sub = avatar.content_type.split('/')
+                if not (main == 'image' and sub in ['jpeg', 'jpg', 'png']):
+                    raise ValidationError('Solo se permiten imágenes JPG o PNG.')
+            if avatar.size > 2 * 1024 * 1024:
+                raise ValidationError('El tamaño máximo permitido es 2MB.')
+        return avatar
 
     def clean_rol(self):
         rol = self.cleaned_data.get('rol')

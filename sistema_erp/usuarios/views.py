@@ -1,10 +1,24 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
+from django.db.models import Q
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from .forms import UsuarioForm, PerfilForm
 from .models import Perfil
+from productos.models import Producto
+from proveedores.models import Proveedor
+from transacciones.models import MovimientoInventario
+from django.contrib.auth.models import User
+from django.http import HttpResponse
+from datetime import datetime
+try:
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, PatternFill
+except Exception:
+    Workbook = None
 
 # ---------------- DASHBOARD ----------------
 @login_required
@@ -14,13 +28,21 @@ def dashboard_view(request):
         return redirect('login')
 
     if perfil.rol == 'ADMIN':
+        total_productos = Producto.objects.count()
+        total_proveedores = Proveedor.objects.count()
+        total_transacciones = MovimientoInventario.objects.count()
+        total_usuarios = User.objects.count()
+
+        ultimos_productos = Producto.objects.order_by('-id')[:5]
+        ultimas_transacciones = MovimientoInventario.objects.select_related('producto').order_by('-fecha')[:5]
+
         return render(request, 'dashboard.html', {
-            'total_productos': 100,
-            'total_proveedores': 50,
-            'total_transacciones': 200,
-            'total_usuarios': 10,
-            'ultimos_productos': [],
-            'ultimas_transacciones': []
+            'total_productos': total_productos,
+            'total_proveedores': total_proveedores,
+            'total_transacciones': total_transacciones,
+            'total_usuarios': total_usuarios,
+            'ultimos_productos': ultimos_productos,
+            'ultimas_transacciones': ultimas_transacciones
         })
     else:
         return render(request, 'usuarios/acceso_restringido.html', {'rol': perfil.rol})
@@ -33,8 +55,72 @@ def usuarios_list_view(request):
     if not perfil or perfil.rol != 'ADMIN':
         return redirect('dashboard')
 
-    perfiles = Perfil.objects.all()
-    return render(request, 'usuarios/list.html', {'perfiles': perfiles})
+    # Filtros de búsqueda
+    q = (request.GET.get('q') or '').strip()
+
+    # Ordenación segura por campos permitidos
+    sort = (request.GET.get('sort') or 'usuario__username').strip()
+    direction = (request.GET.get('dir') or 'asc').strip().lower()
+
+    sort_map = {
+        'usuario__username': 'usuario__username',
+        'usuario__email': 'usuario__email',
+        'usuario__first_name': 'usuario__first_name',
+        'usuario__last_name': 'usuario__last_name',
+        'telefono': 'telefono',
+        'rol': 'rol',
+        'estado': 'estado',
+        'mfa_habilitado': 'mfa_habilitado',
+        'usuario__last_login': 'usuario__last_login',
+        'sesiones_activas': 'sesiones_activas',
+    }
+
+    base_qs = Perfil.objects.select_related('usuario').all()
+    if q:
+        base_qs = base_qs.filter(
+            Q(usuario__first_name__icontains=q)
+            | Q(usuario__last_name__icontains=q)
+            | Q(usuario__username__icontains=q)
+            | Q(usuario__email__icontains=q)
+            | Q(telefono__icontains=q)
+        )
+
+    order_field = sort_map.get(sort, 'usuario__username')
+    if direction == 'desc':
+        order_field = f'-{order_field}'
+    base_qs = base_qs.order_by(order_field)
+
+    # Paginación
+    # Tamaño de página configurable (persistente en sesión)
+    allowed_page_sizes = [5, 10, 20, 50, 100]
+    try:
+        page_size = int(request.GET.get('page_size') or request.session.get('usuarios_page_size') or 10)
+    except ValueError:
+        page_size = 10
+    if page_size not in allowed_page_sizes:
+        page_size = 10
+    request.session['usuarios_page_size'] = page_size
+
+    paginator = Paginator(base_qs, page_size)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'perfiles': page_obj.object_list,
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'q': q,
+        'sort': sort,
+        'dir': direction,
+        'page_size': page_size,
+        'page_sizes': allowed_page_sizes,
+    }
+
+    # Respuesta parcial para AJAX (solo tabla y paginación)
+    if request.GET.get('partial') == '1' or request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'usuarios/partials/list_table.html', context)
+
+    return render(request, 'usuarios/list.html', context)
 
 
 # ---------------- CREAR ----------------
@@ -52,10 +138,10 @@ def usuarios_create_view(request):
                     perfil.usuario = usuario
                     perfil.save()
 
-                messages.success(request, "Usuario creado exitosamente.")
-                return redirect('usuarios_list')
+                # Redirigir al listado con bandera de creación para SweetAlert
+                url = f"{reverse('usuarios_list')}?created=1"
+                return redirect(url)
             except ValidationError as e:
-                # Adjuntar el error no asociado a campo específico
                 usuario_form.add_error(None, e.message if hasattr(e, 'message') else str(e))
                 messages.error(request, "Hubo un error al crear el usuario. Verifique los datos ingresados.")
         else:
@@ -78,16 +164,17 @@ def usuarios_create_view(request):
 def usuarios_edit_view(request, id):
     perfil = get_object_or_404(Perfil, id=id)
     usuario = perfil.usuario
+    updated = False  # 🔹 Bandera para saber si se guardó correctamente
 
     if request.method == 'POST':
         usuario_form = UsuarioForm(request.POST, instance=usuario)
-        perfil_form = PerfilForm(request.POST, instance=perfil)
+        perfil_form = PerfilForm(request.POST, request.FILES, instance=perfil)
 
         if usuario_form.is_valid() and perfil_form.is_valid():
             usuario_form.save()
             perfil_form.save()
-            messages.success(request, "Cambios guardados correctamente.")
-            return redirect('usuarios_list')
+            # Redirigir con bandera updated para disparar SweetAlert en plantilla
+            return redirect(f"{reverse('usuarios_edit', args=[perfil.id])}?updated=1")
         else:
             print("Errores UsuarioForm:", usuario_form.errors)
             print("Errores PerfilForm:", perfil_form.errors)
@@ -96,9 +183,11 @@ def usuarios_edit_view(request, id):
         usuario_form = UsuarioForm(instance=usuario)
         perfil_form = PerfilForm(instance=perfil)
 
+    updated_flag = request.GET.get('updated') == '1'
     return render(request, 'usuarios/edit.html', {
         'usuario_form': usuario_form,
-        'perfil_form': perfil_form
+        'perfil_form': perfil_form,
+        'updated': updated_flag
     })
 
 
@@ -115,3 +204,67 @@ def usuarios_delete_view(request, id):
         return redirect('usuarios_list')
 
     return render(request, 'usuarios/delete.html', {'perfil': perfil})
+
+
+# ---------------- EXPORTAR EXCEL ----------------
+@login_required
+def export_usuarios_excel(request):
+    """Exporta todos los usuarios (User + Perfil) a un archivo XLSX."""
+    if Workbook is None:
+        return HttpResponse("openpyxl no está instalado. Agrega 'openpyxl' a requirements.txt e instala las dependencias.", status=500)
+
+    perfiles = Perfil.objects.select_related('usuario').order_by('usuario__username')
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'Usuarios'
+
+    headers = [
+        'Username', 'Email', 'Nombres', 'Apellidos', 'Teléfono',
+        'Rol', 'Estado', 'MFA', 'Último acceso', 'Sesiones activas'
+    ]
+    header_fill = PatternFill(start_color='EAF2FF', end_color='EAF2FF', fill_type='solid')
+    bold = Font(bold=True)
+    center = Alignment(horizontal='center')
+
+    ws.append(headers)
+    for cell in ws[1]:
+        cell.font = bold
+        cell.fill = header_fill
+        cell.alignment = center
+
+    for p in perfiles:
+        u = p.usuario
+        ws.append([
+            u.username,
+            u.email,
+            u.first_name,
+            u.last_name,
+            p.telefono or '',
+            p.get_rol_display() if hasattr(p, 'get_rol_display') else p.rol,
+            p.estado,
+            'Sí' if p.mfa_habilitado else 'No',
+            u.last_login.strftime('%Y-%m-%d %H:%M') if u.last_login else '',
+            p.sesiones_activas,
+        ])
+
+    # Ajuste simple de anchos
+    widths = [18, 28, 20, 20, 16, 18, 14, 10, 20, 18]
+    for i, width in enumerate(widths, start=1):
+        col = ws.column_dimensions[chr(64 + i) if i <= 26 else 'A']
+        # Fallback para > Z (no se espera en este reporte)
+        try:
+            from openpyxl.utils import get_column_letter
+            col = ws.column_dimensions[get_column_letter(i)]
+        except Exception:
+            pass
+        col.width = width
+
+    # Respuesta HTTP
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f"usuarios_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    wb.save(response)
+    return response
