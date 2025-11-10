@@ -39,6 +39,9 @@ INSTALLED_APPS = [
     'clientes',
 ]
 
+# ===========================
+# MIDDLEWARE
+# ===========================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -49,6 +52,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# ===========================
+# URLS & WSGI
+# ===========================
 ROOT_URLCONF = 'sistema_erp.urls'
 
 TEMPLATES = [
@@ -81,6 +87,8 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', '3306'),
         'OPTIONS': {
             'charset': 'utf8mb4',
+            # Si tienes configurado el certificado de AWS, deja esta línea
+            # Si no lo usas, comenta la siguiente línea
             'ssl': {'ca': '/etc/ssl/certs/aws-rds/rds-combined-ca-bundle.pem'},
         },
     }
