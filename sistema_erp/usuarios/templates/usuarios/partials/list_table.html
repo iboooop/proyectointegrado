@@ -21,30 +21,9 @@
                         {% endif %}
                     </a>
                 </th>
-                <th>
-                    <a href="?{{ qs_params }}&sort=usuario__first_name&dir={% if sort == 'usuario__first_name' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-                        Nombre
-                        {% if sort == 'usuario__first_name' %}
-                            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                        {% endif %}
-                    </a>
-                </th>
-                <th>
-                    <a href="?{{ qs_params }}&sort=usuario__last_name&dir={% if sort == 'usuario__last_name' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-                        Apellido
-                        {% if sort == 'usuario__last_name' %}
-                            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                        {% endif %}
-                    </a>
-                </th>
-                <th>
-                    <a href="?{{ qs_params }}&sort=telefono&dir={% if sort == 'telefono' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-                        Teléfono
-                        {% if sort == 'telefono' %}
-                            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                        {% endif %}
-                    </a>
-                </th>
+                
+                
+                
                 <th>
                     <a href="?{{ qs_params }}&sort=rol&dir={% if sort == 'rol' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
                         Rol
@@ -61,30 +40,9 @@
                         {% endif %}
                     </a>
                 </th>
-                <th>
-                    <a href="?{{ qs_params }}&sort=mfa_habilitado&dir={% if sort == 'mfa_habilitado' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-                        MFA
-                        {% if sort == 'mfa_habilitado' %}
-                            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                        {% endif %}
-                    </a>
-                </th>
-                <th>
-                    <a href="?{{ qs_params }}&sort=usuario__last_login&dir={% if sort == 'usuario__last_login' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-                        Último acceso
-                        {% if sort == 'usuario__last_login' %}
-                            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                        {% endif %}
-                    </a>
-                </th>
-                <th>
-                    <a href="?{{ qs_params }}&sort=sesiones_activas&dir={% if sort == 'sesiones_activas' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-                        Sesiones
-                        {% if sort == 'sesiones_activas' %}
-                            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                        {% endif %}
-                    </a>
-                </th>
+                
+                
+                
                 <th class="text-center">Acciones</th>
                 {% endwith %}
             </tr>
