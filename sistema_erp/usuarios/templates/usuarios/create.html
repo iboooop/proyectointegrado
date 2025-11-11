@@ -21,6 +21,13 @@
       </div>
 
       <div class="card-body">
+        {% if perfil and perfil.fecha_creacion %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Fecha de creación</label>
+            <input type="text" class="form-control" value="{{ perfil.fecha_creacion|date:'d/m/Y H:i' }}" readonly>
+          </div>
+        {% endif %}
+
         <form method="post" enctype="multipart/form-data" novalidate>
           {% csrf_token %}
           {% for field in usuario_form %}
