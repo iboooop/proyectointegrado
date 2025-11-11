@@ -1,267 +1,76 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Editar Usuario</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{% static 'usuarios/css/usuarios.css' %}" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <meta charset="UTF-8">
+  <title>Editar Usuario</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8f9fa; }
+    .card { border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .card-header { background: #212529; color: white; }
+  </style>
 </head>
 <body>
-    <div class="container" style="padding-left: 32px; padding-right: 32px;">
-        <a href="{% url 'usuarios_list' %}" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
+  <div class="container my-5">
+    <a href="{% url 'usuarios_detail' perfil.id %}" class="btn btn-outline-secondary mb-3">&larr; Volver al detalle</a>
 
-        <div class="card">
-            <div class="card-header">
-                Editar Usuario
+    <div class="card">
+      <div class="card-header">
+        <h4 class="mb-0">Editar Usuario</h4>
+      </div>
+
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+          {% for field in usuario_form %}
+            <div class="mb-3">
+              <label class="form-label fw-semibold">{{ field.label }}</label>
+              {{ field }}
+              {% if field.errors %}
+                <div class="text-danger small mt-1">
+                  {{ field.errors|join:", " }}
+                </div>
+              {% endif %}
             </div>
-
-            {% if messages %}
-                {% for m in messages %}
-                    {% if m.tags == 'success' %}
-                        <div class="d-none" data-swal-success="{{ m }}"></div>
-                    {% else %}
-                        <div class="alert alert-{{ m.tags }} mb-2">{{ m }}</div>
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-
-            <form method="post" enctype="multipart/form-data" novalidate>
-                {% csrf_token %}
-
-                <!-- Errores globales -->
-                {% if usuario_form.non_field_errors %}
-                <div class="alert alert-danger">
-                    {{ usuario_form.non_field_errors|join:", " }}
+          {% endfor %}
+          {% for field in perfil_form %}
+            <div class="mb-3">
+              <label class="form-label fw-semibold">{{ field.label }}</label>
+              {{ field }}
+              {% if field.errors %}
+                <div class="text-danger small mt-1">
+                  {{ field.errors|join:", " }}
                 </div>
-                {% endif %}
-                {% if perfil_form.non_field_errors %}
-                <div class="alert alert-danger">
-                    {{ perfil_form.non_field_errors|join:", " }}
-                </div>
-                {% endif %}
+              {% endif %}
+            </div>
+          {% endfor %}
 
-                <h5 class="mb-4">Avatar</h5>
-                <div class="row mb-4">
-                    <div class="col-md-6 d-flex align-items-center gap-3">
-                        <div class="avatar-circle">
-                            <img id="avatarPreview" class="avatar-img" 
-                                 src="{% if perfil_form.instance.avatar %}{{ perfil_form.instance.avatar.url }}{% else %}https://ui-avatars.com/api/?name={{ usuario_form.instance.first_name|default:'Usuario' }}+{{ usuario_form.instance.last_name|default:'' }}&background=dee2e6&color=495057&size=120{% endif %}" 
-                                 alt="Avatar">
-                            <button type="button" class="btn btn-outline-primary avatar-edit-btn" data-bs-toggle="modal" data-bs-target="#avatarModal">Editar</button>
-                        </div>
-                        {% if perfil_form.avatar.errors %}
-                        <div class="text-danger">{{ perfil_form.avatar.errors|join:", " }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Modal para editar avatar -->
-                <div class="modal fade" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="avatarModalLabel">Editar Avatar</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                            </div>
-                            <div class="modal-body d-flex flex-column align-items-center">
-                                <img id="modalAvatarPreview" class="modal-avatar-img"
-                                     src="{% if perfil_form.instance.avatar %}{{ perfil_form.instance.avatar.url }}{% else %}https://ui-avatars.com/api/?name={{ usuario_form.instance.first_name|default:'Usuario' }}+{{ usuario_form.instance.last_name|default:'' }}&background=dee2e6&color=495057&size=120{% endif %}" 
-                                     alt="Avatar preview">
-                                <input type="file" id="id_avatar" name="avatar" accept="image/*" class="form-control mt-2" style="max-width: 250px;">
-                                <div id="avatarError" class="text-danger mt-2" style="display:none;"></div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="button" class="btn btn-primary" id="saveAvatarBtn" data-bs-dismiss="modal">Guardar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <h5 class="mb-3">Identificación</h5>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="username" class="form-label">Username</label>
-                        {{ usuario_form.username }}
-                        {% if usuario_form.username.errors %}
-                        <div class="text-danger">{{ usuario_form.username.errors|join:", " }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="email" class="form-label">Email</label>
-                        {{ usuario_form.email }}
-                        {% if usuario_form.email.errors %}
-                        <div class="text-danger">{{ usuario_form.email.errors|join:", " }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="first_name" class="form-label">Nombres</label>
-                        {{ usuario_form.first_name }}
-                        {% if usuario_form.first_name.errors %}
-                        <div class="text-danger">{{ usuario_form.first_name.errors|join:", " }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="last_name" class="form-label">Apellidos</label>
-                        {{ usuario_form.last_name }}
-                        {% if usuario_form.last_name.errors %}
-                        <div class="text-danger">{{ usuario_form.last_name.errors|join:", " }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <h5 class="mb-3">Estado y acceso</h5>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="telefono" class="form-label">Teléfono</label>
-                        {{ perfil_form.telefono }}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="rol" class="form-label">Rol</label>
-                        {{ perfil_form.rol }}
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="estado" class="form-label">Estado</label>
-                        {{ perfil_form.estado }}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="mfa_habilitado" class="form-label">MFA habilitado</label>
-                        {{ perfil_form.mfa_habilitado }}
-                    </div>
-                </div>
-
-                <h5 class="mb-3">Seguridad</h5>
-                <div class="form-check form-switch mb-2">
-                    <input class="form-check-input" type="checkbox" id="togglePasswordChange">
-                    <label class="form-check-label" for="togglePasswordChange">Cambiar contraseña</label>
-                </div>
-                <div id="passwordFields" class="row mb-3" style="display:none;">
-                    <div class="col-md-6">
-                        <label for="password" class="form-label">Nueva contraseña</label>
-                        {{ usuario_form.password }}
-                        {% if usuario_form.password.errors %}
-                        <div class="text-danger">{{ usuario_form.password.errors|join:", " }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="confirm_password" class="form-label">Confirmar contraseña</label>
-                        {{ usuario_form.confirm_password }}
-                        {% if usuario_form.confirm_password.errors %}
-                        <div class="text-danger">{{ usuario_form.confirm_password.errors|join:", " }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-12">
-                        <small class="text-muted">Mínimo 8 caracteres, al menos 1 mayúscula y 1 número.</small>
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="last_login" class="form-label">Último acceso</label>
-                        <input type="text" class="form-control" value="{{ usuario_form.instance.last_login|date:'d M Y H:i' }}" readonly>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="sesiones_activas" class="form-label">Sesiones activas</label>
-                        <input type="text" class="form-control" value="{{ perfil_form.instance.sesiones_activas }}" readonly>
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-end gap-2">
-                    <button type="submit" class="btn btn-save">Guardar</button>
-                    <a href="{% url 'usuarios_list' %}" class="btn btn-cancel">Cancelar</a>
-                </div>
-            </form>
-        </div>
+          <div class="d-flex justify-content-end mt-4">
+            <button type="submit" class="btn btn-primary me-2">Guardar cambios</button>
+            <a href="{% url 'usuarios_detail' perfil.id %}" class="btn btn-outline-secondary">Cancelar</a>
+          </div>
+        </form>
+      </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-    // 🔹 SweetAlert solo una vez usando mensajes flash
-    document.addEventListener('DOMContentLoaded', function(){
-        const successContainer = document.querySelector('[data-swal-success]');
-        if(successContainer){
-            const text = successContainer.getAttribute('data-swal-success');
+  </div>
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      {% if messages %}
+        {% for message in messages %}
+          {% if message.tags == 'success' %}
             Swal.fire({
-                icon: 'success',
-                title: 'Cambios guardados',
-                text: text || 'Los cambios se han guardado correctamente.',
-                confirmButtonColor: '#2563eb',
-                timer: 1800,
-                timerProgressBar: true,
-                showConfirmButton: false
+              icon: 'success',
+              title: '{{ message|escapejs }}',
+              timer: 1800,
+              showConfirmButton: false
             });
-        }
+          {% endif %}
+        {% endfor %}
+      {% endif %}
     });
-
-    // 🔹 Previsualización del avatar
-    const avatarInput = document.getElementById('id_avatar');
-    const avatarPreview = document.getElementById('avatarPreview');
-    const modalAvatarPreview = document.getElementById('modalAvatarPreview');
-    const saveAvatarBtn = document.getElementById('saveAvatarBtn');
-    const avatarError = document.getElementById('avatarError');
-    let tempAvatarUrl = avatarPreview.src;
-
-    avatarInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            if (!file.type.startsWith('image/')) {
-                avatarError.textContent = 'Solo se permiten imágenes.';
-                avatarError.style.display = 'block';
-                return;
-            }
-            if (file.size > 2 * 1024 * 1024) {
-                avatarError.textContent = 'El tamaño máximo permitido es 2MB.';
-                avatarError.style.display = 'block';
-                return;
-            }
-            avatarError.style.display = 'none';
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-                modalAvatarPreview.src = ev.target.result;
-                tempAvatarUrl = ev.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    saveAvatarBtn.addEventListener('click', function() {
-        if (tempAvatarUrl) {
-            avatarPreview.src = tempAvatarUrl;
-        }
-    });
-
-    document.getElementById('avatarModal').addEventListener('show.bs.modal', function() {
-        modalAvatarPreview.src = avatarPreview.src;
-        tempAvatarUrl = avatarPreview.src;
-        avatarError.style.display = 'none';
-    });
-
-    // 🔹 Toggle cambio de contraseña
-    (function(){
-        const toggle = document.getElementById('togglePasswordChange');
-        const box = document.getElementById('passwordFields');
-        const pwd = document.getElementById('{{ usuario_form.password.id_for_label }}');
-        const pwd2 = document.getElementById('{{ usuario_form.confirm_password.id_for_label }}');
-        if (toggle && box) {
-            toggle.addEventListener('change', function(){
-                const show = this.checked;
-                box.style.display = show ? 'flex' : 'none';
-                if (!show) {
-                    if (pwd) pwd.value = '';
-                    if (pwd2) pwd2.value = '';
-                }
-            });
-        }
-    })();
-    </script>
+  </script>
 </body>
 </html>
