@@ -60,7 +60,7 @@
       <div class="card-body">
         <form method="get" class="row g-2 align-items-end mb-3">
           <div class="col-md-5">
-            <input type="text" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Buscar (producto, proveedor, tipo, usuario, lote, doc ref)">
+            <input type="text" name="q" id="searchInput" value="{{ request.GET.q }}" class="form-control" placeholder="Buscar (producto, proveedor, tipo, usuario, lote, doc ref)">
           </div>
           <div class="col-md-2">
             <select name="page_size" class="form-select" onchange="this.form.submit()">
@@ -99,6 +99,35 @@
       }
     })();
   </script>
+  <script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('searchInput');
+  const tableWrap = document.getElementById('trxTableWrap');
+  let timeout = null;
+
+  searchInput.addEventListener('input', function() {
+    clearTimeout(timeout);
+    timeout = setTimeout(function() {
+      const q = searchInput.value;
+      const params = new URLSearchParams(window.location.search);
+      params.set('q', q);
+      params.set('page', 1); // Reinicia a la primera página al buscar
+
+      fetch(window.location.pathname + '?' + params.toString(), {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(response => response.text())
+      .then(html => {
+        // Extrae solo la tabla de la respuesta
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newTable = doc.getElementById('trxTableWrap');
+        if (newTable) tableWrap.innerHTML = newTable.innerHTML;
+      });
+    }, 350); // Espera 350ms después de dejar de escribir
+  });
+});
+</script>
 {% include 'partials/footer.html' %}
 </body>
 </html>
