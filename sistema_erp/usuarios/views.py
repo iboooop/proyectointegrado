@@ -203,6 +203,7 @@ def usuarios_edit_view(request, id):
         perfil_form = PerfilForm(instance=perfil)
 
     return render(request, 'usuarios/edit.html', {
+        'perfil': perfil,
         'usuario_form': usuario_form,
         'perfil_form': perfil_form,
         # Los SweetAlerts se disparan por mensajes (messages.success), no por query params
