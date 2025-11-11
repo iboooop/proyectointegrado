@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 
@@ -20,7 +21,7 @@
         .card {
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             border-radius: 10px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: .2s;
         }
 
         .card:hover {
@@ -37,7 +38,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
+            gap: .5rem;
         }
 
         .card-header-with-icon i {
@@ -47,7 +48,7 @@
         .footer {
             background: #212529;
             color: #fff;
-            padding: 0.5rem 2rem;
+            padding: .5rem 2rem;
             margin-top: 2rem;
         }
 
@@ -55,9 +56,9 @@
             background: #f1f3f4;
             color: #212529;
             border-radius: 1em;
-            padding: 0.3em 0.8em;
+            padding: .3em .8em;
             font-weight: 600;
-            font-size: 0.85em;
+            font-size: .85em;
             border: 1px solid #e0e0e0;
             display: inline-block;
         }
@@ -66,7 +67,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.6em 1.2em;
+            padding: .6em 1.2em;
             border-bottom: 1px solid #eee;
         }
 
@@ -80,7 +81,6 @@
             pointer-events: none;
         }
 
-        /* Altura fija para las tarjetas inferiores */
         .card-fixed-height {
             height: 400px;
             display: flex;
@@ -92,14 +92,8 @@
             overflow-y: auto;
         }
 
-        /* Scrollbar personalizado */
         .card-fixed-height .card-body::-webkit-scrollbar {
             width: 6px;
-        }
-
-        .card-fixed-height .card-body::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
         }
 
         .card-fixed-height .card-body::-webkit-scrollbar-thumb {
@@ -132,22 +126,19 @@
 
     <div class="container-fluid mt-4 px-4">
 
-        <!-- FILA PRINCIPAL - 6 TARJETAS CON BOTONES -->
+        <!-- FILA PRINCIPAL -->
         <div class="row g-3">
+
             <!-- Productos -->
             <div class="col-xl-2 col-lg-4 col-md-6">
-                <div class="card">
-                    <div class="card-header text-center">
-                        <div class="card-header-with-icon">
-                            <i class="bi bi-box-seam"></i>
-                            <span>Productos</span>
-                        </div>
+                <div class="card text-center">
+                    <div class="card-header-with-icon card-header">
+                        <i class="bi bi-box-seam"></i><span>Productos</span>
                     </div>
-                    <div class="card-body text-center">
+                    <div class="card-body">
                         <h3>{{ total_productos }}</h3>
                         <p class="text-muted">registrados</p>
-                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'VENTAS' or request.session.rol
-                        == 'BODEGA' or request.session.rol == 'COMPRAS' %}
+                        {% if request.session.rol in 'ADMIN,VENTAS,BODEGA,COMPRAS' %}
                         <a href="/productos/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
                         {% else %}
                         <span class="btn disabled-option w-100">No disponible</span>
@@ -158,14 +149,11 @@
 
             <!-- Proveedores -->
             <div class="col-xl-2 col-lg-4 col-md-6">
-                <div class="card">
-                    <div class="card-header text-center">
-                        <div class="card-header-with-icon">
-                            <i class="bi bi-truck"></i>
-                            <span>Proveedores</span>
-                        </div>
+                <div class="card text-center">
+                    <div class="card-header-with-icon card-header">
+                        <i class="bi bi-truck"></i><span>Proveedores</span>
                     </div>
-                    <div class="card-body text-center">
+                    <div class="card-body">
                         <h3>{{ total_proveedores }}</h3>
                         <p class="text-muted">activos</p>
                         {% if request.session.rol == 'ADMIN' or request.session.rol == 'COMPRAS' %}
@@ -179,14 +167,11 @@
 
             <!-- Bodegas -->
             <div class="col-xl-2 col-lg-4 col-md-6">
-                <div class="card">
-                    <div class="card-header text-center">
-                        <div class="card-header-with-icon">
-                            <i class="bi bi-building"></i>
-                            <span>Bodegas</span>
-                        </div>
+                <div class="card text-center">
+                    <div class="card-header-with-icon card-header">
+                        <i class="bi bi-building"></i><span>Bodegas</span>
                     </div>
-                    <div class="card-body text-center">
+                    <div class="card-body">
                         <h3>{{ total_bodegas }}</h3>
                         <p class="text-muted">activas</p>
                         {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' or request.session.rol
@@ -201,14 +186,11 @@
 
             <!-- Clientes -->
             <div class="col-xl-2 col-lg-4 col-md-6">
-                <div class="card">
-                    <div class="card-header text-center">
-                        <div class="card-header-with-icon">
-                            <i class="bi bi-people"></i>
-                            <span>Clientes</span>
-                        </div>
+                <div class="card text-center">
+                    <div class="card-header-with-icon card-header">
+                        <i class="bi bi-people"></i><span>Clientes</span>
                     </div>
-                    <div class="card-body text-center">
+                    <div class="card-body">
                         <h3>{{ total_clientes }}</h3>
                         <p class="text-muted">registrados</p>
                         {% if request.session.rol == 'ADMIN' or request.session.rol == 'VENTAS' %}
@@ -222,14 +204,11 @@
 
             <!-- Inventario -->
             <div class="col-xl-2 col-lg-4 col-md-6">
-                <div class="card">
-                    <div class="card-header text-center">
-                        <div class="card-header-with-icon">
-                            <i class="bi bi-arrow-left-right"></i>
-                            <span>Inventario</span>
-                        </div>
+                <div class="card text-center">
+                    <div class="card-header-with-icon card-header">
+                        <i class="bi bi-arrow-left-right"></i><span>Inventario</span>
                     </div>
-                    <div class="card-body text-center">
+                    <div class="card-body">
                         <h3>{{ total_transacciones }}</h3>
                         <p class="text-muted">movimientos</p>
                         {% if request.session.rol == 'ADMIN' or request.session.rol == 'VENTAS' or request.session.rol
@@ -244,14 +223,11 @@
 
             <!-- Usuarios -->
             <div class="col-xl-2 col-lg-4 col-md-6">
-                <div class="card">
-                    <div class="card-header text-center">
-                        <div class="card-header-with-icon">
-                            <i class="bi bi-person-badge"></i>
-                            <span>Usuarios</span>
-                        </div>
+                <div class="card text-center">
+                    <div class="card-header-with-icon card-header">
+                        <i class="bi bi-person-badge"></i><span>Usuarios</span>
                     </div>
-                    <div class="card-body text-center">
+                    <div class="card-body">
                         <h3>{{ total_usuarios }}</h3>
                         <p class="text-muted">del sistema</p>
                         {% if request.session.rol == 'ADMIN' %}
@@ -264,8 +240,9 @@
             </div>
         </div>
 
-        <!-- FILA SECUNDARIA (con altura fija) -->
+        <!-- FILA SECUNDARIA -->
         <div class="row mt-4 g-3">
+
             <!-- Últimos Productos -->
             <div class="col-lg-4 col-md-6">
                 <div class="card card-fixed-height">
@@ -294,7 +271,7 @@
             <div class="col-lg-4 col-md-6">
                 <div class="card card-fixed-height">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-arrow-left-right me-2"></i>Transacciones de Inventario recientes</span>
+                        <span><i class="bi bi-arrow-left-right me-2"></i>Transacciones recientes</span>
                         {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' %}
                         <a href="/transacciones/" class="small">Ver todas</a>
                         {% endif %}
@@ -347,7 +324,7 @@
             </div>
         </div>
 
-        <!-- FILA ADICIONAL (Estado de Bodegas) -->
+        <!-- ESTADO DE BODEGAS -->
         <div class="row mt-4 g-3 mb-4">
             <div class="col-12">
                 <div class="card">
