@@ -21,94 +21,46 @@
         <form method="post" novalidate id="movForm">
           {% csrf_token %}
 
-          <div class="d-flex gap-2 mb-4 flex-wrap">
-            <button type="button" class="step-pill active" data-step="1">1. Datos del movimiento</button>
-            <button type="button" class="step-pill" data-step="2">2. Control avanzado</button>
-            <button type="button" class="step-pill" data-step="3">3. Referencias/Observaciones</button>
-          </div>
-
-          <!-- Paso 1 -->
-          <div class="step-content" data-step="1">
-            <div class="row g-3">
-              <div class="col-md-3">
-                <label class="form-label">{{ form.fecha.label }}</label>
-                {{ form.fecha }}
-                {% include 'transacciones/partials/field_errors.html' with field=form.fecha %}
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">{{ form.tipo.label }}</label>
-                {{ form.tipo }}
-                {% include 'transacciones/partials/field_errors.html' with field=form.tipo %}
-              </div>
-              <div class="col-md-2">
-                <label class="form-label">{{ form.cantidad.label }}</label>
-                {{ form.cantidad }}
-                {% include 'transacciones/partials/field_errors.html' with field=form.cantidad %}
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ form.producto.label }}</label>
-                {{ form.producto }}
-                {% include 'transacciones/partials/field_errors.html' with field=form.producto %}
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ form.proveedor.label }}</label>
-                {{ form.proveedor }}
-                {% include 'transacciones/partials/field_errors.html' with field=form.proveedor %}
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">{{ form.bodega.label }}</label>
-                {{ form.bodega }}
-                {% include 'transacciones/partials/field_errors.html' with field=form.bodega %}
-              </div>
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">{{ form.fecha.label }}</label>
+              {{ form.fecha }}
+              {% include 'transacciones/partials/field_errors.html' with field=form.fecha %}
             </div>
-          </div>
-
-          <!-- Paso 2 -->
-            <div class="step-content d-none" data-step="2">
-              <div class="row g-3 align-items-center">
-                <div class="col-md-4">
-                  <div class="form-check mb-2">
-                    {{ form.manejo_lotes }} <label class="form-check-label">{{ form.manejo_lotes.label }}</label>
-                  </div>
-                  {{ form.lote }}
-                  {% include 'transacciones/partials/field_errors.html' with field=form.lote %}
-                </div>
-                <div class="col-md-4">
-                  <div class="form-check mb-2">
-                    {{ form.manejo_series }} <label class="form-check-label">{{ form.manejo_series.label }}</label>
-                  </div>
-                  {{ form.serie }}
-                  {% include 'transacciones/partials/field_errors.html' with field=form.serie %}
-                </div>
-                <div class="col-md-4">
-                  <div class="form-check mb-2">
-                    {{ form.perecible }} <label class="form-check-label">{{ form.perecible.label }}</label>
-                  </div>
-                  {{ form.fecha_vencimiento }}
-                  {% include 'transacciones/partials/field_errors.html' with field=form.fecha_vencimiento %}
-                </div>
-                <div class="col-12 small text-muted mt-2">Las banderas (lote/serie/vencimiento) normalmente vienen desde la ficha del producto; aquí se permiten por demo.</div>
-              </div>
+            <div class="col-md-3">
+              <label class="form-label">{{ form.tipo.label }}</label>
+              {{ form.tipo }}
+              {% include 'transacciones/partials/field_errors.html' with field=form.tipo %}
             </div>
-
-          <!-- Paso 3 -->
-          <div class="step-content d-none" data-step="3">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">{{ form.doc_referencia.label }}</label>
-                {{ form.doc_referencia }}
-                {% include 'transacciones/partials/field_errors.html' with field=form.doc_referencia %}
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">{{ form.motivo.label }}</label>
-                {{ form.motivo }}
-                {% include 'transacciones/partials/field_errors.html' with field=form.motivo %}
-              </div>
-              <div class="col-12">
-                <label class="form-label">{{ form.observaciones.label }}</label>
-                {{ form.observaciones }}
-                {% include 'transacciones/partials/field_errors.html' with field=form.observaciones %}
-              </div>
+            <div class="col-md-2">
+              <label class="form-label">{{ form.cantidad.label }}</label>
+              {{ form.cantidad }}
+              {% include 'transacciones/partials/field_errors.html' with field=form.cantidad %}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ form.producto.label }}</label>
+              {{ form.producto }}
+              {% include 'transacciones/partials/field_errors.html' with field=form.producto %}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ form.proveedor.label }}</label>
+              {{ form.proveedor }}
+              {% include 'transacciones/partials/field_errors.html' with field=form.proveedor %}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ form.usuario.label }}</label>
+              {{ form.usuario }}
+              {% include 'transacciones/partials/field_errors.html' with field=form.usuario %}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ form.perfil.label }}</label>
+              {{ form.perfil }}
+              {% include 'transacciones/partials/field_errors.html' with field=form.perfil %}
+            </div>
+            <div class="col-12">
+              <label class="form-label">{{ form.observaciones.label }}</label>
+              {{ form.observaciones }}
+              {% include 'transacciones/partials/field_errors.html' with field=form.observaciones %}
             </div>
           </div>
 

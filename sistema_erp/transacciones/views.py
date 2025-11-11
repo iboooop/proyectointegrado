@@ -76,16 +76,10 @@ def crear_transaccion(request):
     if request.method == 'POST':
         form = MovimientoInventarioForm(request.POST)
         if form.is_valid():
-            obj = form.save(commit=False)
-            # Asignación automática de usuario/perfil
-            if request.user.is_authenticated:
-                obj.usuario = request.user
-                from usuarios.models import Perfil  # import local para evitar ciclos
-                obj.perfil = Perfil.objects.filter(usuario=request.user).first()
-            obj.save()
+            # El formulario ya incluye usuario y perfil; se guarda directo
+            form.save()
             return redirect('/transacciones/?created=1')
     else:
-        # inicializamos la fecha en el campo datetime-local
         initial = {'fecha': timezone.now().strftime('%Y-%m-%dT%H:%M')}
         form = MovimientoInventarioForm(initial=initial)
     return render(request, 'transacciones/transaccion_add.html', {'form': form})
@@ -99,15 +93,9 @@ def editar_transaccion(request, id):
     if request.method == 'POST':
         form = MovimientoInventarioForm(request.POST, instance=transaccion)
         if form.is_valid():
-            obj = form.save(commit=False)
-            if request.user.is_authenticated:
-                obj.usuario = request.user
-                from usuarios.models import Perfil
-                obj.perfil = Perfil.objects.filter(usuario=request.user).first()
-            obj.save()
+            form.save()
             return redirect('/transacciones/?updated=1')
     else:
-        # Convertir fecha existente al formato del input datetime-local
         initial = {'fecha': transaccion.fecha.strftime('%Y-%m-%dT%H:%M') if transaccion.fecha else timezone.now().strftime('%Y-%m-%dT%H:%M')}
         form = MovimientoInventarioForm(instance=transaccion, initial=initial)
     return render(request, 'transacciones/transaccion_edit.html', {'form': form, 'transaccion': transaccion})
