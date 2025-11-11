@@ -58,7 +58,7 @@
       <div class="card-header d-flex justify-content-between align-items-center">
         <span>Listado de Proveedores</span>
         {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' %}
-          <a href="{% url 'proveedor_agregar' %}" class="btn btn-success">+ Crear proveedor</a>
+          <a href="{% url 'crear_proveedor' %}" class="btn btn-success">+ Crear proveedor</a>
         {% endif %}
       </div>
 
@@ -125,12 +125,12 @@
               <td class="text-center">
                 <a href="{% url 'detalle_proveedor' proveedor.id %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
                 {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' %}
-                  <a href="{% url 'proveedor_editar' proveedor.id %}" class="btn btn-sm btn-warning">Editar</a>
+                  <a href="{% url 'editar_proveedor' proveedor.id %}" class="btn btn-sm btn-warning">Editar</a>
                 {% elif request.session.rol == 'COMPRAS' %}
                   <button class="btn btn-sm btn-warning" disabled>Editar</button>
                 {% endif %}
                 {% if request.session.rol == 'ADMIN' %}
-                  <a href="{% url 'proveedor_eliminar' proveedor.id %}" class="btn btn-sm btn-danger">Eliminar</a>
+                  <a href="{% url 'eliminar_proveedor' proveedor.id %}" class="btn btn-sm btn-danger">Eliminar</a>
                 {% elif request.session.rol == 'BODEGA' or request.session.rol == 'COMPRAS' %}
                   <button class="btn btn-sm btn-danger" disabled>Eliminar</button>
                 {% endif %}
