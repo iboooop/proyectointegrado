@@ -214,13 +214,11 @@ def usuarios_edit_view(request, id):
 @login_required
 def usuarios_delete_view(request, id):
     perfil = get_object_or_404(Perfil, id=id)
-    usuario = perfil.usuario
 
     if request.method == 'POST':
-        usuario.delete()
         perfil.delete()
-        messages.success(request, "Usuario eliminado correctamente.")
-        return redirect('usuarios_list')
+        return redirect(reverse('usuarios_list') + '?deleted=1')
+    # ... lógica para mostrar confirmación si es GET ...
 
     return render(request, 'usuarios/delete.html', {'perfil': perfil})
 
@@ -317,3 +315,5 @@ def export_usuarios_excel(request):
 def usuarios_detail_view(request, id):
     perfil = get_object_or_404(Perfil, id=id)
     return render(request, 'usuarios/detail.html', {'perfil': perfil})
+
+
