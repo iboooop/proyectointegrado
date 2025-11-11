@@ -7,19 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar sesión</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <div class="login-container">
         <h1>Iniciar sesión</h1>
-        <!-- Mostrar solo mensajes de error/alerta (no éxito) -->
-        {% if messages %}
-            {% for message in messages %}
-                {% if 'error' in message.tags or 'warning' in message.tags %}
-                <div class="flash-error"><p>{{ message }}</p></div>
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-        <form method="post">
+
+        <form id="loginForm" method="post" novalidate>
             {% csrf_token %}
             {{ form.as_p }}
             <div style="display:flex; gap:12px; justify-content:center; align-items:center; margin-top:16px; flex-wrap:wrap;">
@@ -30,5 +25,54 @@
             <a href="{% url 'recuperar_password' %}">¿Olvidaste tu contraseña?</a>
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('loginForm');
+
+        // Validación cliente simple
+        form.addEventListener('submit', function(e) {
+            const username = form.querySelector('input[name="username"]');
+            const password = form.querySelector('input[name="password"]');
+            const errors = [];
+
+            if (!username || !username.value.trim()) {
+                errors.push('Ingrese su usuario.');
+            }
+            if (!password || password.value.trim().length < 6) {
+                errors.push('La contraseña debe tener al menos 6 caracteres.');
+            }
+
+            if (errors.length) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Errores en el formulario',
+                    html: errors.join('<br>')
+                });
+            }
+        });
+
+        // Mostrar mensajes enviados desde el servidor con Django messages
+        const messages = [
+        {% if messages %}
+            {% for message in messages %}
+                {"tags": "{{ message.tags }}", "text": "{{ message|escapejs }}"}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        {% endif %}
+        ];
+
+        messages.forEach(function(m) {
+            if (!m.text) return;
+            if (m.tags.includes('success')) {
+                Swal.fire({ icon: 'success', title: 'Éxito', text: m.text });
+            } else if (m.tags.includes('error') || m.tags.includes('warning') || m.tags.includes('danger')) {
+                Swal.fire({ icon: 'error', title: 'Error', text: m.text });
+            } else {
+                Swal.fire({ icon: 'info', title: 'Información', text: m.text });
+            }
+        });
+    });
+    </script>
 </body>
 </html>

@@ -10,6 +10,7 @@ from django.core.mail import send_mail
 from django.contrib import messages
 from usuarios.models import Perfil
 from .forms import LoginForm, RegistroForm
+from django.contrib.auth.forms import AuthenticationForm
 
 # ------------------------------
 # Función para registrar un nuevo usuario
@@ -48,39 +49,22 @@ def registro_view(request):
 # ------------------------------
 def login_view(request):
     if request.method == 'POST':
-        form = LoginForm(request.POST)
+        form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            usuario_o_email = form.cleaned_data['usuario_o_email']
-            password = form.cleaned_data['password']
-
-            # Autenticar usuario por username o email (case-insensitive)
-            user = User.objects.filter(username__iexact=usuario_o_email).first() or User.objects.filter(email__iexact=usuario_o_email).first()
-            if user:
-                auth_user = authenticate(request, username=user.username, password=password)
-                if auth_user:
-                    login(request, auth_user)  # Iniciar sesión
-                    perfil = Perfil.objects.filter(usuario=user).first()
-                    request.session['usuario'] = user.username
-                    request.session['rol'] = perfil.rol if perfil else "Sin rol"
-                    # Redirigir al dashboard
-                    return render(request, 'dashboard.html', {
-                        'total_productos': 100,  # Ejemplo de datos
-                        'total_proveedores': 50,
-                        'total_transacciones': 200,
-                        'total_usuarios': 10,
-                        'ultimos_productos': [],  # Lista vacía como ejemplo
-                        'ultimas_transacciones': []  # Lista vacía como ejemplo
-                    })
-                else:
-                    # Depuración servidor únicamente
-                    print("[DEBUG login_view] Autenticación fallida para usuario:", user.username)
-            else:
-                print("[DEBUG login_view] Usuario no encontrado por username/email:", usuario_o_email)
-            messages.error(request, "Credenciales inválidas. Por favor, inténtalo de nuevo.")
+            user = form.get_user()
+            login(request, user)
+            messages.success(request, 'Has iniciado sesión correctamente.')
+            return redirect('lista_productos')  # ajustar destino
         else:
-            messages.error(request, "Por favor, completa todos los campos correctamente.")
+            # comprobar si el usuario existe pero la contraseña es incorrecta
+            username = request.POST.get('username', '')
+            from django.contrib.auth.models import User
+            if username and not User.objects.filter(username=username).exists():
+                messages.error(request, 'El usuario no existe.')
+            else:
+                messages.error(request, 'Usuario o contraseña incorrectos.')
     else:
-        form = LoginForm()
+        form = AuthenticationForm()
     return render(request, 'autenticacion/login.html', {'form': form})
 
 # ------------------------------
