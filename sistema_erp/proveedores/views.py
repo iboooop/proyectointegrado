@@ -4,6 +4,8 @@ from .models import Proveedor
 from productos.models import Producto
 from transacciones.models import MovimientoInventario
 from .forms import ProveedorForm
+from django.core.paginator import Paginator
+
 try:
     from openpyxl import Workbook
     from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
