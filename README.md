@@ -60,6 +60,7 @@ python.exe -m pip install --upgrade pip
 # 6️⃣ Cargar datos iniciales
 ```bash
    python manage.py seed_sistema_erp
+   python manage.py seed_lilis
 ```
 
 

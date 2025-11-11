@@ -7,4 +7,5 @@ urlpatterns = [
     path('<int:id>/editar/', views.editar_transaccion, name='editar_transaccion'),
     path('<int:id>/eliminar/', views.eliminar_transaccion, name='eliminar_transaccion'),
     path('agregar/', views.crear_transaccion, name='crear_transaccion'),
+    path('exportar/', views.exportar_transacciones_excel, name='transacciones_export'),
 ]

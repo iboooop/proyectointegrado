@@ -24,6 +24,8 @@ class Perfil(models.Model):
     telefono = models.CharField(max_length=15, blank=True)
     estado = models.CharField(max_length=10, choices=ESTADOS, default='ACTIVO')
     mfa_habilitado = models.BooleanField(default=False)
+
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True, verbose_name='Avatar')
     sesiones_activas = models.IntegerField(default=0)
 
     def __str__(self):

@@ -17,6 +17,9 @@ mysqlclient>=2.1
 # Alternativa si mysqlclient falla en Windows
 mysql-connector-python>=8.0
 
+# Exportación a Excel
+openpyxl>=3.1
+
 # ===============================================================
 # Para regenerar este archivo después de instalar paquetes:
 # pip freeze > requirements.txt

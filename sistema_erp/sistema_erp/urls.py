@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from . import views
 
 urlpatterns = [
@@ -23,9 +23,14 @@ urlpatterns = [
     path('autenticacion/', include('autenticacion.urls')),  # URLs de autenticación
     path('usuarios/', include('usuarios.urls')),  # URLs de usuarios
     path('', views.dashboard, name='dashboard'),
+    path('forzar-404/', views.force_404, name='force_404'),
+    path('ver-404/', views.preview_404, name='preview_404'),
     path('productos/', include('productos.urls')),
     path('proveedores/', include('proveedores.urls')),
     path('transacciones/', include('transacciones.urls')),
-    path('bodegas/', include('bodegas.urls')),
-    path('clientes/', include('clientes.urls')),
+    # Catch-all: al final, cualquier otra URL muestra el 404 personalizado incluso en DEBUG
+    re_path(r'^(?P<extra>.*)$', views.not_found_view, name='not_found'),
 ]
+
+# Handler para errores HTTP personalizados
+handler404 = 'sistema_erp.views.custom_404_view'
