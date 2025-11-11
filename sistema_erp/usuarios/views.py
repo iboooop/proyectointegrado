@@ -193,7 +193,7 @@ def usuarios_edit_view(request, id):
             # Mensaje flash de éxito (consumido una sola vez)
             messages.success(request, "Los cambios se han guardado correctamente.")
             # Redirigir sin query params para evitar re-mostrar al refrescar
-            return redirect(reverse('usuarios_edit', args=[perfil.id]))
+            return redirect(reverse('usuarios_list', args=[perfil.id]))
         else:
             print("Errores UsuarioForm:", usuario_form.errors)
             print("Errores PerfilForm:", perfil_form.errors)
