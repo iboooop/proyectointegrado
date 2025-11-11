@@ -42,18 +42,12 @@ def dashboard(request):
 
     # Contadores extendidos opcionales (otra rama)
     if Bodega:
-        try:
-            total_bodegas = Bodega.objects.filter(estado='ACTIVO').count()
-        except Exception:
-            total_bodegas = Bodega.objects.count() if hasattr(Bodega, 'objects') else 0
+        total_bodegas = Bodega.objects.count()
     else:
         total_bodegas = 0
 
     if Cliente:
-        try:
-            total_clientes = Cliente.objects.filter(estadoCondicion='activo').count()
-        except Exception:
-            total_clientes = Cliente.objects.count() if hasattr(Cliente, 'objects') else 0
+        total_clientes = Cliente.objects.count()
     else:
         total_clientes = 0
 
