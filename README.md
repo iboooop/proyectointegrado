@@ -52,6 +52,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 # 6️⃣ Cargar datos iniciales
 ```bash
    python manage.py seed_sistema_erp
+   python manage.py seed_lilis
 ```
 
 
