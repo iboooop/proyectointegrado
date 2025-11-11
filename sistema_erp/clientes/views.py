@@ -48,12 +48,23 @@ class ClienteListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['q'] = self.request.GET.get('q', '')
-        # Si usas paginación dinámica:
         context['page_size'] = int(self.request.GET.get('page_size', self.paginate_by))
         context['page_sizes'] = [5, 10, 25, 50, 100]
         context['sort'] = self.request.GET.get('sort', '')
         context['dir'] = self.request.GET.get('dir', '')
         return context
+
+    def render_to_response(self, context, **response_kwargs):
+        request = self.request
+        if request.GET.get('partial') == '1' or request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return self.response_class(
+                request=request,
+                template='clientes/partials/cliente_table.html',
+                context=context,
+                using=self.template_engine,
+                **response_kwargs
+            )
+        return super().render_to_response(context, **response_kwargs)
 
 
 class ClienteCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
