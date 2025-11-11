@@ -30,154 +30,20 @@
       padding: 0.5rem 2rem;
       margin-top: 2rem;
     }
-    /* pestañas del formulario */
-    .tab-btn { min-width: 220px; }
-    .tab-btn.active, .tab-btn.btn-primary { box-shadow: 0 2px 6px rgba(13,110,253,0.15); }
-    .tab-content { padding: .5rem 0 0.5rem 0; }
   </style>
 </head>
 <body>
 
   <div class="container my-5">
     <a href="/" class="btn btn-outline-secondary mb-3">&larr; Volver al dashboard</a>
-    <!-- Formulario de producto con pestañas -->
-    <div class="card mb-4">
-      <div class="card-header">
-        <span>Formulario de Producto</span>
-      </div>
-      <div class="card-body">
-        <div class="mb-3 d-flex gap-2 flex-wrap">
-          <button type="button" class="btn btn-primary tab-btn active" data-target="#tab-identificacion">1. Identificación y precios</button>
-          <button type="button" class="btn btn-outline-secondary tab-btn" data-target="#tab-stock">2. Stock y control</button>
-          <button type="button" class="btn btn-outline-secondary tab-btn" data-target="#tab-relaciones">3. Relaciones y derivados</button>
-        </div>
-
-  <form method="post" action="{% url 'producto_agregar' %}">
-          {% csrf_token %}
-          <div id="tab-identificacion" class="tab-content">
-            <h6 class="mb-3">Identificación</h6>
-            <div class="row g-2">
-              <div class="col-md-3">
-                <label class="form-label">SKU (requerido)</label>
-                <input name="sku" class="form-control" placeholder="SKU-0001">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">EAN / UPC</label>
-                <input name="ean_upc" class="form-control" placeholder="7891234567890">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Nombre (requerido)</label>
-                <input name="nombre" class="form-control" placeholder="Silla ergonómica">
-              </div>
-              <div class="col-12">
-                <label class="form-label">Descripción</label>
-                <textarea name="descripcion" class="form-control" rows="2" placeholder="Detalles del producto..."></textarea>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Categoría</label>
-                <select name="categoria" class="form-select">
-                  <option value="">Seleccione...</option>
-                </select>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Marca</label>
-                <input name="marca" class="form-control" placeholder="MarcaX">
-              </div>
-              <div class="col-md-4">
-                <label class="form-label">Modelo</label>
-                <input name="modelo" class="form-control" placeholder="MX-200">
-              </div>
-              <hr>
-              <div class="col-md-3">
-                <label class="form-label">UOM compra</label>
-                <select name="uom_compra" class="form-select"><option>Seleccione...</option></select>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">UOM venta</label>
-                <select name="uom_venta" class="form-select"><option>Seleccione...</option></select>
-              </div>
-              <div class="col-md-2">
-                <label class="form-label">Factor conversión</label>
-                <input name="factor_conversion" class="form-control" value="1">
-              </div>
-              <div class="col-md-2">
-                <label class="form-label">Precio venta</label>
-                <input name="precio_venta" class="form-control">
-              </div>
-              <div class="col-md-2">
-                <label class="form-label">IVA (%)</label>
-                <input name="impuesto_iva" class="form-control" value="19">
-              </div>
-            </div>
-          </div>
-
-          <div id="tab-stock" class="tab-content d-none">
-            <h6 class="mb-3">Stock y control</h6>
-            <div class="row g-2">
-              <div class="col-md-3">
-                <label class="form-label">Stock actual</label>
-                <input name="stock_actual" class="form-control">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Stock mínimo</label>
-                <input name="stock_minimo" class="form-control">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Stock máximo</label>
-                <input name="stock_maximo" class="form-control">
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Punto de reorden</label>
-                <input name="punto_reorden" class="form-control">
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label">Control especial</label>
-                <select name="control_especial" class="form-select">
-                  <option value="normal">Normal</option>
-                  <option value="perecible">Perecible</option>
-                  <option value="por_lote">Por lote</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label">Control por</label>
-                <select name="control_por" class="form-select">
-                  <option value="">-</option>
-                </select>
-              </div>
-              <div class="col-md-4 mt-2">
-                <label class="form-label">Fecha de vencimiento</label>
-                <input type="month" name="fecha_vencimiento" class="form-control">
-              </div>
-            </div>
-          </div>
-
-          <div id="tab-relaciones" class="tab-content d-none">
-            <h6 class="mb-3">Relaciones y derivados</h6>
-            <div class="row g-2">
-              <div class="col-md-6">
-                <label class="form-label">Productos relacionados</label>
-                <input name="relacionados" class="form-control" placeholder="SKU1, SKU2...">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Derivados / variantes</label>
-                <input name="derivados" class="form-control" placeholder="Color, Talla...">
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-3 d-flex gap-2">
-            <button type="submit" class="btn btn-primary">Guardar</button>
-            <button type="reset" class="btn btn-outline-secondary">Limpiar</button>
-          </div>
-        </form>
-      </div>
-    </div>
 
     <!-- Listado de productos -->
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span>Listado de Productos</span>
-        <a href="{% url 'producto_agregar' %}" class="btn btn-success">+ Crear producto</a>
+        {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' %}
+          <a href="{% url 'producto_agregar' %}" class="btn btn-success">+ Crear producto</a>
+        {% endif %}
       </div>
 
       <div class="card-body">
@@ -202,6 +68,16 @@
               <td>{{ producto.proveedor }}</td>
               <td class="text-center">
                 <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
+                {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' %}
+                  <a href="{% url 'editar_producto' producto.id %}" class="btn btn-sm btn-warning">Editar</a>
+                {% elif request.session.rol == 'COMPRAS' %}
+                  <button class="btn btn-sm btn-warning" disabled>Editar</button>
+                {% endif %}
+                {% if request.session.rol == 'ADMIN' %}
+                  <a href="{% url 'eliminar_producto' producto.id %}" class="btn btn-sm btn-danger">Eliminar</a>
+                {% elif request.session.rol == 'BODEGA' or request.session.rol == 'COMPRAS' %}
+                  <button class="btn btn-sm btn-danger" disabled>Eliminar</button>
+                {% endif %}
               </td>
             </tr>
             {% empty %}
@@ -221,29 +97,6 @@
     <span>&copy; 2025 Sistema ERP</span>
     <span>Soporte</span>
   </div> 
-
-  <script>
-    // Alterna secciones del formulario por pestañas (botones)
-    (function(){
-      const buttons = document.querySelectorAll('.tab-btn');
-      if(!buttons.length) return;
-      buttons.forEach(btn => btn.addEventListener('click', function(){
-        // resetear estilos de botones
-        buttons.forEach(b => {
-          b.classList.remove('btn-primary','active');
-          b.classList.add('btn-outline-secondary');
-        });
-        this.classList.remove('btn-outline-secondary');
-        this.classList.add('btn-primary','active');
-
-        // mostrar contenido objetivo
-        const target = this.getAttribute('data-target');
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('d-none'));
-        const el = document.querySelector(target);
-        if(el) el.classList.remove('d-none');
-      }));
-    })();
-  </script>
 
 </body>
 </html>
