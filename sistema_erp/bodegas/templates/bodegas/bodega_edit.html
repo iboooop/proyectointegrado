@@ -121,8 +121,10 @@
           <div class="col-md-6">
             <label class="form-label">Responsable</label>
             {{ form.responsable }}
-            {% if form.responsable.errors %}<div class="text-danger">{{ form.responsable.errors|join:", " }}</div>{%
-            endif %}
+            {% if form.responsable.errors %}
+            <div class="text-danger">{{ form.responsable.errors|join:", " }}</div>
+            {% endif %}
+
           </div>
           <div class="col-md-6">
             <label class="form-label">Capacidad máxima</label>
