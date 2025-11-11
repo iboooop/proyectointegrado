@@ -166,5 +166,38 @@
             </div>
         </div>
     </div>
+
+    <!-- SweetAlert2 para mensajes Django -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const messages = [
+        {% if messages %}
+            {% for message in messages %}
+                {"tags": "{{ message.tags }}", "text": "{{ message|escapejs }}"}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        {% endif %}
+        ];
+        messages.forEach(function(m) {
+            if (!m.text) return;
+            if (m.tags.includes('success')) {
+                if (m.text.startsWith('Bienvenido')) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: m.text,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire({ icon: 'success', title: 'Éxito', text: m.text });
+                }
+            } else if (m.tags.includes('error') || m.tags.includes('warning') || m.tags.includes('danger')) {
+                Swal.fire({ icon: 'error', title: 'Error', text: m.text });
+            } else {
+                Swal.fire({ icon: 'info', title: 'Información', text: m.text });
+            }
+        });
+    });
+    </script>
 </body>
 </html>
