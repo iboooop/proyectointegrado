@@ -51,7 +51,7 @@ def lista_productos(request):
     page_obj = paginator.get_page(page_number)
 
     context = {
-        'productos': page_obj.object_list,
+        'productos': page_obj,
         'page_obj': page_obj,
         'paginator': paginator,
         'q': q,
