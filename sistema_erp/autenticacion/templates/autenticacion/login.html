@@ -65,7 +65,17 @@
         messages.forEach(function(m) {
             if (!m.text) return;
             if (m.tags.includes('success')) {
-                Swal.fire({ icon: 'success', title: 'Éxito', text: m.text });
+                // Si el mensaje contiene "Bienvenido", muestra el SweetAlert personalizado
+                if (m.text.startsWith('Bienvenido')) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: m.text,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire({ icon: 'success', title: 'Éxito', text: m.text });
+                }
             } else if (m.tags.includes('error') || m.tags.includes('warning') || m.tags.includes('danger')) {
                 Swal.fire({ icon: 'error', title: 'Error', text: m.text });
             } else {

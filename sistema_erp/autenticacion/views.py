@@ -53,10 +53,10 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            messages.success(request, 'Has iniciado sesión correctamente.')
-            return redirect('lista_productos')  # ajustar destino
+            # Cambia el mensaje para incluir el nombre de usuario
+            messages.success(request, f'Bienvenido, {user.username}')
+            return redirect('lista_productos')  # ajustar destino si es necesario
         else:
-            # comprobar si el usuario existe pero la contraseña es incorrecta
             username = request.POST.get('username', '')
             from django.contrib.auth.models import User
             if username and not User.objects.filter(username=username).exists():
