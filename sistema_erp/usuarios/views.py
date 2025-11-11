@@ -309,3 +309,10 @@ def export_usuarios_excel(request):
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     wb.save(response)
     return response
+
+
+# ---------------- DETALLE ----------------
+@login_required
+def usuarios_detail_view(request, id):
+    perfil = get_object_or_404(Perfil, id=id)
+    return render(request, 'usuarios/detail.html', {'perfil': perfil})

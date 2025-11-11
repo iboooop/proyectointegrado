@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Detalle de Usuario</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container my-5">
+    <a href="{% url 'usuarios_list' %}" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
+    <div class="card">
+      <div class="card-header">
+        <h4 class="mb-0">Detalle de Usuario</h4>
+      </div>
+      <div class="card-body">
+        <p><strong>Usuario:</strong> {{ perfil.usuario.username }}</p>
+        <p><strong>Nombre:</strong> {{ perfil.usuario.first_name }} {{ perfil.usuario.last_name }}</p>
+        <p><strong>Email:</strong> {{ perfil.usuario.email }}</p>
+        <p><strong>Teléfono:</strong> {{ perfil.telefono }}</p>
+        <p><strong>Rol:</strong> {{ perfil.get_rol_display }}</p>
+        <p><strong>Estado:</strong> {{ perfil.estado }}</p>
+        <p><strong>MFA habilitado:</strong> {{ perfil.mfa_habilitado|yesno:"Sí,No" }}</p>
+        <p><strong>Último acceso:</strong> {{ perfil.usuario.last_login|date:"d/m/Y H:i" }}</p>
+        <p><strong>Sesiones activas:</strong> {{ perfil.sesiones_activas }}</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
