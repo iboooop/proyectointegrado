@@ -112,6 +112,7 @@
             showConfirmButton: false,
             confirmButtonColor: '#2563eb'
         });
+        // Elimina el parámetro de la URL para que no vuelva a aparecer
         params.delete('updated');
         const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
         window.history.replaceState({}, '', newUrl);
