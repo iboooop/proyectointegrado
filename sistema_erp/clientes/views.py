@@ -6,7 +6,8 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django import forms
 from django.db.models import Q
-
+import openpyxl
+from django.http import HttpResponse
 from .models import Cliente
 
 # Si tienes un forms.py con ClienteForm, reemplaza la definición siguiente por:
@@ -102,3 +103,38 @@ class ClienteDeleteView(LoginRequiredMixin, View):
         cliente.delete()
         messages.success(request, f'Cliente "{nombre}" eliminado correctamente.')
         return redirect(reverse_lazy("clientes_list"))
+    
+
+def clientes_export(request):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Clientes"
+    ws.append(['ID', 'Nombre', 'RUT', 'Teléfono', 'Email', 'Fecha creación'])
+
+    # Filtro igual que en la lista
+    q = request.GET.get('q', '').strip()
+    clientes = Cliente.objects.all()
+    if q:
+        clientes = clientes.filter(
+            Q(nombre__icontains=q) |
+            Q(rut__icontains=q) |
+            Q(telefono__icontains=q) |
+            Q(email__icontains=q)
+        )
+
+    for c in clientes:
+        ws.append([
+            c.pk,
+            c.nombre,
+            c.rut,
+            c.telefono,
+            c.email,
+            c.fecha_creacion.strftime('%d/%m/%Y %H:%M') if c.fecha_creacion else ''
+        ])
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=clientes.xlsx'
+    wb.save(response)
+    return response
