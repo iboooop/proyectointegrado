@@ -1,19 +1,15 @@
 {% load static %}
 <div class="table-responsive">
-  <table class="table table-hover align-middle table-lg">
-    <thead>
+  <table class="table table-hover align-middle">
+    <thead class="table-light">
       <tr>
         {% with qs_base='q='|add:q|add:'&page_size='|add:page_size %}
-        <th>
-          <a href="?{{ qs_base }}&sort=codigo&dir={% if sort == 'codigo' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-            Código {% if sort == 'codigo' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
-          </a>
-        </th>
         <th>
           <a href="?{{ qs_base }}&sort=nombre&dir={% if sort == 'nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
             Nombre {% if sort == 'nombre' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
           </a>
         </th>
+        <th>Código</th>
         <th>Dirección</th>
         <th>Responsable</th>
         <th>Tipo</th>
@@ -22,33 +18,27 @@
         {% endwith %}
       </tr>
     </thead>
-
     <tbody>
       {% for b in bodegas %}
       <tr>
-        <td>{{ b.codigo }}</td>
         <td>{{ b.nombre }}</td>
+        <td>{{ b.codigo }}</td>
         <td>{{ b.direccion|default:"—" }}</td>
         <td>{{ b.responsable|default:"—" }}</td>
         <td>{{ b.tipo|default:"—" }}</td>
         <td>
-          {% if b.estado|lower == 'operativa' %}
-            <span class="badge bg-success">Operativa</span>
-          {% elif b.estado|lower == 'en mantenimiento' %}
-            <span class="badge bg-warning text-dark">En mantenimiento</span>
-          {% elif b.estado|lower == 'cerrada' %}
-            <span class="badge bg-danger">Cerrada</span>
+          {% if b.estado == 'Activo' %}
+            <span class="badge bg-success">Activo</span>
+          {% elif b.estado == 'Inactivo' %}
+            <span class="badge bg-secondary">Inactivo</span>
+          {% elif b.estado == 'En Mantenimiento' %}
+            <span class="badge bg-warning text-dark">En Mantenimiento</span>
           {% else %}
-            <span class="badge bg-secondary">Desconocido</span>
+            <span class="badge bg-light text-dark">Desconocido</span>
           {% endif %}
         </td>
         <td class="text-center">
-          <a href="{% url 'bodegas_detail' b.id %}" class="btn btn-sm btn-outline-primary">Ver</a>
-          <a href="{% url 'bodegas_edit' b.id %}" class="btn btn-sm btn-outline-secondary">Editar</a>
-          <form action="{% url 'bodegas_delete' b.id %}" method="post" class="d-inline js-del-bodega" data-name="{{ b.nombre }}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
-          </form>
+          <a href="{% url 'bodegas_detail' b.id %}" class="btn btn-outline-primary btn-sm">Ver detalle</a>
         </td>
       </tr>
       {% empty %}
