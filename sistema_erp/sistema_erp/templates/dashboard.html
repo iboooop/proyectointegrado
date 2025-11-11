@@ -138,7 +138,7 @@
                     <div class="card-body">
                         <h3>{{ total_productos }}</h3>
                         <p class="text-muted">registrados</p>
-                        {% if request.session.rol in ['ADMIN','LECTOR','EDITOR'] %}
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'LECTOR' or request.session.rol == 'EDITOR' %}
                         <a href="/productos/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
                         {% else %}
                         <span class="btn disabled-option w-100">No disponible</span>
