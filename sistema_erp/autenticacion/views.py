@@ -53,8 +53,15 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
+            # Obtener el perfil y guardar el rol en la sesión
+            from usuarios.models import Perfil
+            perfil = Perfil.objects.filter(usuario=user).first()
+            if perfil:
+                request.session['rol'] = perfil.rol
+            else:
+                request.session['rol'] = None
             messages.success(request, f'Bienvenido, {user.username}')
-            return redirect('dashboard')  # Ajusta el destino si es necesario
+            return redirect('dashboard')
         else:
             username = request.POST.get('username', '')
             from django.contrib.auth.models import User

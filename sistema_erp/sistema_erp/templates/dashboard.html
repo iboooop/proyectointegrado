@@ -60,10 +60,14 @@
                     <div class="card-body text-center">
                         <h3>{{ total_productos }}</h3>
                         <p class="text-muted">registrados</p>
-                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'VENTAS' or request.session.rol == 'BODEGA' %}
-                        <a href="/productos/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
-                        {% else %}
-                        <span class="btn disabled-option w-100">No disponible</span>
+                        {% if request.session.rol == 'ADMIN' %}
+                            <a href="/productos/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                            <a href="/productos/agregar/" class="btn btn-primary btn-sm w-100 mt-2">Agregar producto</a>
+                        {% elif request.session.rol == 'BODEGA' %}
+                            <a href="/productos/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                            <a href="/productos/agregar/" class="btn btn-primary btn-sm w-100 mt-2">Agregar producto</a>
+                        {% elif request.session.rol == 'VENTAS' %}
+                            <a href="/productos/" class="btn btn-secondary btn-sm w-100">Ver solo</a>
                         {% endif %}
                     </div>
                 </div>
