@@ -3,43 +3,59 @@
   <table class="table table-hover align-middle table-lg">
     <thead>
       <tr>
-        {% with qs_base='q='|add:q|add:'&page_size='|add:page_size %}
+        {% with qs_base="q="|add:q|add:"&page_size="|add:page_size %}
         <th>
           <a href="?{{ qs_base }}&sort=nombre&dir={% if sort == 'nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}"
             class="text-decoration-none">
-            Nombre {% if sort == 'nombre' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+            Nombre
+            {% if sort == 'nombre' %}
+            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
+            {% endif %}
           </a>
         </th>
         <th>
           <a href="?{{ qs_base }}&sort=rut&dir={% if sort == 'rut' and dir == 'asc' %}desc{% else %}asc{% endif %}"
             class="text-decoration-none">
-            RUT {% if sort == 'rut' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+            RUT
+            {% if sort == 'rut' %}
+            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
+            {% endif %}
           </a>
         </th>
         <th>
           <a href="?{{ qs_base }}&sort=telefono&dir={% if sort == 'telefono' and dir == 'asc' %}desc{% else %}asc{% endif %}"
             class="text-decoration-none">
-            Teléfono {% if sort == 'telefono' and dir == 'asc' %}▲{% else if sort == 'telefono' %}▼{% endif %}
+            Teléfono
+            {% if sort == 'telefono' %}
+            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
+            {% endif %}
           </a>
         </th>
         <th>
           <a href="?{{ qs_base }}&sort=email&dir={% if sort == 'email' and dir == 'asc' %}desc{% else %}asc{% endif %}"
             class="text-decoration-none">
-            Email {% if sort == 'email' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+            Email
+            {% if sort == 'email' %}
+            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
+            {% endif %}
           </a>
         </th>
         <th>
           <a href="?{{ qs_base }}&sort=estadoCondicion&dir={% if sort == 'estadoCondicion' and dir == 'asc' %}desc{% else %}asc{% endif %}"
             class="text-decoration-none">
-            Estado {% if sort == 'estadoCondicion' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif
-            %}
+            Estado
+            {% if sort == 'estadoCondicion' %}
+            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
+            {% endif %}
           </a>
         </th>
         <th>
           <a href="?{{ qs_base }}&sort=fecha_registro&dir={% if sort == 'fecha_registro' and dir == 'asc' %}desc{% else %}asc{% endif %}"
             class="text-decoration-none">
-            Registrado {% if sort == 'fecha_registro' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{%
-            endif %}
+            Registrado
+            {% if sort == 'fecha_registro' %}
+            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
+            {% endif %}
           </a>
         </th>
         <th class="text-center">Acciones</th>
@@ -86,7 +102,7 @@
   </form>
 
   <ul class="pagination justify-content-end mb-0 flex-grow-1">
-    {% with qs_base='q='|add:q|add:'&sort='|add:sort|add:'&dir='|add:dir|add:'&page_size='|add:page_size %}
+    {% with qs_base="q="|add:q|add:"&sort="|add:sort|add:"&dir="|add:dir|add:"&page_size="|add:page_size %}
     <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
       <a class="page-link" href="?{{ qs_base }}&page=1">« Primero</a>
     </li>
@@ -98,7 +114,7 @@
       {% endif %}
     </li>
     {% for num in page_obj.paginator.page_range %}
-    {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %} <li
+    {% if num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %} <li
       class="page-item {% if page_obj.number == num %}active{% endif %}">
       <a class="page-link" href="?{{ qs_base }}&page={{ num }}">{{ num }}</a>
       </li>

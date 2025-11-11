@@ -107,15 +107,6 @@
       font-size: 0.875rem;
     }
 
-    .stats-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
     .sort-indicator {
       font-size: 0.75rem;
       margin-left: 0.25rem;
@@ -168,7 +159,7 @@
               <label for="pageSizeSelect" class="form-label">Filas por página:</label>
               <select id="pageSizeSelect" class="form-select">
                 {% for n in page_sizes %}
-                <option value="{{ n }}" {% if page_size == n %}selected{% endif %}>{{ n }}</option>
+                <option value="{{ n }}" {% if page_size==n %}selected{% endif %}>{{ n }}</option>
                 {% endfor %}
               </select>
             </div>
@@ -258,8 +249,14 @@
       function buildUrl() {
         const p = new URLSearchParams(window.location.search);
         const qVal = (searchInput?.value || '').trim();
-        if (qVal) p.set('q', qVal); else p.delete('q');
-        if (pageSizeSelect?.value) p.set('page_size', pageSizeSelect.value);
+        if (qVal) {
+          p.set('q', qVal);
+        } else {
+          p.delete('q');
+        }
+        if (pageSizeSelect?.value) {
+          p.set('page_size', pageSizeSelect.value);
+        }
         p.delete('page');
         p.set('partial', '1');
         return window.location.pathname + '?' + p.toString();
@@ -269,8 +266,14 @@
       function updateUrlOnly() {
         const p = new URLSearchParams(window.location.search);
         const qVal = (searchInput?.value || '').trim();
-        if (qVal) p.set('q', qVal); else p.delete('q');
-        if (pageSizeSelect?.value) p.set('page_size', pageSizeSelect.value);
+        if (qVal) {
+          p.set('q', qVal);
+        } else {
+          p.delete('q');
+        }
+        if (pageSizeSelect?.value) {
+          p.set('page_size', pageSizeSelect.value);
+        }
         const newUrl = window.location.pathname + (p.toString() ? '?' + p.toString() : '');
         window.history.replaceState({}, '', newUrl);
       }
@@ -327,7 +330,9 @@
           const p = new URLSearchParams(window.location.search);
           p.set('page', target);
           p.set('partial', '1');
-          if (pageSizeSelect?.value) p.set('page_size', pageSizeSelect.value);
+          if (pageSizeSelect?.value) {
+            p.set('page_size', pageSizeSelect.value);
+          }
           await fetchAndUpdate(window.location.pathname + '?' + p.toString());
           p.delete('partial');
           window.history.replaceState({}, '', window.location.pathname + '?' + p.toString());
