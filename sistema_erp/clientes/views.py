@@ -129,7 +129,7 @@ def clientes_export(request):
             c.rut,
             c.telefono,
             c.email,
-            c.fecha_creacion.strftime('%d/%m/%Y %H:%M') if c.fecha_creacion else ''
+            
         ])
 
     response = HttpResponse(
