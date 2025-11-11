@@ -20,7 +20,6 @@
     .badge-mov {
       font-size: 1rem;
       font-weight: 600;
-      background: #198754;
       padding: 0.35em 1.2em;
       letter-spacing: 0.5px;
       text-transform: capitalize;
@@ -37,6 +36,9 @@
       text-align: right;
       text-transform: none;
     }
+    .badge-salida { background: #dc3545; color: #fff; }
+    .badge-entrada { background: #198754; color: #fff; }
+    .badge-ajuste { background: #6c757d; color: #fff; }
     .btn-warning { color: #fff; }
     .btn-danger { color: #fff; }
   </style>
@@ -48,10 +50,27 @@
     <div class="card">
       <div class="card-header">
         Movimiento #{{ transaccion.id }}
-        <span class="badge badge-mov">
-          <span class="badge-label">Tipo de movimiento:</span>
-          {{ transaccion.get_tipo_display|default:"-" }}
-        </span>
+        {% if transaccion.tipo == 'SALIDA' %}
+          <span class="badge badge-mov badge-salida">
+            <span class="badge-label">Tipo de movimiento:</span>
+            {{ transaccion.get_tipo_display|default:"-" }}
+          </span>
+        {% elif transaccion.tipo == 'ENTRADA' %}
+          <span class="badge badge-mov badge-entrada">
+            <span class="badge-label">Tipo de movimiento:</span>
+            {{ transaccion.get_tipo_display|default:"-" }}
+          </span>
+        {% elif transaccion.tipo == 'AJUSTE' %}
+          <span class="badge badge-mov badge-ajuste">
+            <span class="badge-label">Tipo de movimiento:</span>
+            {{ transaccion.get_tipo_display|default:"-" }}
+          </span>
+        {% else %}
+          <span class="badge badge-mov badge-ajuste">
+            <span class="badge-label">Tipo de movimiento:</span>
+            {{ transaccion.get_tipo_display|default:"-" }}
+          </span>
+        {% endif %}
       </div>
       <div class="card-body">
         <div class="row mb-2">
