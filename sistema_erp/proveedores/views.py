@@ -71,7 +71,7 @@ def editar_proveedor(request, id):
         if form.is_valid():
             form.save()
             messages.success(request, "Cambios guardados")
-            return redirect('detalle_proveedor', id=proveedor.id)
+            return redirect('editar_proveedor', id=proveedor.id)
     else:
         form = ProveedorForm(instance=proveedor)
     return render(request, 'proveedores/proveedor_edit.html', {'form': form, 'proveedor': proveedor})
