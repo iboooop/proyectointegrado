@@ -31,11 +31,15 @@
         <p>{{ transaccion.observaciones|default:"Sin observaciones." }}</p>
 
         <div class="mt-4 d-flex justify-content-end gap-2">
-          <a href="{% url 'editar_transaccion' transaccion.id %}" class="btn btn-edit btn-sm">Editar</a>
-          <form action="{% url 'eliminar_transaccion' transaccion.id %}" method="post" class="d-inline js-del-trx-detail">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-delete btn-sm">Eliminar</button>
-          </form>
+          {% if request.user.perfil.rol != 'LECTOR' %}
+            <a href="{% url 'editar_transaccion' transaccion.id %}" class="btn btn-edit btn-sm">Editar</a>
+          {% endif %}
+          {% if request.user.perfil.rol == 'ADMIN' %}
+            <form action="{% url 'eliminar_transaccion' transaccion.id %}" method="post" class="d-inline js-del-trx-detail">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-delete btn-sm">Eliminar</button>
+            </form>
+          {% endif %}
         </div>
       </div>
     </div>
