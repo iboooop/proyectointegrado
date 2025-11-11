@@ -174,8 +174,7 @@
                     <div class="card-body">
                         <h3>{{ total_bodegas }}</h3>
                         <p class="text-muted">activas</p>
-                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' or request.session.rol
-                        == 'COMPRAS' %}
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' or request.session.rol == 'COMPRAS' %}
                         <a href="/bodegas/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
                         {% else %}
                         <span class="btn disabled-option w-100">No disponible</span>
@@ -211,8 +210,7 @@
                     <div class="card-body">
                         <h3>{{ total_transacciones }}</h3>
                         <p class="text-muted">movimientos</p>
-                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'VENTAS' or request.session.rol
-                        == 'BODEGA' %}
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'VENTAS' or request.session.rol == 'BODEGA' %}
                         <a href="/transacciones/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
                         {% else %}
                         <span class="btn disabled-option w-100">No disponible</span>
