@@ -110,12 +110,21 @@
                 <td>{{ perfil.mfa_habilitado|yesno:"Sí,No" }}</td>
                 <td>{{ perfil.usuario.last_login|date:"d M Y H:i" }}</td>
                 <td>{{ perfil.sesiones_activas }}</td>
-                <td class="text-center">
-                    <a href="{% url 'usuarios_edit' perfil.id %}" class="btn btn-sm btn-edit">Editar</a>
-                    <form action="{% url 'usuarios_delete' perfil.id %}" method="post" class="d-inline js-delete-user">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-delete">Eliminar</button>
-                    </form>
+                <td class="text-end">
+                    <div class="d-inline-flex gap-1">
+                        {# Editar visible para ADMIN y EDITOR #}
+                        {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
+                          <a href="{% url 'usuarios_edit' perfil.id %}" class="btn btn-sm btn-warning">Editar</a>
+                        {% endif %}
+
+                        {# Eliminar solo para ADMIN #}
+                        {% if request.user.perfil.rol == 'ADMIN' %}
+                          <form action="{% url 'usuarios_delete' perfil.id %}" method="post" class="d-inline js-delete-user">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                          </form>
+                        {% endif %}
+                    </div>
                 </td>
             </tr>
             {% empty %}
