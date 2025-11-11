@@ -5,6 +5,8 @@ from productos.models import Producto
 from transacciones.models import MovimientoInventario
 from .forms import ProveedorForm
 from django.core.paginator import Paginator
+from django.db.models import Q
+
 
 try:
     from openpyxl import Workbook
