@@ -1,124 +1,104 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
-  <meta charset="UTF-8" />
-  <title>Detalle Cliente</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <meta charset="UTF-8">
+  <title>Detalle del Cliente #{{ cliente.idCliente }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
-      background-color: #f8f9fa;
-      font-family: 'Inter', sans-serif;
-    }
-
-    .container {
-      max-width: 900px;
-      margin-top: 40px;
+      background: #f8f9fa;
     }
 
     .card {
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-      padding: 25px;
-      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .card-header {
-      font-weight: 700;
-      font-size: 1.2rem;
-      color: #2c3e50;
-      margin-bottom: 20px;
-    }
-
-    .btn-save {
-      background-color: #2563eb;
+      background: #212529;
       color: #fff;
-      font-weight: 600;
-      border-radius: 10px;
-      border: none;
-      padding: 10px 18px;
     }
 
-    .btn-cancel {
-      background-color: #f1f3f5;
-      color: #333;
-      font-weight: 600;
-      border-radius: 10px;
-      border: 1px solid #ced4da;
-      padding: 10px 18px;
+    .badge-activo {
+      background-color: #198754;
+    }
+
+    .badge-inactivo {
+      background-color: #ffc107;
+      color: #212529;
+    }
+
+    .badge-bloqueado {
+      background-color: #dc3545;
+    }
+
+    .btn-fixed {
+      font-size: 0.85rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+
+    .btn-warning-fixed {
+      background-color: #ffc107;
+      color: #212529;
+      border: none;
+    }
+
+    .btn-danger-fixed {
+      background-color: #dc3545;
+      color: #fff;
+      border: none;
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
+  <div class="container my-5">
     <a href="{% url 'clientes_list' %}" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
 
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
-        <h5>Cliente: {{ cliente.nombre }}</h5>
-        <div>
-          <a href="{% url 'clientes_edit' cliente.idCliente %}" class="btn btn-sm btn-warning">Editar</a>
-
-          <form action="{% url 'clientes_delete' cliente.idCliente %}" method="post" class="d-inline form-delete"
-            data-name="{{ cliente.nombre }}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-delete"
-              style="background:#dc3545;color:#fff;border:none;border-radius:6px;padding:6px 10px;">Eliminar</button>
-          </form>
-        </div>
+        <h4 class="mb-0">Cliente: {{ cliente.nombre }}</h4>
+        <span class="badge 
+          {% if cliente.estadoCondicion == 'ACTIVO' %}badge-activo
+          {% elif cliente.estadoCondicion == 'INACTIVO' %}badge-inactivo
+          {% else %}badge-bloqueado{% endif %}">
+          <strong>Estado: </strong>
+          {{ cliente.estadoCondicion|default:"-" }}
+        </span>
       </div>
 
       <div class="card-body">
-        <p><strong>RUT:</strong> {{ cliente.rut }}</p>
-        <p><strong>Dirección:</strong> {{ cliente.direccion }}</p>
-        <p><strong>Teléfono:</strong> {{ cliente.telefono }}</p>
-        <p><strong>Email:</strong> {{ cliente.email }}</p>
-        <p><strong>Estado:</strong> {{ cliente.estadoCondicion }}</p>
-        <p><strong>Fecha registro:</strong> {{ cliente.fecha_registro|date:"d M Y H:i" }}</p>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <p><strong>RUT:</strong> {{ cliente.rut }}</p>
+            <p><strong>Dirección:</strong> {{ cliente.direccion }}</p>
+            <p><strong>Teléfono:</strong> {{ cliente.telefono }}</p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Email:</strong> {{ cliente.email }}</p>
+            <p><strong>Fecha registro:</strong> {{ cliente.fecha_registro|date:"d/m/Y H:i" }}</p>
+          </div>
+        </div>
+        <hr>
+        <p><strong>Observaciones:</strong></p>
+        <p>{{ cliente.observaciones|default:"Sin observaciones." }}</p>
 
-        <a href="{% url 'clientes_list' %}" class="btn btn-cancel">Volver</a>
+        <!-- Botones de acción -->
+        <div class="mt-4 d-flex justify-content-end gap-2">
+          <a href="{% url 'clientes_edit' cliente.idCliente %}" class="btn btn-warning-fixed btn-fixed">Editar</a>
+          <form action="{% url 'clientes_delete' cliente.idCliente %}" method="post"
+            onsubmit="return confirm('¿Seguro que deseas eliminar este cliente?');" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger-fixed btn-fixed">Eliminar</button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
-
-  <script>
-    function getCookie(name) { let cookieValue = null; if (document.cookie && document.cookie !== '') { const cookies = document.cookie.split(';'); for (let c of cookies) { const cookie = c.trim(); if (cookie.substring(0, name.length + 1) === (name + '=')) { cookieValue = decodeURIComponent(cookie.substring(name.length + 1)); break; } } } return cookieValue; }
-    const csrftoken = getCookie('csrftoken');
-
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('form.form-delete').forEach(form => {
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const name = form.dataset.name || 'el registro';
-          Swal.fire({
-            title: `¿Eliminar ${name}?`,
-            text: 'Esta acción no se puede deshacer.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar'
-          }).then(result => {
-            if (result.isConfirmed) {
-              Swal.fire({ title: 'Eliminando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-              form.submit();
-            }
-          });
-        });
-      });
-
-      {% if messages %}
-      {% for message in messages %}
-      Swal.fire({
-        icon: "{% if 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% else %}success{% endif %}",
-        title: "{{ message.tags|default:'Mensaje'|title }}",
-        text: "{{ message|escapejs }}"
-      });
-      {% endfor %}
-      {% endif %}
-    });
-  </script>
 </body>
 
 </html>
