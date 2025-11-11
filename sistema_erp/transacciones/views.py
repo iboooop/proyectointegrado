@@ -4,10 +4,12 @@ from django.core.paginator import Paginator
 from django.utils import timezone
 from django.http import HttpResponse
 
+
 # ✅ Corrección: importamos Bodega desde la app bodegas, no desde transacciones
 from bodegas.models import Bodega
 from .models import MovimientoInventario
 from .forms import MovimientoInventarioForm
+
 
 
 # ---------------- LISTA ----------------
