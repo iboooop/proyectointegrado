@@ -56,7 +56,7 @@
             <label for="pageSizeSelect" class="form-label m-0">Filas por página:</label>
             <select id="pageSizeSelect" class="form-select" style="width: 140px;">
               {% for n in page_sizes %}
-              <option value="{{ n }}" {% if page_size==n %}selected{% endif %}>{{ n }}</option>
+              <option value="{{ n }}" {% if page_size == n %}selected{% endif %}>{{ n }}</option>
               {% endfor %}
             </select>
           </form>
