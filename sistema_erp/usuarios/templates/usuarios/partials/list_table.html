@@ -92,10 +92,10 @@
         <tbody>
             {% for perfil in perfiles %}
             <tr>
-                <td>{{ perfil.usuario.username }}</td>
-                <td>{{ perfil.usuario.email }}</td>
-                <td>{{ perfil.usuario.first_name }}</td>
-                <td>{{ perfil.usuario.last_name }}</td>
+                <td>{{ usuario.username }}</td>
+                <td>{{ usuario.first_name }}</td>
+                <td>{{ usuario.last_name }}</td>
+                <td>{{ usuario.email }}</td>
                 <td>{{ perfil.telefono|default:"—" }}</td>
                 <td>{{ perfil.rol }}</td>
                 <td>
@@ -111,11 +111,7 @@
                 <td>{{ perfil.usuario.last_login|date:"d M Y H:i" }}</td>
                 <td>{{ perfil.sesiones_activas }}</td>
                 <td class="text-center">
-                    <a href="{% url 'usuarios_edit' perfil.id %}" class="btn btn-sm btn-edit">Editar</a>
-                    <form action="{% url 'usuarios_delete' perfil.id %}" method="post" class="d-inline js-delete-user">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-delete">Eliminar</button>
-                    </form>
+                    <a href="{% url 'usuarios_detail' usuario.id %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
                 </td>
             </tr>
             {% empty %}
