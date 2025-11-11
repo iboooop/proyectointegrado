@@ -74,6 +74,96 @@
     <span>&copy; 2025 Sistema ERP</span>
     <span>Soporte</span>
   </div>
+  <script>
+  (function(){
+    const wrap = document.getElementById('proveedoresTableWrap');
+    const searchInput = document.getElementById('searchInput');
+    const pageSizeSelect = document.getElementById('pageSizeSelect');
+    let debounceTimer = null;
+
+    async function fetchAndUpdate(url){
+      const resp = await fetch(url, { headers: { 'X-Requested-With':'XMLHttpRequest' }});
+      const html = await resp.text();
+      wrap.innerHTML = html;
+      attachJumpHandler();
+    }
+
+    function buildUrl(){
+      const p = new URLSearchParams(window.location.search);
+      const qVal = (searchInput?.value || '').trim();
+      if (qVal) p.set('q', qVal); else p.delete('q');
+      if (pageSizeSelect?.value) p.set('page_size', pageSizeSelect.value);
+      p.delete('page');
+      p.set('partial','1');
+      return window.location.pathname + '?' + p.toString();
+    }
+
+    function updateUrlOnly(){
+      const p = new URLSearchParams(window.location.search);
+      const qVal = (searchInput?.value || '').trim();
+      if (qVal) p.set('q', qVal); else p.delete('q');
+      if (pageSizeSelect?.value) p.set('page_size', pageSizeSelect.value);
+      const newUrl = window.location.pathname + (p.toString()? '?' + p.toString() : '');
+      window.history.replaceState({}, '', newUrl);
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', function(){
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(async ()=>{
+          await fetchAndUpdate(buildUrl());
+          updateUrlOnly();
+        }, 300);
+      });
+    }
+
+    if (pageSizeSelect) {
+      pageSizeSelect.addEventListener('change', async function(){
+        const p = new URLSearchParams(window.location.search);
+        p.set('page_size', this.value); p.delete('page'); p.set('partial','1');
+        await fetchAndUpdate(window.location.pathname + '?' + p.toString());
+        p.delete('partial');
+        window.history.replaceState({}, '', window.location.pathname + '?' + p.toString());
+      });
+    }
+
+    // interceptar clicks de paginación
+    wrap.addEventListener('click', async function(e){
+      const a = e.target.closest('a.page-link, thead a');
+      if (a && a.getAttribute('href')) {
+        e.preventDefault();
+        const clean = a.getAttribute('href');
+        await fetchAndUpdate(clean + '&partial=1');
+        window.history.replaceState({}, '', clean);
+      }
+    });
+
+    // salto a página
+    function attachJumpHandler(){
+      const form = wrap.querySelector('#jumpPageForm');
+      if (!form) return;
+      const input = form.querySelector('#jumpPageInput');
+      const btn = form.querySelector('#jumpGoBtn');
+      if (!btn) return;
+      btn.addEventListener('click', async function(){
+        let target = parseInt(input.value, 10);
+        if (isNaN(target) || target < 1) target = 1;
+        const max = parseInt(input.getAttribute('max'), 10) || 1;
+        if (target > max) target = max;
+        const p = new URLSearchParams(window.location.search);
+        p.set('page', target);
+        p.set('partial','1');
+        if (pageSizeSelect?.value) p.set('page_size', pageSizeSelect.value);
+        await fetchAndUpdate(window.location.pathname + '?' + p.toString());
+        p.delete('partial');
+        window.history.replaceState({}, '', window.location.pathname + '?' + p.toString());
+      });
+    }
+
+    attachJumpHandler();
+  })();
+  </script>
+
 </body>
 
 </html>
