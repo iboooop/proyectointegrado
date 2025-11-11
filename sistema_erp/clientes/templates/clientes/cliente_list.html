@@ -2,10 +2,10 @@
 <html lang="es">
 
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Listado de Clientes</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
   <style>
     body {
       background: #f8f9fa;
@@ -15,51 +15,150 @@
     .card {
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .card-header {
       background: #212529;
       color: white;
+      font-weight: 600;
     }
 
     .table th {
       background-color: #f1f3f4;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85rem;
     }
 
-    .btn-edit {
-      background-color: #007bff;
-      color: white;
+    .footer {
+      background: #212529;
+      color: #fff;
+      padding: 0.5rem 2rem;
+      margin-top: 2rem;
     }
 
-    .btn-delete {
-      background-color: #dc3545;
-      color: white;
-    }
-
-    .btn-create {
+    .badge-activo {
       background-color: #28a745;
-      color: white;
+    }
+
+    .badge-inactivo {
+      background-color: #dc3545;
+    }
+
+    .badge-suspendido {
+      background-color: #ffc107;
+      color: #000;
+    }
+
+    .search-box {
+      position: relative;
+    }
+
+    .search-box input {
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #999;
+    }
+
+    .filter-section {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .pagination {
+      margin-top: 1.5rem;
     }
 
     .table-responsive {
       overflow-x: auto;
     }
+
+    .btn-sm {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.875rem;
+    }
   </style>
 </head>
 
 <body>
-  <div class="container my-5">
-    <a href="/" class="btn btn-outline-secondary mb-3">&larr; Volver al dashboard</a>
+  <div class="container-fluid my-5 px-4">
+    <!-- Botón Volver -->
+    <a href="/" class="btn btn-outline-secondary mb-4">
+      <i class="bi bi-arrow-left"></i> Volver al dashboard
+    </a>
 
     <div class="card">
+      <!-- HEADER -->
       <div class="card-header d-flex justify-content-between align-items-center">
-        <span>Lista de Clientes</span>
-        <a href="{% url 'clientes_create' %}" class="btn btn-create">+ Crear cliente</a>
+        <div>
+          <i class="bi bi-people"></i>
+          <span>Listado de Clientes</span>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="{% url 'clientes_export' %}" class="btn btn-success btn-sm">
+            <i class="bi bi-download"></i> Exportar Excel
+          </a>
+          <a href="{% url 'clientes_create' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg"></i> Crear cliente
+          </a>
+        </div>
       </div>
 
+      <!-- FILTROS Y BÚSQUEDA -->
       <div class="card-body">
+        <div class="filter-section">
+          <div class="row g-3 align-items-end">
+            <!-- Búsqueda -->
+            <div class="col-md-6 col-lg-4">
+              <label class="form-label">Buscar cliente</label>
+              <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="searchInput" class="form-control" placeholder="Nombre, RUT, email...">
+              </div>
+            </div>
+
+            <!-- Filtro por Estado -->
+            <div class="col-md-6 col-lg-3">
+              <label class="form-label">Estado</label>
+              <select id="estadoFilter" class="form-select">
+                <option value="">Todos</option>
+                <option value="activo">Activo</option>
+                <option value="suspendido">Suspendido</option>
+                <option value="inactivo">Inactivo</option>
+              </select>
+            </div>
+
+            <!-- Botón Limpiar Filtros -->
+            <div class="col-md-12 col-lg-5 d-flex gap-2">
+              <button id="clearFilters" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-x-circle"></i> Limpiar filtros
+              </button>
+              <button id="applyFilters" class="btn btn-primary btn-sm">
+                <i class="bi bi-funnel"></i> Aplicar filtros
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABLA -->
         <div class="table-responsive">
-          <table class="table table-hover align-middle">
+          <table class="table table-hover align-middle" id="clientesTable">
             <thead>
               <tr>
                 <th>Nombre</th>
@@ -73,73 +172,145 @@
             </thead>
             <tbody>
               {% for cliente in clientes %}
-              <tr>
+              <tr data-estado="{{ cliente.estadoCondicion|lower }}">
                 <td>{{ cliente.nombre }}</td>
                 <td>{{ cliente.rut }}</td>
                 <td>{{ cliente.telefono|default:"—" }}</td>
                 <td>{{ cliente.email }}</td>
-                <td>{{ cliente.estadoCondicion }}</td>
+                <td>
+                  {% if cliente.estadoCondicion == 'activo' %}
+                  <span class="badge badge-activo">Activo</span>
+                  {% elif cliente.estadoCondicion == 'suspendido' %}
+                  <span class="badge badge-suspendido">Suspendido</span>
+                  {% else %}
+                  <span class="badge badge-inactivo">Inactivo</span>
+                  {% endif %}
+                </td>
                 <td>{{ cliente.fecha_registro|date:"d M Y H:i" }}</td>
                 <td class="text-center">
-                  <a href="{% url 'clientes_detail' cliente.idCliente %}" class="btn btn-sm btn-info">Ver</a>
-                  <a href="{% url 'clientes_edit' cliente.idCliente %}" class="btn btn-sm btn-edit">Editar</a>
-
-                  <form action="{% url 'clientes_delete' cliente.idCliente %}" method="post"
-                    class="d-inline form-delete" data-name="{{ cliente.nombre }}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-sm btn-delete">Eliminar</button>
-                  </form>
+                  <a href="{% url 'clientes_detail' cliente.idCliente %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-eye"></i> Ver detalles
+                  </a>
                 </td>
               </tr>
               {% empty %}
               <tr>
-                <td colspan="7" class="text-center text-muted py-4">No hay clientes registrados.</td>
+                <td colspan="7" class="text-center text-muted py-4">
+                  <i class="bi bi-inbox"></i><br>
+                  No hay clientes registrados.
+                </td>
               </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
+
+        <!-- PAGINADOR -->
+        {% if is_paginated %}
+        <nav aria-label="Paginación">
+          <ul class="pagination justify-content-center">
+            <!-- Primera página -->
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page=1">Primera</a>
+            </li>
+            {% endif %}
+
+            <!-- Anterior -->
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">Anterior</span>
+            </li>
+            {% endif %}
+
+            <!-- Números de página -->
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active">
+              <span class="page-link">{{ num }}</span>
+            </li>
+            {% else %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+
+            <!-- Siguiente -->
+            {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">Siguiente</span>
+            </li>
+            {% endif %}
+
+            <!-- Última página -->
+            {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Última</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
       </div>
     </div>
   </div>
 
+  <!-- FOOTER -->
+  <div class="footer d-flex justify-content-between align-items-center">
+    <span>&copy; 2025 Sistema ERP</span>
+    <span>Soporte</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
   <script>
-    function getCookie(name) { let cookieValue = null; if (document.cookie && document.cookie !== '') { const cookies = document.cookie.split(';'); for (let c of cookies) { const cookie = c.trim(); if (cookie.substring(0, name.length + 1) === (name + '=')) { cookieValue = decodeURIComponent(cookie.substring(name.length + 1)); break; } } } return cookieValue; }
-    const csrftoken = getCookie('csrftoken');
+    // Búsqueda en tiempo real
+    document.getElementById('searchInput').addEventListener('keyup', function () {
+      const searchTerm = this.value.toLowerCase();
+      const tableRows = document.querySelectorAll('#clientesTable tbody tr');
 
-    document.addEventListener('DOMContentLoaded', () => {
-      /* Intercept delete forms and show SweetAlert confirmation */
-      document.querySelectorAll('form.form-delete').forEach(form => {
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const name = form.dataset.name || 'el registro';
-          Swal.fire({
-            title: `¿Eliminar ${name}?`,
-            text: 'Esta acción no se puede deshacer.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar'
-          }).then(result => {
-            if (result.isConfirmed) {
-              // Submit the form
-              Swal.fire({ title: 'Eliminando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-              form.submit();
-            }
-          });
-        });
+      tableRows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
       });
+    });
 
-      /* Display Django messages via SweetAlert2 */
-      {% if messages %}
-      {% for message in messages %}
-      Swal.fire({
-        icon: "{% if 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% else %}success{% endif %}",
-        title: "{{ message.tags|default:'Mensaje'|title }}",
-        text: "{{ message|escapejs }}"
+    // Filtro por estado
+    document.getElementById('estadoFilter').addEventListener('change', filterTable);
+    document.getElementById('applyFilters').addEventListener('click', filterTable);
+
+    function filterTable() {
+      const estadoFilter = document.getElementById('estadoFilter').value.toLowerCase();
+      const tableRows = document.querySelectorAll('#clientesTable tbody tr');
+
+      tableRows.forEach(row => {
+        const estado = row.dataset.estado || '';
+
+        if (estadoFilter === '' || estado === estadoFilter) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
       });
-      {% endfor %}
-      {% endif %}
+    }
+
+    // Limpiar filtros
+    document.getElementById('clearFilters').addEventListener('click', function () {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('estadoFilter').value = '';
+      document.querySelectorAll('#clientesTable tbody tr').forEach(row => {
+        row.style.display = '';
+      });
     });
   </script>
 </body>
