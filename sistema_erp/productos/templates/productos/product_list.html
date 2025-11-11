@@ -30,6 +30,26 @@
       padding: 0.5rem 2rem;
       margin-top: 2rem;
     }
+    .sortable-header {
+      color: #212529;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: none;
+      padding: 0;
+      outline: none;
+    }
+    .sortable-header.active {
+      font-weight: 700;
+    }
+    .arrow {
+      font-size: 0.95em;
+      margin-left: 2px;
+      color: #888;
+      font-family: 'Segoe UI Symbol', 'Arial', sans-serif;
+      font-weight: normal;
+    }
   </style>
 </head>
 <body>
@@ -66,27 +86,30 @@
           <thead>
             <tr>
               <th>
-                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}sort=nombre&dir={% if request.GET.sort == 'nombre' and request.GET.dir == 'asc' %}desc{% else %}asc{% endif %}">
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}sort=nombre&dir={% if request.GET.sort == 'nombre' and request.GET.dir == 'asc' %}desc{% else %}asc{% endif %}"
+                   class="sortable-header{% if request.GET.sort == 'nombre' %} active{% endif %}">
                   Nombre
                   {% if request.GET.sort == 'nombre' %}
-                    {% if request.GET.dir == 'asc' %}▲{% else %}▼{% endif %}
+                    <span class="arrow">{% if request.GET.dir == 'asc' %}&#8593;{% else %}&#8595;{% endif %}</span>
                   {% endif %}
                 </a>
               </th>
               <th>Categoría</th>
               <th>
-                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}sort=precio&dir={% if request.GET.sort == 'precio' and request.GET.dir == 'asc' %}desc{% else %}asc{% endif %}">
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}sort=precio&dir={% if request.GET.sort == 'precio' and request.GET.dir == 'asc' %}desc{% else %}asc{% endif %}"
+                   class="sortable-header{% if request.GET.sort == 'precio' %} active{% endif %}">
                   Precio
                   {% if request.GET.sort == 'precio' %}
-                    {% if request.GET.dir == 'asc' %}▲{% else %}▼{% endif %}
+                    <span class="arrow">{% if request.GET.dir == 'asc' %}&#8593;{% else %}&#8595;{% endif %}</span>
                   {% endif %}
                 </a>
               </th>
               <th>
-                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}sort=stock_actual&dir={% if request.GET.sort == 'stock_actual' and request.GET.dir == 'asc' %}desc{% else %}asc{% endif %}">
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}sort=stock_actual&dir={% if request.GET.sort == 'stock_actual' and request.GET.dir == 'asc' %}desc{% else %}asc{% endif %}"
+                   class="sortable-header{% if request.GET.sort == 'stock_actual' %} active{% endif %}">
                   Stock
                   {% if request.GET.sort == 'stock_actual' %}
-                    {% if request.GET.dir == 'asc' %}▲{% else %}▼{% endif %}
+                    <span class="arrow">{% if request.GET.dir == 'asc' %}&#8593;{% else %}&#8595;{% endif %}</span>
                   {% endif %}
                 </a>
               </th>
