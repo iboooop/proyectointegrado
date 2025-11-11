@@ -35,15 +35,12 @@
 <body>
 
   <div class="container my-5">
-    <a href="/" class="btn btn-outline-secondary mb-3">&larr; Volver al dashboard</a>
+    <a href="/" class="btn btn-outline-secondary mb-3">&larr; Volver al Dashboard</a>
 
-    <!-- Listado de productos -->
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span>Listado de Productos</span>
-        {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' %}
-          <a href="{% url 'producto_agregar' %}" class="btn btn-success">+ Crear producto</a>
-        {% endif %}
+        <a href="{% url 'producto_agregar' %}" class="btn btn-success">+ Crear producto</a>
       </div>
 
       <div class="card-body">
@@ -68,16 +65,6 @@
               <td>{{ producto.proveedor }}</td>
               <td class="text-center">
                 <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
-                {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' %}
-                  <a href="{% url 'editar_producto' producto.id %}" class="btn btn-sm btn-warning">Editar</a>
-                {% elif request.session.rol == 'COMPRAS' %}
-                  <button class="btn btn-sm btn-warning" disabled>Editar</button>
-                {% endif %}
-                {% if request.session.rol == 'ADMIN' %}
-                  <a href="{% url 'eliminar_producto' producto.id %}" class="btn btn-sm btn-danger">Eliminar</a>
-                {% elif request.session.rol == 'BODEGA' or request.session.rol == 'COMPRAS' %}
-                  <button class="btn btn-sm btn-danger" disabled>Eliminar</button>
-                {% endif %}
               </td>
             </tr>
             {% empty %}
