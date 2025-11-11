@@ -3,60 +3,30 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Detalle del Movimiento</title>
+  <title>Detalle del Movimiento #{{ transaccion.id }}</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body { background: #f8f9fa; }
     .card { border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .card-header {
-      background: #212529;
-      color: #fff;
-      font-size: 1.7rem;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .card-header { background: #212529; color: #fff; }
+    .badge-salida { background-color: #dc3545; }
+    .badge-entrada { background-color: #198754; }
+    .badge-ajuste { background-color: #6c757d; }
+    .btn-fixed {
+      font-size: 0.85rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 500;
     }
-    .badge-mov {
-      font-size: 1rem;
-      font-weight: 600;
-      padding: 0.35em 1.2em;
-      letter-spacing: 0.5px;
-      text-transform: capitalize;
-      display: flex;
-      align-items: center;
-      gap: 0.7em;
-    }
-    .badge-label {
-      font-size: 0.95em;
-      font-weight: 400;
-      color: #e0e0e0;
-      margin-bottom: 0;
-      margin-right: 0.5em;
-      text-align: right;
-      text-transform: none;
-    }
-    .badge-salida { background: #dc3545; color: #fff; }
-    .badge-entrada { background: #198754; color: #fff; }
-    .badge-ajuste { background: #6c757d; color: #fff; }
-    .btn-warning { color: #000000ff; }
-    .btn-danger { color: #ffffffff; }
-    /* HOVER: Oculta el botón al pasar el mouse */
-    .btn-warning.btn-sm:hover,
-    .btn-danger.btn-sm:hover {
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.2s;
-    }
-    .btn-warning.btn-sm:hover {
+    .btn-warning-fixed {
       background-color: #ffc107;
-      color: #fff;
-      opacity: 0.85;
+      color: #212529;
+      border: none;
     }
-    .btn-danger.btn-sm:hover {
+    .btn-danger-fixed {
       background-color: #dc3545;
       color: #fff;
-      opacity: 0.85;
+      border: none;
     }
   </style>
 </head>
@@ -65,32 +35,19 @@
     <a href="{% url 'lista_transacciones' %}" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
 
     <div class="card">
-      <div class="card-header">
-        Movimiento #{{ transaccion.id }}
-        {% if transaccion.tipo == 'SALIDA' %}
-          <span class="badge badge-mov badge-salida">
-            <span class="badge-label">Tipo de movimiento:</span>
-            {{ transaccion.get_tipo_display|default:"-" }}
-          </span>
-        {% elif transaccion.tipo == 'ENTRADA' %}
-          <span class="badge badge-mov badge-entrada">
-            <span class="badge-label">Tipo de movimiento:</span>
-            {{ transaccion.get_tipo_display|default:"-" }}
-          </span>
-        {% elif transaccion.tipo == 'AJUSTE' %}
-          <span class="badge badge-mov badge-ajuste">
-            <span class="badge-label">Tipo de movimiento:</span>
-            {{ transaccion.get_tipo_display|default:"-" }}
-          </span>
-        {% else %}
-          <span class="badge badge-mov badge-ajuste">
-            <span class="badge-label">Tipo de movimiento:</span>
-            {{ transaccion.get_tipo_display|default:"-" }}
-          </span>
-        {% endif %}
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Movimiento #{{ transaccion.id }}</h4>
+        <span class="badge 
+          {% if transaccion.tipo == 'SALIDA' %}badge-salida
+          {% elif transaccion.tipo == 'ENTRADA' %}badge-entrada
+          {% else %}badge-ajuste{% endif %}">
+          <strong>Tipo de movimiento: </strong>
+          {{ transaccion.get_tipo_display|default:"-" }}
+        </span>
       </div>
+
       <div class="card-body">
-        <div class="row mb-2">
+        <div class="row mb-3">
           <div class="col-md-6">
             <p><strong>Fecha:</strong> {{ transaccion.fecha|date:"d/m/Y H:i" }}</p>
             <p><strong>Producto:</strong> {{ transaccion.producto }}</p>
@@ -99,20 +56,27 @@
           </div>
           <div class="col-md-6">
             <p><strong>Usuario:</strong> {{ transaccion.usuario }}</p>
-            <p><strong>Lote:</strong> {{ transaccion.lote|default:"—" }}</p>
+            <p><strong>Lote:</strong> {{ transaccion.lote|default:"N/A" }}</p>
+            <p><strong>Documento Ref.:</strong> {{ transaccion.documento_referencia|default:"N/A" }}</p>
           </div>
         </div>
         <hr>
         <p><strong>Observaciones:</strong></p>
-        <p>{{ transaccion.observaciones|default:"—" }}</p>
+        <p>{{ transaccion.observaciones|default:"Sin observaciones." }}</p>
+
+        <!-- Botones de acción -->
         <div class="mt-4 d-flex justify-content-end gap-2">
-          <a href="{% url 'editar_transaccion' transaccion.id %}" class="btn btn-warning btn-sm">Editar</a>
-          <form action="{% url 'eliminar_transaccion' transaccion.id %}" method="post" class="d-inline">
+          <a href="{% url 'editar_transaccion' transaccion.id %}" class="btn btn-warning-fixed btn-fixed">Editar</a>
+          <form action="{% url 'eliminar_transaccion' transaccion.id %}" method="post" onsubmit="return confirm('¿Seguro que deseas eliminar este movimiento?');" class="d-inline">
             {% csrf_token %}
-            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+            <button type="submit" class="btn btn-danger-fixed btn-fixed">Eliminar</button>
           </form>
         </div>
       </div>
+    </div>
+    <div class="footer d-flex justify-content-between align-items-center mt-4">
+      <span>&copy; 2025 Sistema ERP</span>
+      <span>Soporte</span>
     </div>
   </div>
 </body>
