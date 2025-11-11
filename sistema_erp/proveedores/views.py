@@ -5,6 +5,7 @@ from transacciones.models import MovimientoInventario
 from .forms import ProveedorForm
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.contrib import messages
 
 def lista_proveedores(request):
     q = request.GET.get('q', '')
@@ -69,6 +70,7 @@ def editar_proveedor(request, id):
         form = ProveedorForm(request.POST, instance=proveedor)
         if form.is_valid():
             form.save()
+            messages.success(request, "Cambios guardados")
             return redirect('detalle_proveedor', id=proveedor.id)
     else:
         form = ProveedorForm(instance=proveedor)
