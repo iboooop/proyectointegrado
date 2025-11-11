@@ -1,22 +1,24 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from django.contrib.messages import constants as messages
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# ===========================
+# BASE DIR & ENV
+# ===========================
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Cargar el archivo .env
 load_dotenv(BASE_DIR / ".env")
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-default')  # Puedes agregar un valor por defecto
-
-# SECURITY WARNING: don't run with debug turned on in production!
+# ===========================
+# SECURITY
+# ===========================
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-default')
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
 
-ALLOWED_HOSTS = []
-
-# Application definition
+# ===========================
+# APPLICATIONS
+# ===========================
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -24,14 +26,22 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Tus apps locales
     'transacciones',
     'productos',
     'proveedores',
     'usuarios',
+    'autenticacion',
     'sistema_erp',
     'django_extensions',
+    'bodegas',
+    'clientes',
 ]
 
+# ===========================
+# MIDDLEWARE
+# ===========================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -42,6 +52,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# ===========================
+# URLS & WSGI
+# ===========================
 ROOT_URLCONF = 'sistema_erp.urls'
 
 TEMPLATES = [
@@ -61,49 +74,67 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'sistema_erp.wsgi.application'
 
-# Database configuration using environment variables
+# ===========================
+# DATABASE CONFIGURATION (AWS RDS)
+# ===========================
 DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.mysql'),
         'NAME': os.getenv('DB_NAME', 'sistema_erp'),
-        'USER': os.getenv('DB_USER', 'root'),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+        'USER': os.getenv('DB_USER', 'proyecto_user'),
+        'PASSWORD': os.getenv('DB_PASSWORD', '1u_p4ssw0rd_segur0'),
+        'HOST': os.getenv('DB_HOST', 'database-sistema-erp.ctjtmux5fshd.us-east-1.rds.amazonaws.com'),
         'PORT': os.getenv('DB_PORT', '3306'),
         'OPTIONS': {
             'charset': 'utf8mb4',
+            # Si tienes configurado el certificado de AWS, deja esta línea
+            # Si no lo usas, comenta la siguiente línea
+            'ssl': {'ca': '/etc/ssl/certs/aws-rds/rds-combined-ca-bundle.pem'},
         },
     }
 }
 
-
-# Password validation
+# ===========================
+# PASSWORD VALIDATION
+# ===========================
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Internationalization
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
+# ===========================
+# INTERNATIONALIZATION
+# ===========================
+LANGUAGE_CODE = os.getenv("DJANGO_LANGUAGE_CODE", "es-cl")
+TIME_ZONE = os.getenv("DJANGO_TIME_ZONE", "America/Santiago")
 USE_I18N = True
-
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+# ===========================
+# STATIC & MEDIA FILES
+# ===========================
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Default primary key field type
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# ===========================
+# MESSAGES & LOGIN
+# ===========================
+MESSAGE_TAGS = {
+    messages.DEBUG: 'debug',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+    messages.ERROR: 'danger',
+}
+
+LOGIN_URL = '/autenticacion/login/'
+
+# ===========================
+# DEFAULT
+# ===========================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

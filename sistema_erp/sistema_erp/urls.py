@@ -20,8 +20,12 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('autenticacion/', include('autenticacion.urls')),  # URLs de autenticación
+    path('usuarios/', include('usuarios.urls')),  # URLs de usuarios
     path('', views.dashboard, name='dashboard'),
     path('productos/', include('productos.urls')),
     path('proveedores/', include('proveedores.urls')),
     path('transacciones/', include('transacciones.urls')),
+    path('bodegas/', include('bodegas.urls')),
+    path('clientes/', include('clientes.urls')),
 ]
