@@ -57,11 +57,6 @@
         <td>{{ t.usuario.username|default:"—" }}</td>
         <td class="text-center">
           <a href="{% url 'detalle_transaccion' t.id %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
-          <a href="{% url 'editar_transaccion' t.id %}" class="btn btn-sm btn-edit">Editar</a>
-          <form action="{% url 'eliminar_transaccion' t.id %}" method="post" class="d-inline js-del-trx">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-delete">Eliminar</button>
-          </form>
         </td>
       </tr>
       {% empty %}

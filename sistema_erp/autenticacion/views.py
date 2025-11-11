@@ -62,15 +62,8 @@ def login_view(request):
                     perfil = Perfil.objects.filter(usuario=user).first()
                     request.session['usuario'] = user.username
                     request.session['rol'] = perfil.rol if perfil else "Sin rol"
-                    # Redirigir al dashboard
-                    return render(request, 'dashboard.html', {
-                        'total_productos': 100,  # Ejemplo de datos
-                        'total_proveedores': 50,
-                        'total_transacciones': 200,
-                        'total_usuarios': 10,
-                        'ultimos_productos': [],  # Lista vacía como ejemplo
-                        'ultimas_transacciones': []  # Lista vacía como ejemplo
-                    })
+                    # Redirigir al dashboard real (sin datos ficticios)
+                    return redirect('dashboard')
                 else:
                     # Depuración servidor únicamente
                     print("[DEBUG login_view] Autenticación fallida para usuario:", user.username)

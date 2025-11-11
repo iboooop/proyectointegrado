@@ -1,17 +1,37 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from productos.models import Producto
 from proveedores.models import Proveedor
 from transacciones.models import MovimientoInventario
 from usuarios.models import Perfil
+from django.http import Http404
+from django.conf import settings
 
+@login_required
 def dashboard(request):
+    """Dashboard principal con datos reales del sistema (sin datos ficticios)."""
+    # Sincroniza el rol en sesión para que la plantilla pueda autorizar opciones por rol
+    try:
+        perfil = Perfil.objects.select_related('usuario').filter(usuario=request.user).first()
+        if perfil:
+            if request.session.get('rol') != perfil.rol:
+                request.session['rol'] = perfil.rol
+        else:
+            request.session['rol'] = 'Sin rol'
+    except Exception:
+        # En caso de un estado inconsistente, evitar romper el dashboard
+        request.session['rol'] = request.session.get('rol') or 'Sin rol'
     total_productos = Producto.objects.count()
     total_proveedores = Proveedor.objects.count()
     total_transacciones = MovimientoInventario.objects.count()
-    total_usuarios = MovimientoInventario.objects.count()
+    # Conteo correcto de usuarios del sistema
+    total_usuarios = User.objects.count()
 
-    ultimos_productos = Producto.objects.all().order_by('-id')[:5]
-    ultimas_transacciones = MovimientoInventario.objects.all().order_by('-fecha')[:5]
+    ultimos_productos = Producto.objects.order_by('-id')[:5]
+    ultimas_transacciones = (
+        MovimientoInventario.objects.select_related('producto').order_by('-fecha')[:5]
+    )
 
     context = {
         'total_productos': total_productos,
@@ -23,3 +43,29 @@ def dashboard(request):
     }
 
     return render(request, 'dashboard.html', context)
+
+
+def custom_404_view(request, exception):
+    """Vista personalizada para páginas no encontradas (404)."""
+    return render(request, '404.html', status=404)
+
+
+def force_404(request):
+    """Ruta utilitaria para probar el handler 404 en desarrollo."""
+    if getattr(settings, 'DEBUG', False):
+        # En DEBUG, Django muestra el debug page para Http404; renderizamos para previsualizar
+        return render(request, '404.html', status=404)
+    raise Http404("Prueba de 404")
+
+
+def preview_404(request):
+    """Vista que renderiza directamente el template 404 (siempre), útil para QA."""
+    return render(request, '404.html', status=404)
+
+
+def not_found_view(request, extra=None):
+    """Catch-all para rutas no definidas que muestra el template 404 incluso con DEBUG=True.
+
+    Se coloca al final del urlpatterns para no interferir con rutas válidas.
+    """
+    return render(request, '404.html', status=404)

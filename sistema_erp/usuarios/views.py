@@ -224,18 +224,25 @@ def export_usuarios_excel(request):
         'Rol', 'Estado', 'MFA', 'Último acceso', 'Sesiones activas'
     ]
     header_fill = PatternFill(start_color='EAF2FF', end_color='EAF2FF', fill_type='solid')
-    bold = Font(bold=True)
-    center = Alignment(horizontal='center')
+    bold = Font(bold=True, color='1f2937')
+    center = Alignment(horizontal='center', vertical='center')
 
     ws.append(headers)
+    # Estilos de encabezado con bordes gruesos
+    from openpyxl.styles import Border, Side
+    medium_side = Side(style='medium', color='64748B')
+    header_border = Border(top=medium_side, left=medium_side, right=medium_side, bottom=medium_side)
     for cell in ws[1]:
         cell.font = bold
         cell.fill = header_fill
         cell.alignment = center
+        cell.border = header_border
 
-    for p in perfiles:
+    thin_side = Side(style='thin', color='CBD5E1')
+    row_border = Border(top=thin_side, left=thin_side, right=thin_side, bottom=thin_side)
+    for idx, p in enumerate(perfiles, start=2):
         u = p.usuario
-        ws.append([
+        row = [
             u.username,
             u.email,
             u.first_name,
@@ -246,19 +253,35 @@ def export_usuarios_excel(request):
             'Sí' if p.mfa_habilitado else 'No',
             u.last_login.strftime('%Y-%m-%d %H:%M') if u.last_login else '',
             p.sesiones_activas,
-        ])
+        ]
+        ws.append(row)
+        # Alternancia de filas para mejor lectura
+        # Alternancia filas pares
+        if idx % 2 == 0:
+            alt_fill = PatternFill(start_color='F9FAFB', end_color='F9FAFB', fill_type='solid')
+            for c in ws[idx]:
+                c.fill = alt_fill
+        # Bordes y alineaciones
+        for col_i, c in enumerate(ws[idx], start=1):
+            c.border = row_border
+            if col_i in (1,2,3,4,6,7):  # texto clave
+                c.alignment = Alignment(vertical='center')
+            if col_i == 9:  # Último acceso
+                c.alignment = Alignment(horizontal='center', vertical='center')
+            if col_i == 10:  # Sesiones activas
+                c.alignment = Alignment(horizontal='center', vertical='center')
 
-    # Ajuste simple de anchos
+    # Formatos y UX de hoja: auto-filter, freeze panes y anchos
+    ws.auto_filter.ref = ws.dimensions
+    ws.freeze_panes = 'A2'
+    # Ajustar altura encabezado y datos
+    ws.row_dimensions[1].height = 24
+    for r in range(2, ws.max_row+1):
+        ws.row_dimensions[r].height = 18
+    from openpyxl.utils import get_column_letter
     widths = [18, 28, 20, 20, 16, 18, 14, 10, 20, 18]
-    for i, width in enumerate(widths, start=1):
-        col = ws.column_dimensions[chr(64 + i) if i <= 26 else 'A']
-        # Fallback para > Z (no se espera en este reporte)
-        try:
-            from openpyxl.utils import get_column_letter
-            col = ws.column_dimensions[get_column_letter(i)]
-        except Exception:
-            pass
-        col.width = width
+    for i, w in enumerate(widths, start=1):
+        ws.column_dimensions[get_column_letter(i)].width = w
 
     # Respuesta HTTP
     response = HttpResponse(

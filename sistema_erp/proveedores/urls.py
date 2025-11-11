@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.lista_proveedores, name='lista_proveedores'),
+    path('exportar/', views.exportar_proveedores_excel, name='proveedores_export'),
     path('<int:id>/', views.detalle_proveedor, name='detalle_proveedor'),
     path('<int:id>/editar/', views.editar_proveedor, name='editar_proveedor'),
     path('<int:id>/eliminar/', views.eliminar_proveedor, name='eliminar_proveedor'),

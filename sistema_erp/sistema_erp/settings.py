@@ -43,6 +43,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'sistema_erp.middleware.LoginRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'sistema_erp.urls'
