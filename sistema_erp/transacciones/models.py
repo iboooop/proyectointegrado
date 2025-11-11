@@ -5,23 +5,6 @@ from proveedores.models import Proveedor
 from django.contrib.auth.models import User
 from usuarios.models import Perfil
 
-
-class Bodega(models.Model):
-    """Bodegas o ubicaciones de inventario.
-
-    Mantenerlo en este módulo evita acoplar con otros apps hasta que se requiera
-    un catálogo más complejo.
-    """
-    codigo = models.CharField(max_length=50, unique=True)
-    nombre = models.CharField(max_length=150)
-
-    class Meta:
-        verbose_name = "Bodega"
-        verbose_name_plural = "Bodegas"
-
-    def __str__(self) -> str:  # pragma: no cover - representación simple
-        return f"{self.codigo} - {self.nombre}"
-
 class MovimientoInventario(models.Model):
     TIPO_MOVIMIENTO = [
         ('ENTRADA', 'Entrada'),
@@ -37,7 +20,7 @@ class MovimientoInventario(models.Model):
     bodega_destino = models.ForeignKey('bodegas.Bodega', on_delete=models.SET_NULL, null=True, blank=True, related_name='movimientos_destino')  # referencia al app bodegas
     usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     perfil = models.ForeignKey(Perfil, on_delete=models.SET_NULL, null=True, blank=True)
-    bodega = models.ForeignKey('Bodega', on_delete=models.SET_NULL, null=True, blank=True)
+    bodega = models.ForeignKey('bodegas.Bodega', on_delete=models.SET_NULL, null=True, blank=True)
     tipo = models.CharField(max_length=20, choices=TIPO_MOVIMIENTO)
     cantidad = models.IntegerField()
     fecha = models.DateTimeField(default=timezone.now)
