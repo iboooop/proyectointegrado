@@ -37,7 +37,7 @@ def lista_transacciones(request):
             Q(producto__nombre__icontains=q) |
             Q(proveedor__nombre__icontains=q) |
             Q(tipo__icontains=q) |
-            Q(usuario__icontains=q) |
+            Q(usuario__username__icontains=q) |  # <-- CORRECTO
             Q(lote__icontains=q) |
             Q(observaciones__icontains=q)
         )
