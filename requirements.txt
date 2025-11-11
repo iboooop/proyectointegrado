@@ -5,6 +5,9 @@
 # Framework principal
 Django>=4.2,<5.0
 
+# Extensiones de Django
+django-extensions>=3.2
+
 # Variables de entorno (.env)
 python-dotenv>=1.0.0
 

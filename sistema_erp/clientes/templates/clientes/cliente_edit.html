@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Editar Cliente</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .container {
+      max-width: 900px;
+      margin-top: 40px;
+    }
+
+    .card {
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      padding: 25px;
+      background-color: #fff;
+    }
+
+    .card-header {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .form-control,
+    .form-select {
+      border-radius: 10px;
+      border: 1px solid #ced4da;
+      font-size: 0.95rem;
+      padding: 8px 12px;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, .25);
+    }
+
+    .btn-save {
+      background-color: #2563eb;
+      color: #fff;
+      font-weight: 600;
+      border-radius: 10px;
+      border: none;
+      padding: 10px 18px;
+      transition: all 0.2s;
+    }
+
+    .btn-save:hover {
+      background-color: #1d4ed8;
+    }
+
+    .btn-cancel {
+      background-color: #f1f3f5;
+      color: #333;
+      font-weight: 600;
+      border-radius: 10px;
+      border: 1px solid #ced4da;
+      padding: 10px 18px;
+    }
+
+    .btn-cancel:hover {
+      background-color: #e2e6ea;
+    }
+
+    .text-danger {
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <a href="{% url 'clientes_list' %}" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
+
+    <div class="card">
+      <div class="card-header">Editar Cliente</div>
+
+      <form method="post" class="confirm-submit" data-action="editar cliente" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors|join:", " }}</div>{%
+        endif %}
+
+        <h5 class="mb-3">Identificación</h5>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Nombre</label>
+            {{ form.nombre }}
+            {% if form.nombre.errors %}<div class="text-danger">{{ form.nombre.errors|join:", " }}</div>{% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">RUT</label>
+            {{ form.rut }}
+            {% if form.rut.errors %}<div class="text-danger">{{ form.rut.errors|join:", " }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-8">
+            <label class="form-label">Dirección</label>
+            {{ form.direccion }}
+            {% if form.direccion.errors %}<div class="text-danger">{{ form.direccion.errors|join:", " }}</div>{% endif
+            %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Teléfono</label>
+            {{ form.telefono }}
+            {% if form.telefono.errors %}<div class="text-danger">{{ form.telefono.errors|join:", " }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label">Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}<div class="text-danger">{{ form.email.errors|join:", " }}</div>{% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Estado</label>
+            {{ form.estadoCondicion }}
+            {% if form.estadoCondicion.errors %}<div class="text-danger">{{ form.estadoCondicion.errors|join:", " }}
+            </div>{% endif %}
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button type="submit" class="btn btn-save">Guardar cambios</button>
+          <a href="{% url 'clientes_list' %}" class="btn btn-cancel">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    function getCookie(name) { let cookieValue = null; if (document.cookie && document.cookie !== '') { const cookies = document.cookie.split(';'); for (let c of cookies) { const cookie = c.trim(); if (cookie.substring(0, name.length + 1) === (name + '=')) { cookieValue = decodeURIComponent(cookie.substring(name.length + 1)); break; } } } return cookieValue; }
+    const csrftoken = getCookie('csrftoken');
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('form.confirm-submit').forEach(form => {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const action = form.dataset.action || 'guardar';
+          Swal.fire({
+            title: `¿Confirma ${action}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'Cancelar'
+          }).then(result => {
+            if (result.isConfirmed) {
+              Swal.fire({ title: 'Guardando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+              form.submit();
+            }
+          });
+        });
+      });
+
+      {% if messages %}
+      {% for message in messages %}
+      Swal.fire({
+        icon: "{% if 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% else %}success{% endif %}",
+        title: "{{ message.tags|default:'Mensaje'|title }}",
+        text: "{{ message|escapejs }}"
+      });
+      {% endfor %}
+      {% endif %}
+    });
+  </script>
+</body>
+
+</html>
