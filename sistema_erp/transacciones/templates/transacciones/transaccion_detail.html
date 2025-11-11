@@ -40,7 +40,14 @@
     .badge-entrada { background: #198754; color: #fff; }
     .badge-ajuste { background: #6c757d; color: #fff; }
     .btn-warning { color: #000000ff; }
-    .btn-danger { color: #000000ff; }
+    .btn-danger { color: #ffffffff; }
+    /* HOVER: Oculta el botón al pasar el mouse */
+    .btn-warning.btn-sm:hover,
+    .btn-danger.btn-sm:hover {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s;
+    }
   </style>
 </head>
 <body>
