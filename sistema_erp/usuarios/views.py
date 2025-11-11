@@ -12,7 +12,7 @@ from productos.models import Producto
 from proveedores.models import Proveedor
 from transacciones.models import MovimientoInventario
 from django.contrib.auth.models import User
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from datetime import datetime
 try:
     from openpyxl import Workbook
@@ -309,3 +309,80 @@ def export_usuarios_excel(request):
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     wb.save(response)
     return response
+
+@login_required
+def user_list(request):
+    # obtener rol de forma segura
+    perfil = getattr(request.user, 'perfil', None)
+    rol = getattr(perfil, 'rol', None)
+
+    # permitir ADMIN, LECTOR y EDITOR
+    if rol not in ('ADMIN', 'LECTOR', 'EDITOR'):
+        return HttpResponseForbidden("No tiene permisos para ver usuarios.")
+
+    # Filtros de búsqueda
+    q = (request.GET.get('q') or '').strip()
+
+    # Ordenación segura por campos permitidos
+    sort = (request.GET.get('sort') or 'usuario__username').strip()
+    direction = (request.GET.get('dir') or 'asc').strip().lower()
+
+    sort_map = {
+        'usuario__username': 'usuario__username',
+        'usuario__email': 'usuario__email',
+        'usuario__first_name': 'usuario__first_name',
+        'usuario__last_name': 'usuario__last_name',
+        'telefono': 'telefono',
+        'rol': 'rol',
+        'estado': 'estado',
+        'mfa_habilitado': 'mfa_habilitado',
+        'usuario__last_login': 'usuario__last_login',
+        'sesiones_activas': 'sesiones_activas',
+    }
+
+    base_qs = Perfil.objects.select_related('usuario').all()
+    if q:
+        base_qs = base_qs.filter(
+            Q(usuario__first_name__icontains=q)
+            | Q(usuario__last_name__icontains=q)
+            | Q(usuario__username__icontains=q)
+            | Q(usuario__email__icontains=q)
+            | Q(telefono__icontains=q)
+        )
+
+    order_field = sort_map.get(sort, 'usuario__username')
+    if direction == 'desc':
+        order_field = f'-{order_field}'
+    base_qs = base_qs.order_by(order_field)
+
+    # Paginación
+    # Tamaño de página configurable (persistente en sesión)
+    allowed_page_sizes = [5, 10, 20, 50, 100]
+    try:
+        page_size = int(request.GET.get('page_size') or request.session.get('usuarios_page_size') or 10)
+    except ValueError:
+        page_size = 10
+    if page_size not in allowed_page_sizes:
+        page_size = 10
+    request.session['usuarios_page_size'] = page_size
+
+    paginator = Paginator(base_qs, page_size)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'perfiles': page_obj.object_list,
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'q': q,
+        'sort': sort,
+        'dir': direction,
+        'page_size': page_size,
+        'page_sizes': allowed_page_sizes,
+    }
+
+    # Respuesta parcial para AJAX (solo tabla y paginación)
+    if request.GET.get('partial') == '1' or request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'usuarios/partials/list_table.html', context)
+
+    return render(request, 'usuarios/list.html', context)
