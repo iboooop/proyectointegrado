@@ -32,7 +32,6 @@
 </table>
 
 <!-- Paginación -->
-{% if page_obj.has_other_pages %}
 <nav aria-label="Paginación" class="mt-3 d-flex justify-content-between align-items-center gap-2 flex-wrap">
   <form id="jumpPageForm" class="d-flex align-items-center gap-2 mb-2 mb-md-0" onsubmit="return false;">
     <label for="jumpPageInput" class="form-label m-0">Ir a página:</label>
@@ -73,5 +72,5 @@
     {% endwith %}
   </ul>
 </nav>
-{% endif %}
+
 
