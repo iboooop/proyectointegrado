@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from .models import Producto
 from .forms import ProductoForm
 from transacciones.models import MovimientoInventario
+from django.core.paginator import Paginator
+from django.db.models import Q
 
 try:
     from openpyxl import Workbook
