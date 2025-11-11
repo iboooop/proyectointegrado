@@ -13,10 +13,6 @@
                         {% endif %}
                     </a>
                 </th>
-                
-                
-                
-                
                 <th>
                     <a href="?{{ qs_params }}&sort=rol&dir={% if sort == 'rol' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
                         Rol
@@ -33,9 +29,14 @@
                         {% endif %}
                     </a>
                 </th>
-                
-                
-                
+                <th>
+                    <a href="?{{ qs_params }}&sort=fecha_creacion&dir={% if sort == 'fecha_creacion' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
+                        Fecha
+                        {% if sort == 'fecha_creacion' %}
+                            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
+                        {% endif %}
+                    </a>
+                </th>
                 <th class="text-center">Acciones</th>
                 {% endwith %}
             </tr>
@@ -44,8 +45,6 @@
             {% for perfil in perfiles %}
             <tr>
                 <td>{{ perfil.usuario.username }}</td>
-
-
                 <td>{{ perfil.rol }}</td>
                 <td>
                     {% if perfil.estado == 'ACTIVO' %}
@@ -56,16 +55,16 @@
                     <span class="badge bg-danger">BLOQUEADO</span>
                     {% endif %}
                 </td>
-
-                <td>{{ perfil.usuario.last_login|date:"d M Y H:i" }}</td>
-
+                <td>
+                    {{ perfil.fecha_creacion|date:"d M Y H:i" }}
+                </td>
                 <td class="text-center">
                     <a href="{% url 'usuarios_detail' perfil.id %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="11" class="text-center text-muted py-4">No hay usuarios registrados.</td>
+                <td colspan="6" class="text-center text-muted py-4">No hay usuarios registrados.</td>
             </tr>
             {% endfor %}
         </tbody>
