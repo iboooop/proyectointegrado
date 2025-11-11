@@ -44,13 +44,51 @@
       </div>
 
       <div class="card-body">
+        <!-- Buscador, paginador y orden -->
+        <form method="get" class="row g-2 align-items-end mb-3">
+          <div class="col-md-4">
+            <input type="text" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Buscar por nombre, stock, precio...">
+          </div>
+          <div class="col-md-2">
+            <select name="paginate_by" class="form-select" onchange="this.form.submit()">
+              <option value="5" {% if request.GET.paginate_by == '5' %}selected{% endif %}>5</option>
+              <option value="15" {% if request.GET.paginate_by == '15' %}selected{% endif %}>15</option>
+              <option value="30" {% if request.GET.paginate_by == '30' %}selected{% endif %}>30</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-outline-primary">Buscar</button>
+          </div>
+        </form>
+
         <table class="table table-hover align-middle">
           <thead>
             <tr>
-              <th>Nombre</th>
+              <th>
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}sort=nombre&dir={% if request.GET.sort == 'nombre' and request.GET.dir == 'asc' %}desc{% else %}asc{% endif %}">
+                  Nombre
+                  {% if request.GET.sort == 'nombre' %}
+                    {% if request.GET.dir == 'asc' %}▲{% else %}▼{% endif %}
+                  {% endif %}
+                </a>
+              </th>
               <th>Categoría</th>
-              <th>Precio</th>
-              <th>Stock</th>
+              <th>
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}sort=precio&dir={% if request.GET.sort == 'precio' and request.GET.dir == 'asc' %}desc{% else %}asc{% endif %}">
+                  Precio
+                  {% if request.GET.sort == 'precio' %}
+                    {% if request.GET.dir == 'asc' %}▲{% else %}▼{% endif %}
+                  {% endif %}
+                </a>
+              </th>
+              <th>
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}sort=stock_actual&dir={% if request.GET.sort == 'stock_actual' and request.GET.dir == 'asc' %}desc{% else %}asc{% endif %}">
+                  Stock
+                  {% if request.GET.sort == 'stock_actual' %}
+                    {% if request.GET.dir == 'asc' %}▲{% else %}▼{% endif %}
+                  {% endif %}
+                </a>
+              </th>
               <th>Proveedor</th>
               <th class="text-center">Acciones</th>
             </tr>
@@ -76,6 +114,26 @@
             {% endfor %}
           </tbody>
         </table>
+
+        <nav>
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort }}&dir={{ request.GET.dir }}&{% endif %}page={{ page_obj.previous_page_number }}">Anterior</a>
+              </li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+              <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort }}&dir={{ request.GET.dir }}&{% endif %}page={{ num }}">{{ num }}</a>
+              </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort }}&dir={{ request.GET.dir }}&{% endif %}page={{ page_obj.next_page_number }}">Siguiente</a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
       </div>
     </div>
   </div>

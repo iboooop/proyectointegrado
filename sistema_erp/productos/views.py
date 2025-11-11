@@ -2,10 +2,41 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Producto
 from .forms import ProductoForm
 from transacciones.models import MovimientoInventario
+from django.core.paginator import Paginator
+from django.db.models import Q
 
 def lista_productos(request):
-    productos = Producto.objects.select_related('proveedor').all()
-    return render(request, 'productos/product_list.html', {'productos': productos})
+    q = request.GET.get('q', '')
+    paginate_by = request.GET.get('paginate_by')
+    if not paginate_by:
+        paginate_by = request.session.get('paginate_by', 15)
+    else:
+        request.session['paginate_by'] = paginate_by
+
+    sort = request.GET.get('sort', 'nombre')
+    dir = request.GET.get('dir', 'asc')
+    order = sort if dir == 'asc' else f'-{sort}'
+
+    productos = Producto.objects.all()
+
+    if q:
+        productos = productos.filter(
+            Q(nombre__icontains=q) |
+            Q(stock_actual__icontains=q) |
+            Q(precio__icontains=q) |
+            Q(proveedor__nombre__icontains=q)
+        )
+
+    productos = productos.order_by(order)
+
+    paginator = Paginator(productos, paginate_by)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'productos/product_list.html', {
+        'productos': page_obj,
+        'page_obj': page_obj,
+    })
 
 
 def crear_producto(request):
