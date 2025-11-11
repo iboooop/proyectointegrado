@@ -93,10 +93,8 @@
             {% for perfil in perfiles %}
             <tr>
                 <td>{{ perfil.usuario.username }}</td>
-                <td>{{ perfil.usuario.email }}</td>
-                <td>{{ perfil.usuario.first_name }}</td>
-                <td>{{ perfil.usuario.last_name }}</td>
-                <td>{{ perfil.telefono|default:"—" }}</td>
+
+
                 <td>{{ perfil.rol }}</td>
                 <td>
                     {% if perfil.estado == 'ACTIVO' %}
@@ -107,9 +105,9 @@
                     <span class="badge bg-danger">BLOQUEADO</span>
                     {% endif %}
                 </td>
-                <td>{{ perfil.mfa_habilitado|yesno:"Sí,No" }}</td>
+
                 <td>{{ perfil.usuario.last_login|date:"d M Y H:i" }}</td>
-                <td>{{ perfil.sesiones_activas }}</td>
+
                 <td class="text-center">
                     <a href="{% url 'usuarios_detail' perfil.id %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
                 </td>
