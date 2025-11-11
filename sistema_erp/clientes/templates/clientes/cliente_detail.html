@@ -90,15 +90,40 @@
         <!-- Botones de acción -->
         <div class="mt-4 d-flex justify-content-end gap-2">
           <a href="{% url 'clientes_edit' cliente.idCliente %}" class="btn btn-warning-fixed btn-fixed">Editar</a>
-          <form action="{% url 'clientes_delete' cliente.idCliente %}" method="post"
-            onsubmit="return confirm('¿Seguro que deseas eliminar este cliente?');" class="d-inline">
+          <form id="deleteForm" action="{% url 'clientes_delete' cliente.idCliente %}" method="post" class="d-inline">
             {% csrf_token %}
-            <button type="submit" class="btn btn-danger-fixed btn-fixed">Eliminar</button>
+            <button type="button" id="deleteBtn" class="btn btn-danger-fixed btn-fixed">Eliminar</button>
           </form>
         </div>
       </div>
     </div>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Confirmación SweetAlert al eliminar
+      const deleteBtn = document.getElementById('deleteBtn');
+      if (deleteBtn) {
+        deleteBtn.addEventListener('click', function (e) {
+          Swal.fire({
+            title: '¿Seguro que deseas eliminar este cliente?',
+            text: 'Esta acción no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              document.getElementById('deleteForm').submit();
+            }
+          });
+        });
+      }
+    });
+  </script>
 </body>
 
 </html>

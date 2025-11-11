@@ -33,7 +33,7 @@
       </div>
 
       <div class="card-body">
-        <form method="post" novalidate>
+        <form method="post" novalidate id="editForm">
           {% csrf_token %}
           {% for field in form %}
           <div class="mb-3">
@@ -48,7 +48,7 @@
           {% endfor %}
 
           <div class="d-flex justify-content-end mt-4">
-            <button type="submit" class="btn btn-primary me-2">Guardar cambios</button>
+            <button type="button" id="saveEditBtn" class="btn btn-primary me-2">Guardar cambios</button>
             <a href="{% url 'clientes_detail' cliente.pk %}" class="btn btn-outline-secondary">Cancelar</a>
           </div>
         </form>
@@ -59,6 +59,24 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
+      // Confirmación SweetAlert al editar
+      const saveBtn = document.getElementById('saveEditBtn');
+      if (saveBtn) {
+        saveBtn.addEventListener('click', function (e) {
+          Swal.fire({
+            title: '¿Guardar cambios?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, guardar',
+            cancelButtonText: 'Cancelar'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              document.getElementById('editForm').submit();
+            }
+          });
+        });
+      }
+      // Mensaje de éxito si corresponde
       {% if messages %}
       {% for message in messages %}
       {% if message.tags == 'success' %}
