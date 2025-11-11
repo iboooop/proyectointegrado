@@ -252,7 +252,50 @@ class ClienteListView(LoginRequiredMixin, ListView):
     model = Cliente
     template_name = "clientes/cliente_list.html"
     context_object_name = "clientes"
-    paginate_by = 25
+
+    def get_queryset(self):
+        """Filtra, busca y ordena los clientes"""
+        qs = Cliente.objects.all()
+
+        # --- Búsqueda ---
+        q = (self.request.GET.get("q") or "").strip()
+        if q:
+            qs = qs.filter(
+                Q(nombre__icontains=q)
+                | Q(rut__icontains=q)
+                | Q(email__icontains=q)
+                | Q(telefono__icontains=q)
+                | Q(direccion__icontains=q)
+            )
+
+        # --- Orden ---
+        sort = (self.request.GET.get("sort") or "nombre").strip()
+        direction = (self.request.GET.get("dir") or "asc").strip().lower()
+        sort_map = {
+            "nombre": "nombre",
+            "rut": "rut",
+            "email": "email",
+            "telefono": "telefono",
+            "estadoCondicion": "estadoCondicion",
+            "fecha_registro": "fecha_registro",
+        }
+        order_field = sort_map.get(sort, "nombre")
+        if direction == "desc":
+            order_field = f"-{order_field}"
+        qs = qs.order_by(order_field)
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        """Agrega variables necesarias para el template"""
+        context = super().get_context_data(**kwargs)
+        context["q"] = self.request.GET.get("q", "")
+        context["sort"] = self.request.GET.get("sort", "nombre")
+        context["dir"] = self.request.GET.get("dir", "asc")
+        context["page_size"] = int(self.request.GET.get("page_size", 10))
+        context["page_sizes"] = [5, 10, 20, 50]
+        return context
+
 
 
 class ClienteCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
