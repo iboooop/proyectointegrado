@@ -18,9 +18,25 @@
       align-items: center;
     }
     .badge-mov {
-      font-size: 0.95em;
+      font-size: 1em;
       font-weight: 600;
       background: #198754;
+      padding: 0.35em 1em;
+      letter-spacing: 0.5px;
+      text-transform: capitalize;
+      font-size: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+    .badge-label {
+      font-size: 0.75em;
+      font-weight: 400;
+      line-height: 1;
+      color: #e0e0e0;
+      margin-bottom: -2px;
+      margin-right: 2px;
+      text-align: right;
     }
     .btn-warning { color: #fff; }
     .btn-danger { color: #fff; }
@@ -34,6 +50,7 @@
       <div class="card-header">
         Movimiento #{{ transaccion.id }}
         <span class="badge badge-mov">
+          <span class="badge-label">Tipo de movimiento</span>
           {{ transaccion.get_tipo_display|default:"-" }}
         </span>
       </div>
@@ -48,7 +65,6 @@
           <div class="col-md-6">
             <p><strong>Usuario:</strong> {{ transaccion.usuario }}</p>
             <p><strong>Lote:</strong> {{ transaccion.lote|default:"—" }}</p>
-
           </div>
         </div>
         <hr>
