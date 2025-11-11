@@ -146,11 +146,10 @@
                     <div class="card-body text-center">
                         <h3>{{ total_productos }}</h3>
                         <p class="text-muted">registrados</p>
-                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'VENTAS' or request.session.rol
-                        == 'BODEGA' or request.session.rol == 'COMPRAS' %}
-                        <a href="/productos/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'VENTAS' or request.session.rol == 'BODEGA' or request.session.rol == 'COMPRAS' %}
+                            <a href="/productos/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
                         {% else %}
-                        <span class="btn disabled-option w-100">No disponible</span>
+                            <span class="btn disabled-option w-100">No disponible</span>
                         {% endif %}
                     </div>
                 </div>
@@ -169,9 +168,9 @@
                         <h3>{{ total_proveedores }}</h3>
                         <p class="text-muted">activos</p>
                         {% if request.session.rol == 'ADMIN' or request.session.rol == 'COMPRAS' %}
-                        <a href="/proveedores/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                            <a href="/proveedores/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
                         {% else %}
-                        <span class="btn disabled-option w-100">No disponible</span>
+                            <span class="btn disabled-option w-100">No disponible</span>
                         {% endif %}
                     </div>
                 </div>
@@ -189,11 +188,10 @@
                     <div class="card-body text-center">
                         <h3>{{ total_bodegas }}</h3>
                         <p class="text-muted">activas</p>
-                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' or request.session.rol
-                        == 'COMPRAS' %}
-                        <a href="/bodegas/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' or request.session.rol == 'COMPRAS' %}
+                            <a href="/bodegas/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
                         {% else %}
-                        <span class="btn disabled-option w-100">No disponible</span>
+                            <span class="btn disabled-option w-100">No disponible</span>
                         {% endif %}
                     </div>
                 </div>
@@ -212,9 +210,9 @@
                         <h3>{{ total_clientes }}</h3>
                         <p class="text-muted">registrados</p>
                         {% if request.session.rol == 'ADMIN' or request.session.rol == 'VENTAS' %}
-                        <a href="/clientes/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                            <a href="/clientes/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
                         {% else %}
-                        <span class="btn disabled-option w-100">No disponible</span>
+                            <span class="btn disabled-option w-100">No disponible</span>
                         {% endif %}
                     </div>
                 </div>
@@ -232,11 +230,10 @@
                     <div class="card-body text-center">
                         <h3>{{ total_transacciones }}</h3>
                         <p class="text-muted">movimientos</p>
-                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'VENTAS' or request.session.rol
-                        == 'BODEGA' %}
-                        <a href="/transacciones/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'VENTAS' or request.session.rol == 'BODEGA' %}
+                            <a href="/transacciones/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
                         {% else %}
-                        <span class="btn disabled-option w-100">No disponible</span>
+                            <span class="btn disabled-option w-100">No disponible</span>
                         {% endif %}
                     </div>
                 </div>
@@ -255,9 +252,9 @@
                         <h3>{{ total_usuarios }}</h3>
                         <p class="text-muted">del sistema</p>
                         {% if request.session.rol == 'ADMIN' %}
-                        <a href="/usuarios/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                            <a href="/usuarios/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
                         {% else %}
-                        <span class="btn disabled-option w-100">No disponible</span>
+                            <span class="btn disabled-option w-100">No disponible</span>
                         {% endif %}
                     </div>
                 </div>
@@ -272,18 +269,18 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-box-seam me-2"></i>Últimos Productos Añadidos</span>
                         {% if request.session.rol == 'ADMIN' or request.session.rol == 'COMPRAS' %}
-                        <a href="/productos/" class="small">Ver todos</a>
+                            <a href="/productos/" class="small">Ver todos</a>
                         {% endif %}
                     </div>
                     <div class="card-body px-2">
                         <ul class="list-unstyled mb-0">
                             {% for producto in ultimos_productos %}
-                            <li class="list-item-centered">
-                                <span>{{ producto.nombre }}</span>
-                                <span class="pill">{{ producto.categoria }}</span>
-                            </li>
+                                <li class="list-item-centered">
+                                    <span>{{ producto.nombre }}</span>
+                                    <span class="pill">{{ producto.categoria }}</span>
+                                </li>
                             {% empty %}
-                            <div class="alert alert-info mb-0">No hay productos recientes.</div>
+                                <div class="alert alert-info mb-0">No hay productos recientes.</div>
                             {% endfor %}
                         </ul>
                     </div>
@@ -296,24 +293,24 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-arrow-left-right me-2"></i>Transacciones de Inventario recientes</span>
                         {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' %}
-                        <a href="/transacciones/" class="small">Ver todas</a>
+                            <a href="/transacciones/" class="small">Ver todas</a>
                         {% endif %}
                     </div>
                     <div class="card-body px-2">
                         {% if ultimas_transacciones %}
-                        {% for transaccion in ultimas_transacciones %}
-                        <div class="mb-3 pb-2 border-bottom">
-                            <div class="fw-bold d-flex justify-content-between align-items-center">
-                                <span>{{ transaccion.producto }}</span>
-                                <span class="pill">{{ transaccion.tipo }}</span>
-                            </div>
-                            <div class="text-muted small">
-                                <i class="bi bi-calendar3"></i> {{ transaccion.fecha|date:"d M Y H:i" }}
-                            </div>
-                        </div>
-                        {% endfor %}
+                            {% for transaccion in ultimas_transacciones %}
+                                <div class="mb-3 pb-2 border-bottom">
+                                    <div class="fw-bold d-flex justify-content-between align-items-center">
+                                        <span>{{ transaccion.producto }}</span>
+                                        <span class="pill">{{ transaccion.tipo }}</span>
+                                    </div>
+                                    <div class="text-muted small">
+                                        <i class="bi bi-calendar3"></i> {{ transaccion.fecha|date:"d M Y H:i" }}
+                                    </div>
+                                </div>
+                            {% endfor %}
                         {% else %}
-                        <div class="alert alert-info mb-0">No hay transacciones recientes.</div>
+                            <div class="alert alert-info mb-0">No hay transacciones recientes.</div>
                         {% endif %}
                     </div>
                 </div>
@@ -325,21 +322,21 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-people me-2"></i>Últimos Clientes</span>
                         {% if request.session.rol == 'ADMIN' or request.session.rol == 'VENTAS' %}
-                        <a href="/clientes/" class="small">Ver todos</a>
+                            <a href="/clientes/" class="small">Ver todos</a>
                         {% endif %}
                     </div>
                     <div class="card-body px-2">
                         <ul class="list-unstyled mb-0">
                             {% for cliente in ultimos_clientes %}
-                            <li class="list-item-centered">
-                                <span>{{ cliente.nombre }}</span>
-                                <span
-                                    class="pill {% if cliente.estadoCondicion == 'activo' %}bg-success text-white{% elif cliente.estadoCondicion == 'suspendido' %}bg-warning{% else %}bg-secondary text-white{% endif %}">
-                                    {{ cliente.get_estadoCondicion_display }}
-                                </span>
-                            </li>
+                                <li class="list-item-centered">
+                                    <span>{{ cliente.nombre }}</span>
+                                    <span
+                                        class="pill {% if cliente.estadoCondicion == 'activo' %}bg-success text-white{% elif cliente.estadoCondicion == 'suspendido' %}bg-warning{% else %}bg-secondary text-white{% endif %}">
+                                        {{ cliente.get_estadoCondicion_display }}
+                                    </span>
+                                </li>
                             {% empty %}
-                            <div class="alert alert-info mb-0">No hay clientes recientes.</div>
+                                <div class="alert alert-info mb-0">No hay clientes recientes.</div>
                             {% endfor %}
                         </ul>
                     </div>
@@ -354,36 +351,36 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-building me-2"></i>Estado de Bodegas</span>
                         {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' %}
-                        <a href="/bodegas/" class="small">Ver todas</a>
+                            <a href="/bodegas/" class="small">Ver todas</a>
                         {% endif %}
                     </div>
                     <div class="card-body">
                         {% if bodegas %}
-                        <div class="row g-3">
-                            {% for bodega in bodegas %}
-                            <div class="col-md-4 col-lg-3">
-                                <div class="card bg-light">
-                                    <div class="card-body">
-                                        <h6 class="card-title fw-bold">{{ bodega.nombre }}</h6>
-                                        <p class="card-text small text-muted mb-2">
-                                            <i class="bi bi-geo-alt"></i> {{ bodega.direccion|truncatewords:5 }}
-                                        </p>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span
-                                                class="pill {% if bodega.estado == 'ACTIVO' %}bg-success text-white{% elif bodega.estado == 'MANTENIMIENTO' %}bg-warning{% else %}bg-secondary text-white{% endif %}">
-                                                {{ bodega.get_estado_display }}
-                                            </span>
-                                            <small class="text-muted">
-                                                <i class="bi bi-box"></i> {{ bodega.capacidad_maxima|default:"N/A" }}
-                                            </small>
+                            <div class="row g-3">
+                                {% for bodega in bodegas %}
+                                    <div class="col-md-4 col-lg-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h6 class="card-title fw-bold">{{ bodega.nombre }}</h6>
+                                                <p class="card-text small text-muted mb-2">
+                                                    <i class="bi bi-geo-alt"></i> {{ bodega.direccion|truncatewords:5 }}
+                                                </p>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span
+                                                        class="pill {% if bodega.estado == 'ACTIVO' %}bg-success text-white{% elif bodega.estado == 'MANTENIMIENTO' %}bg-warning{% else %}bg-secondary text-white{% endif %}">
+                                                        {{ bodega.get_estado_display }}
+                                                    </span>
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-box"></i> {{ bodega.capacidad_maxima|default:"N/A" }}
+                                                    </small>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                {% endfor %}
                             </div>
-                            {% endfor %}
-                        </div>
                         {% else %}
-                        <div class="alert alert-info mb-0">No hay bodegas registradas.</div>
+                            <div class="alert alert-info mb-0">No hay bodegas registradas.</div>
                         {% endif %}
                     </div>
                 </div>
