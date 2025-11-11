@@ -92,10 +92,10 @@
         <tbody>
             {% for perfil in perfiles %}
             <tr>
-                <td>{{ usuario.username }}</td>
-                <td>{{ usuario.first_name }}</td>
-                <td>{{ usuario.last_name }}</td>
-                <td>{{ usuario.email }}</td>
+                <td>{{ perfil.usuario.username }}</td>
+                <td>{{ perfil.usuario.email }}</td>
+                <td>{{ perfil.usuario.first_name }}</td>
+                <td>{{ perfil.usuario.last_name }}</td>
                 <td>{{ perfil.telefono|default:"—" }}</td>
                 <td>{{ perfil.rol }}</td>
                 <td>
