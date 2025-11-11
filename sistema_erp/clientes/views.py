@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.contrib import messages
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, View
 from django.contrib.messages.views import SuccessMessageMixin
@@ -37,20 +37,19 @@ class ClienteCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Cliente
     form_class = ClienteForm
     template_name = "clientes/cliente_add.html"
+    success_url = reverse_lazy("clientes_list")
     success_message = "Cliente creado correctamente."
-
-    def get_success_url(self):
-        return reverse('clientes:clientes_detail', args=[self.object.pk])
 
 
 class ClienteUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Cliente
     form_class = ClienteForm
     template_name = "clientes/cliente_edit.html"
+    success_url = reverse_lazy("clientes_list")
     success_message = "Cliente actualizado correctamente."
 
-    def get_success_url(self):
-        return reverse('clientes:clientes_detail', args=[self.object.pk])
+    # Si tu URL usa otro nombre para el PK (por ejemplo 'id'), ajusta:
+    # pk_url_kwarg = 'id'
 
 
 class ClienteDetailView(LoginRequiredMixin, DetailView):
@@ -68,4 +67,4 @@ class ClienteDeleteView(LoginRequiredMixin, View):
         nombre = str(cliente)
         cliente.delete()
         messages.success(request, f'Cliente "{nombre}" eliminado correctamente.')
-        return redirect('clientes:clientes_list')
+        return redirect(reverse_lazy("clientes_list"))

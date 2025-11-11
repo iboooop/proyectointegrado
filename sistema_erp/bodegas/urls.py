@@ -1,8 +1,6 @@
 from django.urls import path
 from . import views
 
-app_name = 'bodegas'   # <-- añadir namespace
-
 urlpatterns = [
     path('', views.BodegaListView.as_view(), name='bodegas_list'),
     path('create/', views.BodegaCreateView.as_view(), name='bodegas_create'),

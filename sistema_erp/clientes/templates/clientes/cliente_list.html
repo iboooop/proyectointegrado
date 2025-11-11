@@ -54,7 +54,7 @@
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span>Lista de Clientes</span>
-        <a href="{% url 'clientes:clientes_create' %}" class="btn btn-create">+ Crear cliente</a>
+        <a href="{% url 'clientes_create' %}" class="btn btn-create">+ Crear cliente</a>
       </div>
 
       <div class="card-body">
@@ -81,10 +81,10 @@
                 <td>{{ cliente.estadoCondicion }}</td>
                 <td>{{ cliente.fecha_registro|date:"d M Y H:i" }}</td>
                 <td class="text-center">
-                  <a href="{% url 'clientes:clientes_detail' cliente.pk %}" class="btn btn-sm btn-info">Ver</a>
-                  <a href="{% url 'clientes:clientes_edit' cliente.pk %}" class="btn btn-sm btn-edit">Editar</a>
+                  <a href="{% url 'clientes_detail' cliente.idCliente %}" class="btn btn-sm btn-info">Ver</a>
+                  <a href="{% url 'clientes_edit' cliente.idCliente %}" class="btn btn-sm btn-edit">Editar</a>
 
-                  <form action="{% url 'clientes:clientes_delete' cliente.pk %}" method="post"
+                  <form action="{% url 'clientes_delete' cliente.idCliente %}" method="post"
                     class="d-inline form-delete" data-name="{{ cliente.nombre }}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-delete">Eliminar</button>
@@ -134,7 +134,7 @@
       {% if messages %}
       {% for message in messages %}
       Swal.fire({
-        icon: {% if 'error' in message.tags %}'error'{% elif 'warning' in message.tags %}'warning'{% else %}'success'{% endif %},
+        icon: "{% if 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% else %}success{% endif %}",
         title: "{{ message.tags|default:'Mensaje'|title }}",
         text: "{{ message|escapejs }}"
       });

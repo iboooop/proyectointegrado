@@ -50,7 +50,7 @@
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span>Lista de Bodegas</span>
-        <a href="{% url 'bodegas:bodegas_create' %}" class="btn btn-create">+ Crear bodega</a>
+        <a href="{% url 'bodegas_create' %}" class="btn btn-create">+ Crear bodega</a>
       </div>
 
       <div class="card-body">
@@ -77,10 +77,10 @@
                 <td>{{ bodega.tipo }}</td>
                 <td>{{ bodega.estado }}</td>
                 <td class="text-center">
-                  <a href="{% url 'bodegas:bodegas_detail' bodega.pk %}" class="btn btn-sm btn-info">Ver</a>
-                  <a href="{% url 'bodegas:bodegas_edit' bodega.pk %}" class="btn btn-sm btn-edit">Editar</a>
+                  <a href="{% url 'bodegas_detail' bodega.id %}" class="btn btn-sm btn-info">Ver</a>
+                  <a href="{% url 'bodegas_edit' bodega.id %}" class="btn btn-sm btn-edit">Editar</a>
 
-                  <form action="{% url 'bodegas:bodegas_delete' bodega.pk %}" method="post" class="d-inline form-delete"
+                  <form action="{% url 'bodegas_delete' bodega.id %}" method="post" class="d-inline form-delete"
                     data-name="{{ bodega.nombre }}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-delete">Eliminar</button>
@@ -124,7 +124,7 @@
       {% if messages %}
       {% for message in messages %}
       Swal.fire({
-        icon: {% if 'error' in message.tags %}'error'{% elif 'warning' in message.tags %}'warning'{% else %}'success'{% endif %},
+        icon: "{% if 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% else %}success{% endif %}",
         title: "{{ message.tags|default:'Mensaje'|title }}",
         text: "{{ message|escapejs }}"
       });
