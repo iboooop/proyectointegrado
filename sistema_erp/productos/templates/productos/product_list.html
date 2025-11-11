@@ -56,8 +56,9 @@
               <option value="30" {% if request.GET.paginate_by == '30' %}selected{% endif %}>30</option>
             </select>
           </div>
-          <div class="col-md-2">
+          <div class="col-md-2 d-flex gap-2">
             <button type="submit" class="btn btn-outline-primary">Buscar</button>
+            <a href="{% url 'lista_productos' %}" class="btn btn-outline-secondary">Limpiar filtro</a>
           </div>
         </form>
 
