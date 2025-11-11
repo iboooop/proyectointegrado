@@ -5,6 +5,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DetailView, V
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django import forms
+from django.db.models import Q
 
 from .models import Cliente
 
@@ -31,6 +32,28 @@ class ClienteListView(LoginRequiredMixin, ListView):
     template_name = "clientes/cliente_list.html"
     context_object_name = "clientes"
     paginate_by = 25
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            queryset = queryset.filter(
+                Q(nombre__icontains=q) |
+                Q(rut__icontains=q) |
+                Q(telefono__icontains=q) |
+                Q(email__icontains=q)
+            )
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['q'] = self.request.GET.get('q', '')
+        # Si usas paginación dinámica:
+        context['page_size'] = int(self.request.GET.get('page_size', self.paginate_by))
+        context['page_sizes'] = [5, 10, 25, 50, 100]
+        context['sort'] = self.request.GET.get('sort', '')
+        context['dir'] = self.request.GET.get('dir', '')
+        return context
 
 
 class ClienteCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
