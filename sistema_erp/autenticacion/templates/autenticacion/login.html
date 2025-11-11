@@ -9,21 +9,119 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            background: #f5f6fa;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        .login-container {
+            max-width: 370px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+            padding: 32px 28px 24px 28px;
+            text-align: center;
+        }
+        .login-container img {
+            width: 80px;
+            margin-bottom: 10px;
+        }
+        .login-container h1 {
+            font-size: 1.5rem;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+        .login-container p {
+            color: #888;
+            font-size: 1rem;
+            margin-bottom: 18px;
+        }
+        .login-container label {
+            display: block;
+            text-align: left;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        .login-container input[type="text"],
+        .login-container input[type="password"] {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+            background: #f9fafb;
+            transition: border 0.2s;
+        }
+        .login-container input[type="text"]:focus,
+        .login-container input[type="password"]:focus {
+            border: 1.5px solid #2563eb;
+            outline: none;
+            background: #fff;
+        }
+        .login-container .form-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .login-container .form-row label {
+            margin-bottom: 0;
+        }
+        .login-container .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .login-container button[type="submit"] {
+            width: 100%;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+        .login-container button[type="submit"]:hover {
+            background: #1d4ed8;
+        }
+        .login-container .forgot-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-size: 0.97rem;
+            transition: color 0.2s;
+        }
+        .login-container .forgot-link:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
+        <img src="{% static 'img/logo.png' %}" alt="Logo">
         <h1>Iniciar sesión</h1>
-
-        <form id="loginForm" method="post" novalidate>
+        <p>Accede con tu correo y contraseña</p>
+        <form id="loginForm" method="post" novalidate autocomplete="off">
             {% csrf_token %}
-            {{ form.as_p }}
-            <div style="display:flex; gap:12px; justify-content:center; align-items:center; margin-top:16px; flex-wrap:wrap;">
-                <button type="submit" class="btn btn-primary">Iniciar sesi</button>
+            <label for="id_username">Usuario o correo</label>
+            <input type="text" name="username" id="id_username" placeholder="usuario@dominio.com" required>
+            <label for="id_password">Contraseña</label>
+            <input type="password" name="password" id="id_password" placeholder="********" required minlength="6">
+            <div class="form-row">
+                <div class="remember-me">
+                    <input type="checkbox" name="rememberme" id="id_rememberme">
+                    <label for="id_rememberme" style="font-weight:400;">Recordarme</label>
+                </div>
+                <a href="{% url 'recuperar_password' %}" class="forgot-link">¿Olvidaste tu contraseña?</a>
             </div>
+            <button type="submit">Iniciar sesión</button>
         </form>
-        <div style="text-align:center; margin-top:12px;">
-            <a href="{% url 'recuperar_password' %}">¿Olvidaste tu contraseña?</a>
-        </div>
     </div>
 
     <script>
@@ -37,7 +135,7 @@
             const errors = [];
 
             if (!username || !username.value.trim()) {
-                errors.push('Ingrese su usuario.');
+                errors.push('Ingrese su usuario o correo.');
             }
             if (!password || password.value.trim().length < 6) {
                 errors.push('La contraseña debe tener al menos 6 caracteres.');
@@ -65,7 +163,6 @@
         messages.forEach(function(m) {
             if (!m.text) return;
             if (m.tags.includes('success')) {
-                // Si el mensaje contiene "Bienvenido", muestra el SweetAlert personalizado
                 if (m.text.startsWith('Bienvenido')) {
                     Swal.fire({
                         icon: 'success',

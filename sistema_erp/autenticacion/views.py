@@ -53,9 +53,8 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            # Cambia el mensaje para incluir el nombre de usuario
             messages.success(request, f'Bienvenido, {user.username}')
-            return redirect('lista_productos')  # ajustar destino si es necesario
+            return redirect('lista_productos')  # Ajusta el destino si es necesario
         else:
             username = request.POST.get('username', '')
             from django.contrib.auth.models import User
