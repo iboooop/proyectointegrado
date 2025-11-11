@@ -57,6 +57,11 @@
               {{ form.perfil }}
               {% include 'transacciones/partials/field_errors.html' with field=form.perfil %}
             </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ form.lote.label }}</label>
+              {{ form.lote }}
+              {% include 'transacciones/partials/field_errors.html' with field=form.lote %}
+            </div>
             <div class="col-12">
               <label class="form-label">{{ form.observaciones.label }}</label>
               {{ form.observaciones }}

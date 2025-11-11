@@ -13,7 +13,7 @@ class MovimientoInventarioForm(forms.ModelForm):
         model = MovimientoInventario
         # Solo los campos solicitados en el formulario
         fields = [
-            'fecha', 'tipo', 'cantidad', 'producto', 'proveedor', 'usuario', 'perfil', 'observaciones'
+            'fecha', 'tipo', 'cantidad', 'producto', 'proveedor', 'usuario', 'perfil', 'lote', 'observaciones'
         ]
         widgets = {
             'producto': forms.Select(attrs={'class': 'form-select'}),
@@ -23,6 +23,7 @@ class MovimientoInventarioForm(forms.ModelForm):
             'tipo': forms.Select(attrs={'class': 'form-select'}),
             'cantidad': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
             'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Notas de operación, recibo, daño, etc.'}),
+            'lote': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Lote (opcional)'}),
         }
 
     def __init__(self, *args, **kwargs):
