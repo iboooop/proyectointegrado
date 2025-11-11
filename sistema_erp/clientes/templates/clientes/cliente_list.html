@@ -57,7 +57,12 @@
       async function fetchAndUpdate(url){
         const resp = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }});
         const html = await resp.text();
-        wrap.innerHTML = html;
+        // ✅ Evita duplicados verificando si viene solo la tabla o la página entera
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newTable = doc.querySelector('#clientesTableWrap') || doc;
+        wrap.innerHTML = newTable.innerHTML;
+
         attachJumpHandler();
       }
 

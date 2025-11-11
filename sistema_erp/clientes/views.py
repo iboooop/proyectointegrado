@@ -11,7 +11,9 @@ from django import forms
 
 from .models import Cliente
 
-# Importar ClienteForm
+# ======================================================
+# FORMULARIO DE CLIENTE
+# ======================================================
 try:
     from .forms import ClienteForm
 except Exception:
@@ -28,7 +30,9 @@ except Exception:
             ]
 
 
-# ============= EXPORTAR EXCEL =============
+# ======================================================
+# EXPORTAR CLIENTES A EXCEL
+# ======================================================
 try:
     from openpyxl import Workbook
     from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
@@ -47,7 +51,7 @@ def exportar_clientes_excel(request):
 
     qs = Cliente.objects.all()
 
-    # Búsqueda
+    # --- Búsqueda ---
     q = (request.GET.get('q') or '').strip()
     if q:
         qs = qs.filter(
@@ -58,7 +62,7 @@ def exportar_clientes_excel(request):
             | Q(direccion__icontains=q)
         )
 
-    # Orden
+    # --- Orden ---
     sort = (request.GET.get('sort') or 'nombre').strip()
     direction = (request.GET.get('dir') or 'asc').strip().lower()
     sort_map = {
@@ -79,7 +83,7 @@ def exportar_clientes_excel(request):
     ws.title = 'Clientes'
 
     headers = [
-        'ID', 'Nombre', 'RUT', 'Teléfono', 'Email', 'Dirección', 
+        'ID', 'Nombre', 'RUT', 'Teléfono', 'Email', 'Dirección',
         'Estado', 'Fecha Registro'
     ]
     header_fill = PatternFill(start_color='EAF2FF', end_color='EAF2FF', fill_type='solid')
@@ -141,10 +145,11 @@ def exportar_clientes_excel(request):
     return response
 
 
-# ============= VISTAS BASADAS EN FUNCIONES (MEJORADAS) =============
-
+# ======================================================
+# LISTAR CLIENTES (AJAX + PAGINACIÓN)
+# ======================================================
 def clientes_list(request):
-    """Lista de clientes con búsqueda, filtros y paginación (compatible con AJAX parcial)"""
+    """Lista de clientes con búsqueda, filtros y paginación (compatible con AJAX parcial)."""
     qs = Cliente.objects.all()
 
     # --- Búsqueda ---
@@ -188,7 +193,6 @@ def clientes_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # --- Contexto ---
     context = {
         'clientes': page_obj.object_list,
         'page_obj': page_obj,
@@ -200,19 +204,21 @@ def clientes_list(request):
         'page_sizes': allowed_sizes,
     }
 
-    # ⚠️ AQUÍ ESTÁ LA CLAVE:
-    # Si la petición viene de AJAX o incluye `?partial=1`, renderizamos SOLO la tabla.
-    if request.GET.get('partial') == '1' or request.headers.get('x-requested-with') == 'XMLHttpRequest':
+    # --- Renderizado parcial (AJAX o Fetch) ---
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
+    is_partial = request.GET.get('partial') == '1'
+    if is_ajax or is_partial:
         return render(request, 'clientes/partials/cliente_table.html', context)
 
-    # De lo contrario, renderizamos la página completa.
+    # --- Renderizado completo ---
     return render(request, 'clientes/cliente_list.html', context)
 
 
-
-
+# ======================================================
+# CRUD CLIENTES
+# ======================================================
 def clientes_create(request):
-    """Crear nuevo cliente"""
+    """Crear nuevo cliente."""
     if request.method == 'POST':
         form = ClienteForm(request.POST)
         if form.is_valid():
@@ -225,13 +231,13 @@ def clientes_create(request):
 
 
 def clientes_detail(request, pk):
-    """Ver detalle de un cliente"""
+    """Ver detalle de un cliente."""
     cliente = get_object_or_404(Cliente, idCliente=pk)
     return render(request, 'clientes/cliente_detail.html', {'cliente': cliente})
 
 
 def clientes_edit(request, pk):
-    """Editar cliente"""
+    """Editar cliente."""
     cliente = get_object_or_404(Cliente, idCliente=pk)
     if request.method == 'POST':
         form = ClienteForm(request.POST, instance=cliente)
@@ -245,7 +251,7 @@ def clientes_edit(request, pk):
 
 
 def clientes_delete(request, pk):
-    """Eliminar cliente"""
+    """Eliminar cliente."""
     cliente = get_object_or_404(Cliente, idCliente=pk)
     if request.method == 'POST':
         nombre = str(cliente.nombre)
@@ -255,18 +261,16 @@ def clientes_delete(request, pk):
     return redirect('clientes_detail', pk=pk)
 
 
-# ============= VISTAS BASADAS EN CLASES (LEGACY - Si las necesitas) =============
-
+# ======================================================
+# CLASES LEGACY (opcional, no usadas en AJAX)
+# ======================================================
 class ClienteListView(LoginRequiredMixin, ListView):
     model = Cliente
     template_name = "clientes/cliente_list.html"
     context_object_name = "clientes"
 
     def get_queryset(self):
-        """Filtra, busca y ordena los clientes"""
         qs = Cliente.objects.all()
-
-        # --- Búsqueda ---
         q = (self.request.GET.get("q") or "").strip()
         if q:
             qs = qs.filter(
@@ -277,7 +281,6 @@ class ClienteListView(LoginRequiredMixin, ListView):
                 | Q(direccion__icontains=q)
             )
 
-        # --- Orden ---
         sort = (self.request.GET.get("sort") or "nombre").strip()
         direction = (self.request.GET.get("dir") or "asc").strip().lower()
         sort_map = {
@@ -291,12 +294,9 @@ class ClienteListView(LoginRequiredMixin, ListView):
         order_field = sort_map.get(sort, "nombre")
         if direction == "desc":
             order_field = f"-{order_field}"
-        qs = qs.order_by(order_field)
-
-        return qs
+        return qs.order_by(order_field)
 
     def get_context_data(self, **kwargs):
-        """Agrega variables necesarias para el template"""
         context = super().get_context_data(**kwargs)
         context["q"] = self.request.GET.get("q", "")
         context["sort"] = self.request.GET.get("sort", "nombre")
@@ -304,36 +304,3 @@ class ClienteListView(LoginRequiredMixin, ListView):
         context["page_size"] = int(self.request.GET.get("page_size", 10))
         context["page_sizes"] = [5, 10, 20, 50]
         return context
-
-
-
-class ClienteCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
-    model = Cliente
-    form_class = ClienteForm
-    template_name = "clientes/cliente_add.html"
-    success_url = reverse_lazy("clientes_list")
-    success_message = "Cliente creado correctamente."
-
-
-class ClienteUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
-    model = Cliente
-    form_class = ClienteForm
-    template_name = "clientes/cliente_edit.html"
-    success_url = reverse_lazy("clientes_list")
-    success_message = "Cliente actualizado correctamente."
-
-
-class ClienteDetailView(LoginRequiredMixin, DetailView):
-    model = Cliente
-    template_name = "clientes/cliente_detail.html"
-    context_object_name = "cliente"
-
-
-class ClienteDeleteView(LoginRequiredMixin, View):
-    """Eliminación via POST"""
-    def post(self, request, pk=None, *args, **kwargs):
-        cliente = get_object_or_404(Cliente, pk=pk)
-        nombre = str(cliente)
-        cliente.delete()
-        messages.success(request, f'Cliente "{nombre}" eliminado correctamente.')
-        return redirect(reverse_lazy("clientes_list"))
