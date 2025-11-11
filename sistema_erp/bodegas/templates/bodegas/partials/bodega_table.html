@@ -27,15 +27,16 @@
         <td>{{ b.responsable|default:"—" }}</td>
         <td>{{ b.tipo|default:"—" }}</td>
         <td>
-          {% if b.estado == 'Activo' %}
+          {% if b.estado == 'ACTIVO' %}
             <span class="badge bg-success">Activo</span>
-          {% elif b.estado == 'Inactivo' %}
+          {% elif b.estado == 'INACTIVO' %}
             <span class="badge bg-secondary">Inactivo</span>
-          {% elif b.estado == 'En Mantenimiento' %}
+          {% elif b.estado == 'MANTENIMIENTO' %}
             <span class="badge bg-warning text-dark">En Mantenimiento</span>
           {% else %}
             <span class="badge bg-light text-dark">Desconocido</span>
           {% endif %}
+
         </td>
         <td class="text-center">
           <a href="{% url 'bodegas_detail' b.id %}" class="btn btn-outline-primary btn-sm">Ver detalle</a>
