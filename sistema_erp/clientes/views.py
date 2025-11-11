@@ -144,10 +144,10 @@ def exportar_clientes_excel(request):
 # ============= VISTAS BASADAS EN FUNCIONES (MEJORADAS) =============
 
 def clientes_list(request):
-    """Lista de clientes con búsqueda, filtros y paginación"""
+    """Lista de clientes con búsqueda, filtros y paginación (compatible con AJAX parcial)"""
     qs = Cliente.objects.all()
 
-    # Búsqueda
+    # --- Búsqueda ---
     q = (request.GET.get('q') or '').strip()
     if q:
         qs = qs.filter(
@@ -158,7 +158,7 @@ def clientes_list(request):
             | Q(direccion__icontains=q)
         )
 
-    # Orden
+    # --- Orden ---
     sort = (request.GET.get('sort') or 'nombre').strip()
     direction = (request.GET.get('dir') or 'asc').strip().lower()
     sort_map = {
@@ -174,7 +174,7 @@ def clientes_list(request):
         order_field = f'-{order_field}'
     qs = qs.order_by(order_field)
 
-    # Tamaño de página persistente
+    # --- Tamaño de página ---
     allowed_sizes = [5, 10, 20, 50]
     try:
         page_size = int(request.GET.get('page_size') or request.session.get('cliente_page_size') or 10)
@@ -188,6 +188,7 @@ def clientes_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # --- Contexto ---
     context = {
         'clientes': page_obj.object_list,
         'page_obj': page_obj,
@@ -199,7 +200,13 @@ def clientes_list(request):
         'page_sizes': allowed_sizes,
     }
 
+    # --- Renderizado parcial (AJAX / Fetch) ---
+    if request.GET.get('partial') == '1' or request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'clientes/partials/cliente_table.html', context)
+
+    # --- Renderizado completo (carga inicial) ---
     return render(request, 'clientes/cliente_list.html', context)
+
 
 
 def clientes_create(request):
