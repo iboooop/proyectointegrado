@@ -111,7 +111,7 @@
                 <td>{{ perfil.usuario.last_login|date:"d M Y H:i" }}</td>
                 <td>{{ perfil.sesiones_activas }}</td>
                 <td class="text-center">
-                    <a href="{% url 'usuarios_detail' usuario.id %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
+                    <a href="{% url 'usuarios_detail' perfil.id %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
                 </td>
             </tr>
             {% empty %}
