@@ -3,9 +3,39 @@ from django.core.exceptions import ValidationError
 from .models import MovimientoInventario
 
 class MovimientoInventarioForm(forms.ModelForm):
+    # Acepta el formato de input HTML5 "datetime-local" (con T)
+    fecha = forms.DateTimeField(
+        input_formats=['%Y-%m-%dT%H:%M', '%Y-%m-%d %H:%M', '%d/%m/%Y %H:%M'],
+        widget=forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local', 'step': '60'}, format='%Y-%m-%dT%H:%M')
+    )
+
     class Meta:
         model = MovimientoInventario
-        fields = "__all__"
+        # Solo los campos solicitados en el formulario
+        fields = [
+            'fecha', 'tipo', 'cantidad', 'producto', 'proveedor', 'usuario', 'perfil', 'observaciones'
+        ]
+        widgets = {
+            'producto': forms.Select(attrs={'class': 'form-select'}),
+            'proveedor': forms.Select(attrs={'class': 'form-select'}),
+            'usuario': forms.Select(attrs={'class': 'form-select'}),
+            'perfil': forms.Select(attrs={'class': 'form-select'}),
+            'tipo': forms.Select(attrs={'class': 'form-select'}),
+            'cantidad': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
+            'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Notas de operación, recibo, daño, etc.'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Placeholder y etiquetas amigables
+        self.fields['producto'].label = 'Producto'
+        self.fields['proveedor'].label = 'Proveedor'
+        self.fields['usuario'].label = 'Usuario'
+        self.fields['perfil'].label = 'Perfil'
+        self.fields['tipo'].label = 'Tipo'
+        self.fields['cantidad'].label = 'Cantidad'
+        self.fields['fecha'].label = 'Fecha'
+        
 
     def clean_producto(self):
         producto = self.cleaned_data["producto"]
@@ -18,16 +48,7 @@ class MovimientoInventarioForm(forms.ModelForm):
         # El proveedor puede ser opcional, pero puedes validar si lo necesitas
         return proveedor
 
-    def clean_usuario(self):
-        usuario = self.cleaned_data["usuario"]
-        if not usuario:
-            raise ValidationError("Debes seleccionar un usuario.")
-        return usuario
-
-    def clean_perfil(self):
-        perfil = self.cleaned_data["perfil"]
-        # El perfil puede ser opcional, pero puedes validar si lo necesitas
-        return perfil
+    # usuario y perfil se gestionan desde el formulario (usuario requerido por defecto)
 
     def clean_tipo(self):
         tipo = self.cleaned_data["tipo"]
@@ -42,6 +63,8 @@ class MovimientoInventarioForm(forms.ModelForm):
         if cantidad <= 0:
             raise ValidationError("La cantidad debe ser mayor a 0.")
         return cantidad
+
+    # Sin validaciones condicionales del Paso 2: no se usan en el formulario
 
     def clean_observaciones(self):
         observaciones = self.cleaned_data["observaciones"]
