@@ -30,26 +30,6 @@
       padding: 0.5rem 2rem;
       margin-top: 2rem;
     }
-    .sortable-header {
-      color: #212529;
-      text-decoration: none;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      background: none;
-      padding: 0;
-      outline: none;
-    }
-    .sortable-header.active {
-      font-weight: 700;
-    }
-    .arrow {
-      font-size: 0.95em;
-      margin-left: 2px;
-      color: #888;
-      font-family: 'Segoe UI Symbol', 'Arial', sans-serif;
-      font-weight: normal;
-    }
   </style>
 </head>
 <body>
@@ -64,9 +44,7 @@
           <a href="{% url 'proveedor_agregar' %}" class="btn btn-success">+ Crear proveedor</a>
         {% endif %}
       </div>
-
       <div class="card-body">
-        <!-- Buscador, paginador y orden -->
         <form method="get" class="row g-2 align-items-end mb-3">
           <div class="col-md-4">
             <input type="text" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Buscar por nombre, RUT, contacto...">
@@ -87,44 +65,12 @@
         <table class="table table-hover align-middle">
           <thead>
             <tr>
-              <th>
-                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}sort=nombre&dir={% if request.GET.sort == 'nombre' and request.GET.dir == 'asc' %}desc{% else %}asc{% endif %}"
-                   class="sortable-header{% if request.GET.sort == 'nombre' %} active{% endif %}">
-                  Nombre
-                  {% if request.GET.sort == 'nombre' %}
-                    <span class="arrow">{% if request.GET.dir == 'asc' %}&#8593;{% else %}&#8595;{% endif %}</span>
-                  {% endif %}
-                </a>
-              </th>
-              <th>
-                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}sort=rut&dir={% if request.GET.sort == 'rut' and request.GET.dir == 'asc' %}desc{% else %}asc{% endif %}"
-                   class="sortable-header{% if request.GET.sort == 'rut' %} active{% endif %}">
-                  RUT
-                  {% if request.GET.sort == 'rut' %}
-                    <span class="arrow">{% if request.GET.dir == 'asc' %}&#8593;{% else %}&#8595;{% endif %}</span>
-                  {% endif %}
-                </a>
-              </th>
+              <th>Nombre</th>
+              <th>RUT</th>
               <th>Contacto</th>
-              <th>
-                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}sort=telefono&dir={% if request.GET.sort == 'telefono' and request.GET.dir == 'asc' %}desc{% else %}asc{% endif %}"
-                   class="sortable-header{% if request.GET.sort == 'telefono' %} active{% endif %}">
-                  Teléfono
-                  {% if request.GET.sort == 'telefono' %}
-                    <span class="arrow">{% if request.GET.dir == 'asc' %}&#8593;{% else %}&#8595;{% endif %}</span>
-                  {% endif %}
-                </a>
-              </th>
+              <th>Teléfono</th>
               <th>Correo</th>
-              <th>
-                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}sort=estado&dir={% if request.GET.sort == 'estado' and request.GET.dir == 'asc' %}desc{% else %}asc{% endif %}"
-                   class="sortable-header{% if request.GET.sort == 'estado' %} active{% endif %}">
-                  Estado
-                  {% if request.GET.sort == 'estado' %}
-                    <span class="arrow">{% if request.GET.dir == 'asc' %}&#8593;{% else %}&#8595;{% endif %}</span>
-                  {% endif %}
-                </a>
-              </th>
+              <th>Estado</th>
               <th class="text-center">Acciones</th>
             </tr>
           </thead>
@@ -145,16 +91,6 @@
               </td>
               <td class="text-center">
                 <a href="{% url 'detalle_proveedor' proveedor.id %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
-                {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' %}
-                  <a href="{% url 'editar_proveedor' proveedor.id %}" class="btn btn-sm btn-warning">Editar</a>
-                {% elif request.session.rol == 'COMPRAS' %}
-                  <button class="btn btn-sm btn-warning" disabled>Editar</button>
-                {% endif %}
-                {% if request.session.rol == 'ADMIN' %}
-                  <a href="{% url 'eliminar_proveedor' proveedor.id %}" class="btn btn-sm btn-danger">Eliminar</a>
-                {% elif request.session.rol == 'BODEGA' or request.session.rol == 'COMPRAS' %}
-                  <button class="btn btn-sm btn-danger" disabled>Eliminar</button>
-                {% endif %}
               </td>
             </tr>
             {% empty %}
