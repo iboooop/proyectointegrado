@@ -11,8 +11,56 @@ except ImportError:
     Workbook = None
 
 def lista_proveedores(request):
-    proveedores = Proveedor.objects.all().order_by('nombre')
-    return render(request, 'proveedores/proveedor_list.html', {'proveedores': proveedores})
+    qs = Proveedor.objects.all().order_by('nombre')
+
+    # --- Búsqueda ---
+    q = (request.GET.get('q') or '').strip()
+    if q:
+        qs = qs.filter(
+            Q(nombre__icontains=q) |
+            Q(rut__icontains=q) |
+            Q(contacto__icontains=q) |
+            Q(telefono__icontains=q) |
+            Q(correo__icontains=q) |
+            Q(direccion__icontains=q)
+        )
+
+    # --- Orden (si lo deseas implementar) ---
+    sort = (request.GET.get('sort') or 'nombre').strip()
+    direction = (request.GET.get('dir') or 'asc').strip().lower()
+    if direction == 'desc':
+        sort = f'-{sort}'
+    qs = qs.order_by(sort)
+
+    # --- Paginación ---
+    allowed_sizes = [5, 10, 20, 50]
+    try:
+        page_size = int(request.GET.get('page_size') or request.session.get('proveedor_page_size') or 10)
+    except ValueError:
+        page_size = 10
+    if page_size not in allowed_sizes:
+        page_size = 10
+    request.session['proveedor_page_size'] = page_size
+
+    paginator = Paginator(qs, page_size)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'proveedores': page_obj.object_list,
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'q': q,
+        'sort': sort,
+        'dir': direction,
+        'page_size': page_size,
+        'page_sizes': allowed_sizes,
+    }
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('partial') == '1':
+        return render(request, 'proveedores/partials/proveedor_table.html', context)
+
+    return render(request, 'proveedores/proveedor_list.html', context)
 
 
 def crear_proveedor(request):
