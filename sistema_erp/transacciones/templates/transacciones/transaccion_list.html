@@ -52,7 +52,7 @@
       <div class="card-header d-flex justify-content-between align-items-center">
         <span>Movimientos de Inventario</span>
         <div>
-          <a href="{% url 'transacciones_export' %}?q={{ q }}&sort={{ sort }}&dir={{ dir }}" class="btn btn-success me-2">Exportar Excel</a>
+          <a href="{% url 'transacciones_export' %}?q={{ q }}&sort={{ sort }}&dir={{ dir }}" id="exportExcelBtn" class="btn btn-success me-2">Exportar Excel</a>
           <a href="{% url 'crear_transaccion' %}" class="btn btn-create">+ Crear Movimiento</a>
         </div>
       </div>
@@ -242,6 +242,48 @@
         attachJumpHandler();
     };
 })();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const exportBtn = document.getElementById('exportExcelBtn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const url = exportBtn.getAttribute('href');
+      fetch(url, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Error en la exportación');
+        return response.blob();
+      })
+      .then(blob => {
+        // Descargar el archivo
+        const a = document.createElement('a');
+        a.href = window.URL.createObjectURL(blob);
+        a.download = exportBtn.getAttribute('href').split('filename=')[1] || 'export.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        Swal.fire({
+          icon: 'success',
+          title: 'Exportación exitosa',
+          text: 'El archivo Excel se descargó correctamente.',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      })
+      .catch(() => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo exportar el archivo.',
+        });
+      });
+    });
+  }
+});
 </script>
 {% include 'partials/footer.html' %}
 </body>
