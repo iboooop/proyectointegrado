@@ -17,7 +17,9 @@
                 <span>Lista de Usuarios</span>
                 <div class="d-flex gap-2">
                     <a href="{% url 'usuarios_export' %}" class="btn btn-success">Exportar Excel</a>
-                    <a href="{% url 'usuarios_create' %}" class="btn btn-create">+ Crear usuario</a>
+                    {% if request.user.perfil.rol != 'LECTOR' %}
+                        <a href="{% url 'usuarios_create' %}" class="btn btn-create">+ Crear usuario</a>
+                    {% endif %}
                 </div>
             </div>
 

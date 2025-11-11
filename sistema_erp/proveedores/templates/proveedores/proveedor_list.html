@@ -42,7 +42,9 @@
         <span>Listado de Proveedores</span>
         <div class="d-flex gap-2">
           <a href="{% url 'proveedores_export' %}" class="btn btn-success">Exportar Excel</a>
-          <a href="{% url 'proveedor_agregar' %}" class="btn btn-primary">+ Crear proveedor</a>
+          {% if request.user.perfil.rol != 'LECTOR' %}
+            <a href="{% url 'proveedor_agregar' %}" class="btn btn-primary">+ Crear proveedor</a>
+          {% endif %}
         </div>
       </div>
 

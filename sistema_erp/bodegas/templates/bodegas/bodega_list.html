@@ -19,7 +19,9 @@
         </div>
         <div class="d-flex gap-2">
           <a href="{% url 'bodegas_export' %}?q={{ q }}&sort={{ sort }}&dir={{ dir }}" class="btn btn-success">Exportar Excel</a>
-          <a href="{% url 'bodegas_create' %}" class="btn btn-create">+ Crear Bodega</a>
+          {% if request.user.perfil.rol != 'LECTOR' %}
+            <a href="{% url 'bodegas_create' %}" class="btn btn-create">+ Crear Bodega</a>
+          {% endif %}
         </div>
       </div>
 
