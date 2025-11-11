@@ -7,8 +7,29 @@
   <style>
     body { background: #f8f9fa; }
     .card { border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .card-header { background: #212529; color: white; }
+    .card-header {
+      background: #212529;
+      color: white;
+      font-weight: 600;
+      border-top-left-radius: 10px;
+      border-top-right-radius: 10px;
+    }
     .table th { background-color: #f1f3f4; }
+    .btn-outline-primary {
+      border-color: #0d6efd;
+      color: #0d6efd;
+      transition: all 0.2s;
+    }
+    .btn-outline-primary:hover {
+      background-color: #0d6efd;
+      color: white;
+    }
+    .footer {
+      background: #212529;
+      color: #fff;
+      padding: 0.5rem 2rem;
+      margin-top: 2rem;
+    }
     .sortable-header {
       color: #212529;
       text-decoration: none;
@@ -29,10 +50,10 @@
       font-family: 'Segoe UI Symbol', 'Arial', sans-serif;
       font-weight: normal;
     }
-    .footer { background: #212529; color: #fff; padding: 0.5rem 2rem; margin-top: 2rem; }
   </style>
 </head>
 <body>
+
   <div class="container my-5">
     <a href="/" class="btn btn-outline-secondary mb-3">&larr; Volver al dashboard</a>
 
@@ -43,8 +64,9 @@
           <a href="{% url 'proveedor_agregar' %}" class="btn btn-success">+ Crear proveedor</a>
         {% endif %}
       </div>
+
       <div class="card-body">
-        <!-- Buscador, paginador y limpiar filtro DENTRO de la card -->
+        <!-- Buscador, paginador y orden -->
         <form method="get" class="row g-2 align-items-end mb-3">
           <div class="col-md-4">
             <input type="text" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Buscar por nombre, RUT, contacto...">
@@ -143,7 +165,6 @@
           </tbody>
         </table>
 
-        <!-- Paginador -->
         <nav>
           <ul class="pagination justify-content-center">
             {% if page_obj.has_previous %}
@@ -170,6 +191,7 @@
   <div class="footer d-flex justify-content-between align-items-center">
     <span>&copy; 2025 Sistema ERP</span>
     <span>Soporte</span>
-  </div>
+  </div> 
+
 </body>
 </html>
