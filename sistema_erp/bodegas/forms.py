@@ -39,12 +39,13 @@ class BodegaForm(forms.ModelForm):
             raise ValidationError("El código es obligatorio.")
         if not CODE_REGEX.match(codigo):
             raise ValidationError("Código inválido. Use letras y números (mayúsculas) y opcional guiones, 3-20 caracteres.")
-        qs = Bodega.objects.filter(codigo=codigo)
+        qs = Bodega.objects.filter(codigo__iexact=codigo)
         if self.instance and self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
             raise ValidationError("Ya existe una bodega con ese código.")
         return codigo
+
 
     def clean_nombre(self):
         nombre = (self.cleaned_data.get("nombre") or "").strip()

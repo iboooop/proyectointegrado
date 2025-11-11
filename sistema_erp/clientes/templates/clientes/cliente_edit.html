@@ -93,20 +93,27 @@
 
       <form method="post" class="confirm-submit" data-action="editar cliente" novalidate>
         {% csrf_token %}
-        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors|join:", " }}</div>{%
-        endif %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors|join:", " }}</div>
+        {% endif %}
 
         <h5 class="mb-3">Identificación</h5>
+
         <div class="row mb-3">
           <div class="col-md-6">
             <label class="form-label">Nombre</label>
             {{ form.nombre }}
-            {% if form.nombre.errors %}<div class="text-danger">{{ form.nombre.errors|join:", " }}</div>{% endif %}
+            {% if form.nombre.errors %}
+            <div class="text-danger">{{ form.nombre.errors|join:", " }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-6">
             <label class="form-label">RUT</label>
             {{ form.rut }}
-            {% if form.rut.errors %}<div class="text-danger">{{ form.rut.errors|join:", " }}</div>{% endif %}
+            {% if form.rut.errors %}
+            <div class="text-danger">{{ form.rut.errors|join:", " }}</div>
+            {% endif %}
           </div>
         </div>
 
@@ -114,13 +121,17 @@
           <div class="col-md-8">
             <label class="form-label">Dirección</label>
             {{ form.direccion }}
-            {% if form.direccion.errors %}<div class="text-danger">{{ form.direccion.errors|join:", " }}</div>{% endif
-            %}
+            {% if form.direccion.errors %}
+            <div class="text-danger">{{ form.direccion.errors|join:", " }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-4">
             <label class="form-label">Teléfono</label>
             {{ form.telefono }}
-            {% if form.telefono.errors %}<div class="text-danger">{{ form.telefono.errors|join:", " }}</div>{% endif %}
+            {% if form.telefono.errors %}
+            <div class="text-danger">{{ form.telefono.errors|join:", " }}</div>
+            {% endif %}
           </div>
         </div>
 
@@ -128,13 +139,17 @@
           <div class="col-md-6">
             <label class="form-label">Email</label>
             {{ form.email }}
-            {% if form.email.errors %}<div class="text-danger">{{ form.email.errors|join:", " }}</div>{% endif %}
+            {% if form.email.errors %}
+            <div class="text-danger">{{ form.email.errors|join:", " }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-6">
             <label class="form-label">Estado</label>
             {{ form.estadoCondicion }}
-            {% if form.estadoCondicion.errors %}<div class="text-danger">{{ form.estadoCondicion.errors|join:", " }}
-            </div>{% endif %}
+            {% if form.estadoCondicion.errors %}
+            <div class="text-danger">{{ form.estadoCondicion.errors|join:", " }}</div>
+            {% endif %}
           </div>
         </div>
 
@@ -146,11 +161,7 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
-    function getCookie(name) { let cookieValue = null; if (document.cookie && document.cookie !== '') { const cookies = document.cookie.split(';'); for (let c of cookies) { const cookie = c.trim(); if (cookie.substring(0, name.length + 1) === (name + '=')) { cookieValue = decodeURIComponent(cookie.substring(name.length + 1)); break; } } } return cookieValue; }
-    const csrftoken = getCookie('csrftoken');
-
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('form.confirm-submit').forEach(form => {
         form.addEventListener('submit', (e) => {
@@ -164,7 +175,11 @@
             cancelButtonText: 'Cancelar'
           }).then(result => {
             if (result.isConfirmed) {
-              Swal.fire({ title: 'Guardando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+              Swal.fire({
+                title: 'Guardando...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+              });
               form.submit();
             }
           });

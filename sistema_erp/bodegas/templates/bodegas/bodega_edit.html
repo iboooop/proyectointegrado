@@ -87,19 +87,25 @@
 
       <form method="post" class="confirm-submit" data-action="editar bodega" novalidate>
         {% csrf_token %}
-        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors|join:", " }}</div>{%
-        endif %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors|join:", " }}</div>
+        {% endif %}
 
         <div class="row mb-3">
           <div class="col-md-6">
             <label class="form-label">Código</label>
             {{ form.codigo }}
-            {% if form.codigo.errors %}<div class="text-danger">{{ form.codigo.errors|join:", " }}</div>{% endif %}
+            {% if form.codigo.errors %}
+            <div class="text-danger">{{ form.codigo.errors|join:", " }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-6">
             <label class="form-label">Nombre</label>
             {{ form.nombre }}
-            {% if form.nombre.errors %}<div class="text-danger">{{ form.nombre.errors|join:", " }}</div>{% endif %}
+            {% if form.nombre.errors %}
+            <div class="text-danger">{{ form.nombre.errors|join:", " }}</div>
+            {% endif %}
           </div>
         </div>
 
@@ -107,13 +113,17 @@
           <div class="col-md-8">
             <label class="form-label">Dirección</label>
             {{ form.direccion }}
-            {% if form.direccion.errors %}<div class="text-danger">{{ form.direccion.errors|join:", " }}</div>{% endif
-            %}
+            {% if form.direccion.errors %}
+            <div class="text-danger">{{ form.direccion.errors|join:", " }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-4">
             <label class="form-label">Teléfono</label>
             {{ form.telefono }}
-            {% if form.telefono.errors %}<div class="text-danger">{{ form.telefono.errors|join:", " }}</div>{% endif %}
+            {% if form.telefono.errors %}
+            <div class="text-danger">{{ form.telefono.errors|join:", " }}</div>
+            {% endif %}
           </div>
         </div>
 
@@ -121,14 +131,17 @@
           <div class="col-md-6">
             <label class="form-label">Responsable</label>
             {{ form.responsable }}
-            {% if form.responsable.errors %}<div class="text-danger">{{ form.responsable.errors|join:", " }}</div>{%
-            endif %}
+            {% if form.responsable.errors %}
+            <div class="text-danger">{{ form.responsable.errors|join:", " }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-6">
             <label class="form-label">Capacidad máxima</label>
             {{ form.capacidad_maxima }}
-            {% if form.capacidad_maxima.errors %}<div class="text-danger">{{ form.capacidad_maxima.errors|join:", " }}
-            </div>{% endif %}
+            {% if form.capacidad_maxima.errors %}
+            <div class="text-danger">{{ form.capacidad_maxima.errors|join:", " }}</div>
+            {% endif %}
           </div>
         </div>
 
@@ -136,12 +149,17 @@
           <div class="col-md-6">
             <label class="form-label">Tipo</label>
             {{ form.tipo }}
-            {% if form.tipo.errors %}<div class="text-danger">{{ form.tipo.errors|join:", " }}</div>{% endif %}
+            {% if form.tipo.errors %}
+            <div class="text-danger">{{ form.tipo.errors|join:", " }}</div>
+            {% endif %}
           </div>
+
           <div class="col-md-6">
             <label class="form-label">Estado</label>
             {{ form.estado }}
-            {% if form.estado.errors %}<div class="text-danger">{{ form.estado.errors|join:", " }}</div>{% endif %}
+            {% if form.estado.errors %}
+            <div class="text-danger">{{ form.estado.errors|join:", " }}</div>
+            {% endif %}
           </div>
         </div>
 
