@@ -21,6 +21,15 @@ class MovimientoUsuarioInline(admin.TabularInline):
     fields = ('producto', 'tipo', 'cantidad', 'proveedor')
     show_change_link = True
 
+    def get_queryset(self, request):
+        """
+        No cargar movimientos por defecto (evita consultas pesadas al abrir el admin).
+        Para ver los movimientos en una sesión concreta añadir ?show_movimientos=1 a la URL.
+        """
+        if request.GET.get('show_movimientos') == '1':
+            return super().get_queryset(request)
+        return MovimientoInventario.objects.none()
+
 
 # ============================================================
 # Perfil del usuario
