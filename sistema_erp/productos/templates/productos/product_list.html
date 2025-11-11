@@ -42,7 +42,9 @@
         <span>Listado de Productos</span>
         <div class="d-flex gap-2">
           <a href="{% url 'productos_export' %}" class="btn btn-success">Exportar Excel</a>
-          <a href="{% url 'producto_agregar' %}" class="btn btn-primary">+ Crear producto</a>
+          {% if request.user.perfil.rol != 'LECTOR' %}
+            <a href="{% url 'producto_agregar' %}" class="btn btn-primary">+ Crear producto</a>
+          {% endif %}
         </div>
       </div>
 
