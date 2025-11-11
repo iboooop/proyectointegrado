@@ -200,12 +200,14 @@ def clientes_list(request):
         'page_sizes': allowed_sizes,
     }
 
-    # --- Renderizado parcial (AJAX / Fetch) ---
+    # ⚠️ AQUÍ ESTÁ LA CLAVE:
+    # Si la petición viene de AJAX o incluye `?partial=1`, renderizamos SOLO la tabla.
     if request.GET.get('partial') == '1' or request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return render(request, 'clientes/partials/cliente_table.html', context)
 
-    # --- Renderizado completo (carga inicial) ---
+    # De lo contrario, renderizamos la página completa.
     return render(request, 'clientes/cliente_list.html', context)
+
 
 
 
