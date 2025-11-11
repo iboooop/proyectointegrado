@@ -1,7 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
   <title>Listado de Clientes</title>
@@ -20,8 +19,7 @@
           <span>Listado de Clientes</span>
         </div>
         <div class="d-flex gap-2">
-          <a href="{% url 'clientes_export' %}?q={{ q }}&sort={{ sort }}&dir={{ dir }}" class="btn btn-success">Exportar
-            Excel</a>
+          <a href="{% url 'clientes_export' %}?q={{ q }}&sort={{ sort }}&dir={{ dir }}" class="btn btn-success">Exportar Excel</a>
           <a href="{% url 'clientes_create' %}" class="btn btn-create">+ Crear Cliente</a>
         </div>
       </div>
@@ -29,14 +27,13 @@
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
           <form id="searchForm" class="flex-grow-1 me-3" onsubmit="return false;">
-            <input type="text" id="searchInput" class="form-control"
-              placeholder="Buscar (nombre, RUT, email, teléfono...)" value="{{ q }}">
+            <input type="text" id="searchInput" class="form-control" placeholder="Buscar (nombre, RUT, email, teléfono...)" value="{{ q }}">
           </form>
           <form id="pageSizeForm" class="d-flex align-items-center gap-2" onsubmit="return false;">
             <label for="pageSizeSelect" class="form-label m-0">Filas por página:</label>
             <select id="pageSizeSelect" class="form-select" style="width: 140px;">
               {% for n in page_sizes %}
-              <option value="{{ n }}" {% if page_size==n %}selected{% endif %}>{{ n }}</option>
+              <option value="{{ n }}" {% if page_size == n %}selected{% endif %}>{{ n }}</option>
               {% endfor %}
             </select>
           </form>
@@ -50,96 +47,95 @@
     </div>
   </div>
 
-  <script>
-    (function () {
-      const wrap = document.getElementById('clientesTableWrap');
-      const searchInput = document.getElementById('searchInput');
-      const pageSizeSelect = document.getElementById('pageSizeSelect');
-      let debounceTimer = null;
+<script>
+(function(){
+  const wrap = document.getElementById('clientesTableWrap');
+  const searchInput = document.getElementById('searchInput');
+  const pageSizeSelect = document.getElementById('pageSizeSelect');
+  let debounceTimer = null;
 
-      async function fetchAndUpdate(url) {
-        try {
-          const resp = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-          if (!resp.ok) throw new Error('Error HTTP: ' + resp.status);
+  async function fetchAndUpdate(url){
+    try {
+      const resp = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }});
+      if (!resp.ok) throw new Error('Error HTTP: ' + resp.status);
 
-          const html = await resp.text();
+      const html = await resp.text();
 
-          // ✅ Esta es la clave: solo extraemos el bloque del table, sin duplicar la página
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, 'text/html');
-          const newWrap = doc.querySelector('#clientesTableWrap');
-          if (newWrap) {
-            wrap.innerHTML = newWrap.innerHTML;
-          } else {
-            wrap.innerHTML = html; // fallback
-          }
-
-          attachJumpHandler();
-        } catch (err) {
-          console.error('Error al actualizar:', err);
-          wrap.innerHTML = `<div class="alert alert-danger">Error al cargar los datos.</div>`;
-        }
+      // ✅ Esta es la clave: solo extraemos el bloque del table, sin duplicar la página
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const newWrap = doc.querySelector('#clientesTableWrap');
+      if (newWrap) {
+        wrap.innerHTML = newWrap.innerHTML;
+      } else {
+        wrap.innerHTML = html; // fallback
       }
 
-      function buildUrl() {
-        const p = new URLSearchParams(window.location.search);
-        const qVal = (searchInput?.value || '').trim();
-        if (qVal) p.set('q', qVal); else p.delete('q');
-        if (pageSizeSelect?.value) p.set('page_size', pageSizeSelect.value);
-        p.delete('page');
-        p.set('partial', '1');
-        return window.location.pathname + '?' + p.toString();
-      }
-
-      // 🔍 Búsqueda
-      if (searchInput) {
-        searchInput.addEventListener('input', function () {
-          clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(() => fetchAndUpdate(buildUrl()), 300);
-        });
-      }
-
-      // 📄 Selector de filas
-      if (pageSizeSelect) {
-        pageSizeSelect.addEventListener('change', () => fetchAndUpdate(buildUrl()));
-      }
-
-      // 📑 Paginación y orden
-      wrap.addEventListener('click', async e => {
-        const a = e.target.closest('a.page-link, thead a');
-        if (a && a.getAttribute('href')) {
-          e.preventDefault();
-          const clean = a.getAttribute('href');
-          await fetchAndUpdate(clean + '&partial=1');
-          window.history.replaceState({}, '', clean);
-        }
-      });
-
-      // 🧭 Ir a página específica
-      function attachJumpHandler() {
-        const form = wrap.querySelector('#jumpPageForm');
-        if (!form) return;
-        const input = form.querySelector('#jumpPageInput');
-        const btn = form.querySelector('#jumpGoBtn');
-        if (!btn) return;
-
-        btn.addEventListener('click', async function () {
-          let target = parseInt(input.value, 10);
-          if (isNaN(target) || target < 1) target = 1;
-          const max = parseInt(input.getAttribute('max'), 10) || 1;
-          if (target > max) target = max;
-          const p = new URLSearchParams(window.location.search);
-          p.set('page', target);
-          p.set('partial', '1');
-          await fetchAndUpdate(window.location.pathname + '?' + p.toString());
-        });
-      }
       attachJumpHandler();
-    })();
-  </script>
+    } catch (err) {
+      console.error('Error al actualizar:', err);
+      wrap.innerHTML = `<div class="alert alert-danger">Error al cargar los datos.</div>`;
+    }
+  }
+
+  function buildUrl(){
+    const p = new URLSearchParams(window.location.search);
+    const qVal = (searchInput?.value || '').trim();
+    if (qVal) p.set('q', qVal); else p.delete('q');
+    if (pageSizeSelect?.value) p.set('page_size', pageSizeSelect.value);
+    p.delete('page');
+    p.set('partial', '1');
+    return window.location.pathname + '?' + p.toString();
+  }
+
+  // 🔍 Búsqueda
+  if (searchInput){
+    searchInput.addEventListener('input', function(){
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(()=>fetchAndUpdate(buildUrl()), 300);
+    });
+  }
+
+  // 📄 Selector de filas
+  if (pageSizeSelect){
+    pageSizeSelect.addEventListener('change', ()=>fetchAndUpdate(buildUrl()));
+  }
+
+  // 📑 Paginación y orden
+  wrap.addEventListener('click', async e=>{
+    const a = e.target.closest('a.page-link, thead a');
+    if (a && a.getAttribute('href')){
+      e.preventDefault();
+      const clean = a.getAttribute('href');
+      await fetchAndUpdate(clean + '&partial=1');
+      window.history.replaceState({}, '', clean);
+    }
+  });
+
+  // 🧭 Ir a página específica
+  function attachJumpHandler(){
+    const form = wrap.querySelector('#jumpPageForm');
+    if (!form) return;
+    const input = form.querySelector('#jumpPageInput');
+    const btn = form.querySelector('#jumpGoBtn');
+    if (!btn) return;
+
+    btn.addEventListener('click', async function(){
+      let target = parseInt(input.value, 10);
+      if (isNaN(target) || target < 1) target = 1;
+      const max = parseInt(input.getAttribute('max'), 10) || 1;
+      if (target > max) target = max;
+      const p = new URLSearchParams(window.location.search);
+      p.set('page', target);
+      p.set('partial', '1');
+      await fetchAndUpdate(window.location.pathname + '?' + p.toString());
+    });
+  }
+  attachJumpHandler();
+})();
+</script>
 
 
   {% include 'partials/footer.html' %}
 </body>
-
 </html>
