@@ -1,37 +1,63 @@
-from django.shortcuts import redirect
-from django.urls import resolve
+import re
+import os
 from django.conf import settings
+from django.shortcuts import redirect
 
-EXEMPT_PATHS = {
-    '/autenticacion/login/',
-    '/autenticacion/registro/',
-    '/autenticacion/recuperar/',
-}
-# Paths que empiezan por estos prefijos también se excluyen (static, media, admin)
-EXEMPT_PREFIXES = (
-    '/static/', '/media/', '/admin/',
-)
 
 class LoginRequiredMiddleware:
-    """Redirige a login si el usuario no está autenticado.
+	"""Middleware que exige autenticación para acceder al sitio.
 
-    Se excluyen rutas de autenticación y recursos estáticos.
-    El handler 404 y vistas que no requieren auth se mostrarán solo si están exentas.
-    """
-    def __init__(self, get_response):
-        self.get_response = get_response
+	Exclusiones (no obligan login):
+	  - Rutas estáticas: /static/, /media/
+	  - Admin y su login: /admin/*
+	  - Autenticación: /autenticacion/login, /autenticacion/logout, recuperación (prefijo)
+	  - Rutas de prueba de errores: /ver-404, /forzar-404
+	  - Cualquier patrón agregado en settings.LOGIN_EXEMPT_URLS (lista de regex)
 
-    def __call__(self, request):
-        path = request.path
-        if not request.user.is_authenticated:
-            if not self._is_exempt(path):
-                return redirect(settings.LOGIN_URL)
-        return self.get_response(request)
+	Desactivación rápida: exporta DJANGO_DISABLE_LOGIN_MIDDLEWARE=True
 
-    def _is_exempt(self, path: str) -> bool:
-        if path in EXEMPT_PATHS:
-            return True
-        for prefix in EXEMPT_PREFIXES:
-            if path.startswith(prefix):
-                return True
-        return False
+	Si el usuario no está autenticado y la ruta no está exenta, redirige a LOGIN_URL
+	agregando ?next=<ruta> para volver tras login.
+	"""
+
+	def __init__(self, get_response):
+		self.get_response = get_response
+		self.login_url = settings.LOGIN_URL or '/autenticacion/login/'
+
+		custom_exempt = getattr(settings, 'LOGIN_EXEMPT_URLS', []) or []
+		self._patterns = [re.compile(p) for p in custom_exempt]
+
+		default_patterns = [
+			r'^static/.*',
+			r'^media/.*',
+			r'^admin/.*',
+			r'^autenticacion/login/?$',
+			r'^autenticacion/logout/?$',
+			r'^autenticacion/recuperar.*',
+			r'^ver-404/?$',
+			r'^forzar-404/?$',
+		]
+		self._patterns.extend(re.compile(p) for p in default_patterns)
+
+	def __call__(self, request):
+		# Permitir desactivar por variable de entorno sin tocar settings
+		if os.getenv('DJANGO_DISABLE_LOGIN_MIDDLEWARE') == 'True':
+			return self.get_response(request)
+
+		# Ya autenticado -> continuar
+		if request.user.is_authenticated:
+			return self.get_response(request)
+
+		path = request.path.lstrip('/')  # normalizamos para coincidencias regex
+
+		for pattern in self._patterns:
+			if pattern.match(path):
+				return self.get_response(request)
+
+		# Evita loop si ya estamos en la página de login
+		if path.startswith(self.login_url.lstrip('/')):
+			return self.get_response(request)
+
+		# Redirige a login con parámetro next
+		return redirect(f"{self.login_url}?next={request.path}")
+

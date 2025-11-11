@@ -28,3 +28,8 @@ class Producto(models.Model):
 
     def __str__(self):
         return f"{self.nombre} ({self.categoria})"
+
+    # Alias práctico para plantillas o código que espere 'obj.id'
+    @property
+    def id(self):
+        return self.idProducto

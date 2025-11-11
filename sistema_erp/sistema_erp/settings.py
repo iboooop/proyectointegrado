@@ -14,7 +14,8 @@ load_dotenv(BASE_DIR / ".env")
 # ===========================
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-default')
 DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+
 
 # ===========================
 # APPLICATIONS
@@ -50,7 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'sistema_erp.middleware.LoginRequiredMiddleware',
+    #'sistema_erp.middleware.LoginRequiredMiddleware',
 ]
 
 # ===========================
@@ -76,24 +77,44 @@ TEMPLATES = [
 WSGI_APPLICATION = 'sistema_erp.wsgi.application'
 
 # ===========================
-# DATABASE CONFIGURATION (AWS RDS)
+# DATABASES: MySQL local (WAMP/XAMPP)
 # ===========================
 DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.mysql'),
         'NAME': os.getenv('DB_NAME', 'sistema_erp'),
-        'USER': os.getenv('DB_USER', 'proyecto_user'),
-        'PASSWORD': os.getenv('DB_PASSWORD', '1u_p4ssw0rd_segur0'),
-        'HOST': os.getenv('DB_HOST', 'database-sistema-erp.ctjtmux5fshd.us-east-1.rds.amazonaws.com'),
+        'USER': os.getenv('DB_USER', 'root'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
         'PORT': os.getenv('DB_PORT', '3306'),
         'OPTIONS': {
             'charset': 'utf8mb4',
-            # Si tienes configurado el certificado de AWS, deja esta línea
-            # Si no lo usas, comenta la siguiente línea
-            'ssl': {'ca': '/etc/ssl/certs/aws-rds/rds-combined-ca-bundle.pem'},
         },
     }
 }
+
+# ===========================
+# EJEMPLO DESACTIVADO: Conexión a AWS RDS (NO ACTIVO)
+# ---------------------------------------------------
+# Este bloque es SOLO de referencia para una base de datos MySQL en AWS RDS.
+# No se ejecuta ni afecta al entorno local porque está completamente comentado.
+# Para usarlo, copia y reemplaza el bloque DATABASES anterior y define
+# las variables de entorno AWS_* en tu .env (ver .env.example).
+#
+# DATABASES = {
+#     'default': {
+#         'ENGINE': os.getenv('AWS_DB_ENGINE', 'django.db.backends.mysql'),
+#         'NAME': os.getenv('AWS_DB_NAME', 'sistema_erp_prod'),
+#         'USER': os.getenv('AWS_DB_USER', ''),
+#         'PASSWORD': os.getenv('AWS_DB_PASSWORD', ''),
+#         'HOST': os.getenv('AWS_DB_HOST', 'xxxxx.rds.amazonaws.com'),
+#         'PORT': os.getenv('AWS_DB_PORT', '3306'),
+#         'OPTIONS': {
+#             'charset': 'utf8mb4',
+#         },
+#     }
+# }
+
 
 # ===========================
 # PASSWORD VALIDATION

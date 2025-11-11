@@ -58,7 +58,8 @@ def dashboard(request):
         total_clientes = 0
 
     # Últimos registros (mantener selects optimizados cuando es posible)
-    ultimos_productos = Producto.objects.order_by('-id')[:5]
+    # Usar 'pk' para compatibilidad con claves primarias personalizadas (idProducto)
+    ultimos_productos = Producto.objects.order_by('-pk')[:5]
     ultimas_transacciones = MovimientoInventario.objects.select_related('producto').order_by('-fecha')[:5]
     ultimos_clientes = Cliente.objects.order_by('-idCliente')[:5] if Cliente and hasattr(Cliente, 'objects') else []
     bodegas = Bodega.objects.all()[:8] if Bodega and hasattr(Bodega, 'objects') else []

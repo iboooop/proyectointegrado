@@ -31,6 +31,10 @@ class UsuarioForm(forms.ModelForm):
     # --- VALIDACIONES ---
     def clean_username(self):
         username = (self.cleaned_data.get('username') or '').strip()
+        # Si está editando y no cambió el username, no forzar validaciones adicionales
+        if self.instance.pk and username == (self.instance.username or '').strip():
+            return username
+
         if len(username) < 3:
             raise ValidationError("El username debe tener al menos 3 caracteres.")
 
@@ -50,6 +54,9 @@ class UsuarioForm(forms.ModelForm):
 
     def clean_email(self):
         email = (self.cleaned_data.get('email') or '').strip()
+        # Si está editando y no cambió el email, no forzar validación extra
+        if self.instance.pk and email.lower() == (getattr(self.instance, 'email', '') or '').lower():
+            return email
         qs = User.objects.filter(email__iexact=email)
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
@@ -59,12 +66,24 @@ class UsuarioForm(forms.ModelForm):
 
     def clean_first_name(self):
         first_name = self.cleaned_data.get('first_name', '').strip()
+        # Si está editando y no cambió, permitir el valor tal cual
+        if self.instance.pk and first_name == (self.instance.first_name or '').strip():
+            return first_name
+        # No permitir números en el nombre
+        if re.search(r"\d", first_name or ''):
+            raise ValidationError("El nombre no debe contener números.")
         if len(first_name) < 3:
             raise ValidationError("El nombre debe tener al menos 3 caracteres.")
         return first_name
 
     def clean_last_name(self):
         last_name = self.cleaned_data.get('last_name', '').strip()
+        # Si está editando y no cambió, permitir el valor tal cual
+        if self.instance.pk and last_name == (self.instance.last_name or '').strip():
+            return last_name
+        # No permitir números en el apellido
+        if re.search(r"\d", last_name or ''):
+            raise ValidationError("El apellido no debe contener números.")
         if len(last_name) < 3:
             raise ValidationError("El apellido debe tener al menos 3 caracteres.")
         return last_name

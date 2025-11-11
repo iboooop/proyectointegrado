@@ -33,7 +33,8 @@ def dashboard_view(request):
         total_transacciones = MovimientoInventario.objects.count()
         total_usuarios = User.objects.count()
 
-        ultimos_productos = Producto.objects.order_by('-id')[:5]
+        # Compatibilidad con clave primaria custom (idProducto) usando 'pk'
+        ultimos_productos = Producto.objects.order_by('-pk')[:5]
         ultimas_transacciones = MovimientoInventario.objects.select_related('producto').order_by('-fecha')[:5]
 
         return render(request, 'dashboard.html', {
@@ -171,10 +172,28 @@ def usuarios_edit_view(request, id):
         perfil_form = PerfilForm(request.POST, request.FILES, instance=perfil)
 
         if usuario_form.is_valid() and perfil_form.is_valid():
+            # Detectar si realmente hubo cambios en alguno de los formularios
+            user_changed = usuario_form.has_changed()
+            perfil_changed = perfil_form.has_changed()
+            password_changed = bool(usuario_form.cleaned_data.get('password'))
+
+            if not (user_changed or perfil_changed or password_changed):
+                messages.info(request, "No se detectaron cambios para guardar.")
+                # Renderizar la misma vista sin redirigir ni marcar 'updated'
+                return render(request, 'usuarios/edit.html', {
+                    'usuario_form': usuario_form,
+                    'perfil_form': perfil_form,
+                    'updated': False,
+                    'no_changes': True,
+                })
+
+            # Guardar solo si hubo cambios
             usuario_form.save()
             perfil_form.save()
-            # Redirigir con bandera updated para disparar SweetAlert en plantilla
-            return redirect(f"{reverse('usuarios_edit', args=[perfil.id])}?updated=1")
+            # Mensaje flash de éxito (consumido una sola vez)
+            messages.success(request, "Los cambios se han guardado correctamente.")
+            # Redirigir sin query params para evitar re-mostrar al refrescar
+            return redirect(reverse('usuarios_edit', args=[perfil.id]))
         else:
             print("Errores UsuarioForm:", usuario_form.errors)
             print("Errores PerfilForm:", perfil_form.errors)
@@ -183,11 +202,10 @@ def usuarios_edit_view(request, id):
         usuario_form = UsuarioForm(instance=usuario)
         perfil_form = PerfilForm(instance=perfil)
 
-    updated_flag = request.GET.get('updated') == '1'
     return render(request, 'usuarios/edit.html', {
         'usuario_form': usuario_form,
         'perfil_form': perfil_form,
-        'updated': updated_flag
+        # Los SweetAlerts se disparan por mensajes (messages.success), no por query params
     })
 
 

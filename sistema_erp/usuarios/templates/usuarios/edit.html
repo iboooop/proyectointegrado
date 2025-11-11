@@ -18,8 +18,14 @@
                 Editar Usuario
             </div>
 
-            {% if updated %}
-            <div id="swal-updated" class="d-none"></div>
+            {% if messages %}
+                {% for m in messages %}
+                    {% if m.tags == 'success' %}
+                        <div class="d-none" data-swal-success="{{ m }}"></div>
+                    {% else %}
+                        <div class="alert alert-{{ m.tags }} mb-2">{{ m }}</div>
+                    {% endif %}
+                {% endfor %}
             {% endif %}
 
             <form method="post" enctype="multipart/form-data" novalidate>
@@ -179,15 +185,17 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-    // 🔹 Mostrar SweetAlert si se actualizó correctamente
+    // 🔹 SweetAlert solo una vez usando mensajes flash
     document.addEventListener('DOMContentLoaded', function(){
-        if(document.getElementById('swal-updated')){
+        const successContainer = document.querySelector('[data-swal-success]');
+        if(successContainer){
+            const text = successContainer.getAttribute('data-swal-success');
             Swal.fire({
                 icon: 'success',
-                title: 'Usuario editado',
-                text: 'Los cambios se han guardado correctamente.',
+                title: 'Cambios guardados',
+                text: text || 'Los cambios se han guardado correctamente.',
                 confirmButtonColor: '#2563eb',
-                timer: 2000,
+                timer: 1800,
                 timerProgressBar: true,
                 showConfirmButton: false
             });
