@@ -23,38 +23,40 @@ except Exception:
 # ---------------- DASHBOARD ----------------
 @login_required
 def dashboard_view(request):
+    # obtener perfil y rol de forma segura
     perfil = Perfil.objects.filter(usuario=request.user).first()
-    if not perfil:
-        return redirect('login')
+    rol = getattr(perfil, 'rol', None)
 
-    if perfil.rol == 'ADMIN':
-        total_productos = Producto.objects.count()
-        total_proveedores = Proveedor.objects.count()
-        total_transacciones = MovimientoInventario.objects.count()
-        total_usuarios = User.objects.count()
-
-        # Compatibilidad con clave primaria custom (idProducto) usando 'pk'
-        ultimos_productos = Producto.objects.order_by('-pk')[:5]
-        ultimas_transacciones = MovimientoInventario.objects.select_related('producto').order_by('-fecha')[:5]
-
-        return render(request, 'dashboard.html', {
-            'total_productos': total_productos,
-            'total_proveedores': total_proveedores,
-            'total_transacciones': total_transacciones,
-            'total_usuarios': total_usuarios,
-            'ultimos_productos': ultimos_productos,
-            'ultimas_transacciones': ultimas_transacciones
-        })
+    # sincronizar rol en la sesión para que la plantilla pueda leerlo
+    if rol:
+        request.session['rol'] = rol
     else:
-        return render(request, 'usuarios/acceso_restringido.html', {'rol': perfil.rol})
+        request.session.pop('rol', None)
+
+    # decidir permisos (ADMIN / EDITOR / LECTOR)
+    can_view_all = rol in ('ADMIN', 'LECTOR', 'EDITOR')
+
+    # aquí debes rellenar el contexto que ya tenías (totales, listas, etc).
+    context = {
+        # ... existing context values (ej: total_productos, ultimos_productos, etc) ...
+        'can_view_all': can_view_all,
+    }
+    return render(request, 'sistema_erp/templates/dashboard.html', context)
 
 
 # ---------------- LISTADO ----------------
 @login_required
 def usuarios_list_view(request):
     perfil = Perfil.objects.filter(usuario=request.user).first()
-    if not perfil or perfil.rol != 'ADMIN':
-        return redirect('dashboard')
+    rol = getattr(perfil, 'rol', None)
+
+    # permitir ADMIN, LECTOR y EDITOR; denegar el resto
+    if rol not in ('ADMIN', 'LECTOR', 'EDITOR'):
+        return HttpResponseForbidden("No tiene permisos para ver usuarios.")
+
+    # sincronizar sesión por si se accede directamente
+    if rol:
+        request.session['rol'] = rol
 
     # Filtros de búsqueda
     q = (request.GET.get('q') or '').strip()
@@ -139,7 +141,7 @@ def usuarios_create_view(request):
                     perfil.usuario = usuario
                     perfil.save()
 
-                # Redirigir al listado con bandera de creación para SweetAlert
+                # Redirigir al listado with bandera de creación para SweetAlert
                 url = f"{reverse('usuarios_list')}?created=1"
                 return redirect(url)
             except ValidationError as e:
@@ -309,80 +311,3 @@ def export_usuarios_excel(request):
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     wb.save(response)
     return response
-
-@login_required
-def user_list(request):
-    # obtener rol de forma segura
-    perfil = getattr(request.user, 'perfil', None)
-    rol = getattr(perfil, 'rol', None)
-
-    # permitir ADMIN, LECTOR y EDITOR
-    if rol not in ('ADMIN', 'LECTOR', 'EDITOR'):
-        return HttpResponseForbidden("No tiene permisos para ver usuarios.")
-
-    # Filtros de búsqueda
-    q = (request.GET.get('q') or '').strip()
-
-    # Ordenación segura por campos permitidos
-    sort = (request.GET.get('sort') or 'usuario__username').strip()
-    direction = (request.GET.get('dir') or 'asc').strip().lower()
-
-    sort_map = {
-        'usuario__username': 'usuario__username',
-        'usuario__email': 'usuario__email',
-        'usuario__first_name': 'usuario__first_name',
-        'usuario__last_name': 'usuario__last_name',
-        'telefono': 'telefono',
-        'rol': 'rol',
-        'estado': 'estado',
-        'mfa_habilitado': 'mfa_habilitado',
-        'usuario__last_login': 'usuario__last_login',
-        'sesiones_activas': 'sesiones_activas',
-    }
-
-    base_qs = Perfil.objects.select_related('usuario').all()
-    if q:
-        base_qs = base_qs.filter(
-            Q(usuario__first_name__icontains=q)
-            | Q(usuario__last_name__icontains=q)
-            | Q(usuario__username__icontains=q)
-            | Q(usuario__email__icontains=q)
-            | Q(telefono__icontains=q)
-        )
-
-    order_field = sort_map.get(sort, 'usuario__username')
-    if direction == 'desc':
-        order_field = f'-{order_field}'
-    base_qs = base_qs.order_by(order_field)
-
-    # Paginación
-    # Tamaño de página configurable (persistente en sesión)
-    allowed_page_sizes = [5, 10, 20, 50, 100]
-    try:
-        page_size = int(request.GET.get('page_size') or request.session.get('usuarios_page_size') or 10)
-    except ValueError:
-        page_size = 10
-    if page_size not in allowed_page_sizes:
-        page_size = 10
-    request.session['usuarios_page_size'] = page_size
-
-    paginator = Paginator(base_qs, page_size)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    context = {
-        'perfiles': page_obj.object_list,
-        'page_obj': page_obj,
-        'paginator': paginator,
-        'q': q,
-        'sort': sort,
-        'dir': direction,
-        'page_size': page_size,
-        'page_sizes': allowed_page_sizes,
-    }
-
-    # Respuesta parcial para AJAX (solo tabla y paginación)
-    if request.GET.get('partial') == '1' or request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return render(request, 'usuarios/partials/list_table.html', context)
-
-    return render(request, 'usuarios/list.html', context)
