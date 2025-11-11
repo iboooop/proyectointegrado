@@ -45,264 +45,243 @@
     </style>
 </head>
 <body class="usuarios-list">
-    <div class="container my-5">
-        <a href="/" class="btn btn-outline-secondary mb-3">&larr; Volver al dashboard</a>
+  <div class="container my-5">
+    <a href="/" class="btn btn-outline-secondary mb-3">&larr; Volver al dashboard</a>
 
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span>Lista de Usuarios</span>
-                <div>
-                    <a href="{% url 'usuarios_export' %}" class="btn btn-success me-2" id="exportExcelBtn">Exportar Excel</a>
-                    <a href="{% url 'usuarios_create' %}" class="btn btn-create">+ Crear usuario</a>
-                </div>
-            </div>
-
-            <div class="card-body">
-                <div class="row g-2 align-items-end mb-3">
-                    <div class="col-md-5">
-                        <form id="searchForm" class="w-100" onsubmit="return false;">
-                            <input type="text" id="searchInput" class="form-control" placeholder="Buscar por nombre, apellido, username o email" value="{{ q }}">
-                        </form>
-                    </div>
-                    <div class="col-md-2">
-                        <form id="pageSizeForm" class="d-flex align-items-center gap-2" onsubmit="return false;">
-                            <select id="pageSizeSelect" class="form-select">
-                                {% for n in page_sizes %}
-                                    <option value="{{ n }}" {% if page_size == n %}selected{% endif %}>{{ n }}</option>
-                                {% endfor %}
-                            </select>
-                        </form>
-                    </div>
-                    <div class="col-md-2 d-flex gap-2">
-                        <button type="submit" form="searchForm" class="btn btn-outline-primary">Buscar</button>
-                        <a href="{% url 'usuarios_list' %}" class="btn btn-outline-secondary">Limpiar filtro</a>
-                    </div>
-                    <div class="col-md-3 text-end text-muted small pt-2">
-                        Total: {{ paginator.count }} registros
-                    </div>
-                </div>
-
-                <div id="usersTableWrap">
-                    {% include 'usuarios/partials/list_table.html' %}
-                </div>
-            </div>
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Lista de Usuarios</span>
+        <div>
+          <a href="{% url 'usuarios_export' %}?q={{ q }}&sort={{ sort }}&dir={{ dir }}" id="exportExcelBtn" class="btn btn-success me-2">Exportar Excel</a>
+          <a href="{% url 'usuarios_create' %}" class="btn btn-create">+ Crear usuario</a>
         </div>
+      </div>
+
+      <div class="card-body">
+        <form method="get" class="row g-2 align-items-end mb-3">
+          <div class="col-md-5">
+            <input type="text" name="q" id="searchInput" value="{{ request.GET.q }}" class="form-control" placeholder="Buscar por nombre, apellido, username o email">
+          </div>
+          <div class="col-md-2">
+            <select name="page_size" class="form-select" id="pageSizeSelect" onchange="this.form.submit()">
+              {% for n in page_sizes %}
+                <option value="{{ n }}" {% if page_size == n %}selected{% endif %}>{{ n }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary">Buscar</button>
+            <a href="{% url 'usuarios_list' %}" class="btn btn-outline-secondary">Limpiar filtro</a>
+          </div>
+          <div class="col-md-3 text-end text-muted small pt-2">
+            Total: {{ paginator.count }} registros
+          </div>
+        </form>
+
+        <div id="usersTableWrap">
+          {% include 'usuarios/partials/list_table.html' %}
+        </div>
+      </div>
     </div>
-    <script>
+  </div>
+  <script>
     (function() {
-        // SweetAlert para éxito al crear/editar/eliminar/exportar
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('created') === '1') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Usuario creado',
-                text: 'El usuario se creó correctamente.',
-                timer: 2000,
-                timerProgressBar: true,
-                showConfirmButton: false,
-                confirmButtonColor: '#2563eb'
-            });
-            params.delete('created');
-            const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-            window.history.replaceState({}, '', newUrl);
-        }
-        if (params.get('updated') === '1') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Usuario actualizado',
-                text: 'El usuario se actualizó correctamente.',
-                timer: 2000,
-                timerProgressBar: true,
-                showConfirmButton: false,
-                confirmButtonColor: '#2563eb'
-            });
-            params.delete('updated');
-            const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-            window.history.replaceState({}, '', newUrl);
-        }
-        if (params.get('deleted') === '1') {
-            Swal.fire({
-                icon: 'success',
-                title: 'Usuario eliminado',
-                text: 'El usuario se eliminó correctamente.',
-                timer: 2000,
-                timerProgressBar: true,
-                showConfirmButton: false,
-                confirmButtonColor: '#2563eb'
-            });
-            params.delete('deleted');
-            const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-            window.history.replaceState({}, '', newUrl);
-        }
-
-        // Exportar Excel con SweetAlert
-        const exportBtn = document.getElementById('exportExcelBtn');
-        if (exportBtn) {
-            exportBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const url = exportBtn.getAttribute('href');
-                fetch(url, {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                .then(response => {
-                    if (!response.ok) throw new Error('Error en la exportación');
-                    return response.blob();
-                })
-                .then(blob => {
-                    // Descargar el archivo
-                    const a = document.createElement('a');
-                    a.href = window.URL.createObjectURL(blob);
-                    a.download = "usuarios.xlsx";
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Exportación exitosa',
-                        text: 'El archivo Excel se descargó correctamente.',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                })
-                .catch(() => {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'No se pudo exportar el archivo.',
-                    });
-                });
-        }
-
-        // Búsqueda en vivo (debounce + fetch parcial)
-        const searchInput = document.getElementById('searchInput');
-        const tableWrap = document.getElementById('usersTableWrap');
-        let debounceTimer = null;
-
-        function buildUrl() {
-            const params2 = new URLSearchParams(window.location.search);
-            const qVal = searchInput.value.trim();
-            if (qVal) params2.set('q', qVal); else params2.delete('q');
-            params2.set('partial', '1');
-            params2.delete('page');
-            const pageSizeSel = document.getElementById('pageSizeSelect');
-            if (pageSizeSel && pageSizeSel.value) params2.set('page_size', pageSizeSel.value);
-            return window.location.pathname + '?' + params2.toString();
-        }
-
-        function updateUrlOnly() {
-            const params2 = new URLSearchParams(window.location.search);
-            const qVal = searchInput.value.trim();
-            if (qVal) params2.set('q', qVal); else params2.delete('q');
-            const newUrl = window.location.pathname + (params2.toString() ? '?' + params2.toString() : '');
-            window.history.replaceState({}, '', newUrl);
-        }
-
-        async function fetchAndUpdate(url) {
-            const resp = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-            const html = await resp.text();
-            tableWrap.innerHTML = html;
-            bindDeleteHandlers(tableWrap);
-        }
-
-        function bindDeleteHandlers(scope=document) {
-            scope.querySelectorAll('form.js-delete-user').forEach((form) => {
-                form.addEventListener('submit', function(e){
-                    e.preventDefault();
-                    Swal.fire({
-                        title: '¿Eliminar usuario?',
-                        text: 'Esta acción no se puede deshacer.',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Sí, eliminar',
-                        cancelButtonText: 'Cancelar',
-                        confirmButtonColor: '#dc3545',
-                        cancelButtonColor: '#6c757d'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
-                        }
-                    });
-                });
-            });
-        }
-        bindDeleteHandlers(document);
-
-        if (searchInput) {
-            searchInput.addEventListener('input', function(){
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(async () => {
-                    try {
-                        const url = buildUrl();
-                        await fetchAndUpdate(url);
-                        updateUrlOnly();
-                    } catch (e) {
-                        console.error('Error al buscar:', e);
-                    }
-                }, 300);
-            });
-        }
-
-        // Cambio de filas por página
-        const pageSizeSelect = document.getElementById('pageSizeSelect');
-        if (pageSizeSelect) {
-            pageSizeSelect.addEventListener('change', async function(){
-                const params = new URLSearchParams(window.location.search);
-                params.set('page_size', this.value);
-                params.delete('page');
-                params.set('partial', '1');
-                const url = window.location.pathname + '?' + params.toString();
-                await fetchAndUpdate(url);
-                params.delete('partial');
-                const newUrl = window.location.pathname + '?' + params.toString();
-                window.history.replaceState({}, '', newUrl);
-            });
-        }
-
-        // Interceptar clicks de paginación y orden para AJAX
-        tableWrap.addEventListener('click', async function(e){
-            const a = e.target.closest('a.page-link, thead a');
-            if (a && a.getAttribute('href')) {
-                e.preventDefault();
-                const url = a.getAttribute('href') + (a.getAttribute('href').includes('?') ? '&' : '?') + 'partial=1';
-                await fetchAndUpdate(url);
-                const cleanUrl = a.getAttribute('href');
-                window.history.replaceState({}, '', cleanUrl);
-            }
+    // SweetAlert para éxito al crear/editar/eliminar
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('created') === '1') {
+        Swal.fire({
+            icon: 'success',
+            title: 'Usuario creado',
+            text: 'El usuario se creó correctamente.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            confirmButtonColor: '#2563eb'
         });
+        params.delete('created');
+        const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+        window.history.replaceState({}, '', newUrl);
+    }
+    if (params.get('updated') === '1') {
+        Swal.fire({
+            icon: 'success',
+            title: 'Usuario actualizado',
+            text: 'El usuario se actualizó correctamente.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            confirmButtonColor: '#2563eb'
+        });
+        params.delete('updated');
+        const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+        window.history.replaceState({}, '', newUrl);
+    }
+    if (params.get('deleted') === '1') {
+        Swal.fire({
+            icon: 'success',
+            title: 'Usuario eliminado',
+            text: 'El usuario se eliminó correctamente.',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+            confirmButtonColor: '#2563eb'
+        });
+        params.delete('deleted');
+        const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+        window.history.replaceState({}, '', newUrl);
+    }
 
-        // Ir a página específica (jumpPageForm)
-        const jumpPageForm = () => tableWrap.querySelector('#jumpPageForm');
-        const attachJumpHandler = () => {
-            const form = jumpPageForm();
-            if (!form) return;
-            const input = form.querySelector('#jumpPageInput');
-            const btn = form.querySelector('#jumpGoBtn');
-            if (!input || !btn) return;
-            btn.addEventListener('click', async function(){
-                let target = parseInt(input.value, 10);
-                if (isNaN(target) || target < 1) target = 1;
-                const max = parseInt(input.getAttribute('max'), 10) || 1;
-                if (target > max) target = max;
-                const params = new URLSearchParams(window.location.search);
-                params.set('page', target);
-                params.set('partial', '1');
-                if (pageSizeSelect && pageSizeSelect.value) params.set('page_size', pageSizeSelect.value);
-                const url = window.location.pathname + '?' + params.toString();
-                await fetchAndUpdate(url);
-                params.delete('partial');
-                window.history.replaceState({}, '', window.location.pathname + '?' + params.toString());
-                attachJumpHandler();
-            });
-        };
+    // Búsqueda en vivo (debounce + fetch parcial)
+    const searchInput = document.getElementById('searchInput');
+    const tableWrap = document.getElementById('usersTableWrap');
+    let debounceTimer = null;
+
+    function buildUrl() {
+        const params2 = new URLSearchParams(window.location.search);
+        const qVal = searchInput.value.trim();
+        if (qVal) params2.set('q', qVal); else params2.delete('q');
+        params2.set('partial', '1');
+        // Reiniciar a la primera página al cambiar búsqueda
+        params2.delete('page');
+        // Respetar page_size actual
+        const pageSizeSel = document.getElementById('pageSizeSelect');
+        if (pageSizeSel && pageSizeSel.value) params2.set('page_size', pageSizeSel.value);
+        return window.location.pathname + '?' + params2.toString();
+    }
+
+    function updateUrlOnly() {
+        const params2 = new URLSearchParams(window.location.search);
+        const qVal = searchInput.value.trim();
+        if (qVal) params2.set('q', qVal); else params2.delete('q');
+        const newUrl = window.location.pathname + (params2.toString() ? '?' + params2.toString() : '');
+        window.history.replaceState({}, '', newUrl);
+    }
+
+    async function fetchAndUpdate(url) {
+        const resp = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        const html = await resp.text();
+        tableWrap.innerHTML = html;
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function(){
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(async () => {
+                try {
+                    const url = buildUrl();
+                    await fetchAndUpdate(url);
+                    updateUrlOnly();
+                } catch (e) {
+                    console.error('Error al buscar:', e);
+                }
+            }, 300);
+        });
+    }
+
+    // Cambio de filas por página
+    const pageSizeSelect = document.getElementById('pageSizeSelect');
+    if (pageSizeSelect) {
+        pageSizeSelect.addEventListener('change', async function(){
+            const params = new URLSearchParams(window.location.search);
+            params.set('page_size', this.value);
+            params.delete('page');
+            params.set('partial', '1');
+            const url = window.location.pathname + '?' + params.toString();
+            await fetchAndUpdate(url);
+            // Actualizar URL visible sin partial
+            params.delete('partial');
+            const newUrl = window.location.pathname + '?' + params.toString();
+            window.history.replaceState({}, '', newUrl);
+        });
+    }
+
+    // Interceptar clicks de paginación y orden para AJAX
+    tableWrap.addEventListener('click', async function(e){
+        const a = e.target.closest('a.page-link, thead a');
+        if (a && a.getAttribute('href')) {
+            e.preventDefault();
+            const url = a.getAttribute('href') + (a.getAttribute('href').includes('?') ? '&' : '?') + 'partial=1';
+            await fetchAndUpdate(url);
+            // Actualizar URL sin partial
+            const cleanUrl = a.getAttribute('href');
+            window.history.replaceState({}, '', cleanUrl);
+        }
+    });
+
+    // Ir a página específica (jumpPageForm)
+    const jumpPageForm = () => tableWrap.querySelector('#jumpPageForm');
+    const attachJumpHandler = () => {
+        const form = jumpPageForm();
+        if (!form) return;
+        const input = form.querySelector('#jumpPageInput');
+        const btn = form.querySelector('#jumpGoBtn');
+        if (!input || !btn) return;
+        btn.addEventListener('click', async function(){
+            let target = parseInt(input.value, 10);
+            if (isNaN(target) || target < 1) target = 1;
+            const max = parseInt(input.getAttribute('max'), 10) || 1;
+            if (target > max) target = max;
+            const params = new URLSearchParams(window.location.search);
+            params.set('page', target);
+            params.set('partial', '1');
+            if (pageSizeSelect && pageSizeSelect.value) params.set('page_size', pageSizeSelect.value);
+            const url = window.location.pathname + '?' + params.toString();
+            await fetchAndUpdate(url);
+            // URL limpia
+            params.delete('partial');
+            window.history.replaceState({}, '', window.location.pathname + '?' + params.toString());
+            attachJumpHandler(); // re-attach after DOM replace
+        });
+    };
+    attachJumpHandler();
+
+    // Re-attach jump handler cada vez que se reemplaza el partial
+    const originalFetchAndUpdate = fetchAndUpdate;
+    fetchAndUpdate = async function(url){
+        await originalFetchAndUpdate(url);
         attachJumpHandler();
+    };
 
-        const originalFetchAndUpdate = fetchAndUpdate;
-        fetchAndUpdate = async function(url){
-            await originalFetchAndUpdate(url);
-            attachJumpHandler();
-        };
+    // Exportar Excel con SweetAlert
+    const exportBtn = document.getElementById('exportExcelBtn');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const url = exportBtn.getAttribute('href');
+        fetch(url, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => {
+          if (!response.ok) throw new Error('Error en la exportación');
+          return response.blob();
+        })
+        .then(blob => {
+          // Descargar el archivo
+          const a = document.createElement('a');
+          a.href = window.URL.createObjectURL(blob);
+          a.download = "usuarios.xlsx";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          Swal.fire({
+            icon: 'success',
+            title: 'Exportación exitosa',
+            text: 'El archivo Excel se descargó correctamente.',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        })
+        .catch(() => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo exportar el archivo.',
+          });
+        });
+      });
+    }
     })();
-    </script>
+  </script>
 {% include 'partials/footer.html' %}
 </body>
 </html>
