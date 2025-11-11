@@ -3,10 +3,14 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from django.utils import timezone
 from django.http import HttpResponse
-from .models import MovimientoInventario, Bodega
+
+# ✅ Corrección: importamos Bodega desde la app bodegas, no desde transacciones
+from bodegas.models import Bodega
+from .models import MovimientoInventario
 from .forms import MovimientoInventarioForm
 
 
+# ---------------- LISTA ----------------
 def lista_transacciones(request):
     qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario', 'bodega')
 
@@ -73,11 +77,12 @@ def lista_transacciones(request):
         return render(request, 'transacciones/partials/transaccion_table.html', context)
     return render(request, 'transacciones/transaccion_list.html', context)
 
+
+# ---------------- CREAR ----------------
 def crear_transaccion(request):
     if request.method == 'POST':
         form = MovimientoInventarioForm(request.POST)
         if form.is_valid():
-            # El formulario ya incluye usuario y perfil; se guarda directo
             form.save()
             return redirect('/transacciones/?created=1')
     else:
@@ -85,10 +90,16 @@ def crear_transaccion(request):
         form = MovimientoInventarioForm(initial=initial)
     return render(request, 'transacciones/transaccion_add.html', {'form': form})
 
+
+# ---------------- DETALLE ----------------
 def detalle_transaccion(request, id):
-    transaccion = get_object_or_404(MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario'), id=id)
+    transaccion = get_object_or_404(
+        MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario'), id=id
+    )
     return render(request, 'transacciones/transaccion_detail.html', {'transaccion': transaccion})
 
+
+# ---------------- EDITAR ----------------
 def editar_transaccion(request, id):
     transaccion = get_object_or_404(MovimientoInventario, id=id)
     if request.method == 'POST':
@@ -97,10 +108,15 @@ def editar_transaccion(request, id):
             form.save()
             return redirect('/transacciones/?updated=1')
     else:
-        initial = {'fecha': transaccion.fecha.strftime('%Y-%m-%dT%H:%M') if transaccion.fecha else timezone.now().strftime('%Y-%m-%dT%H:%M')}
+        initial = {
+            'fecha': transaccion.fecha.strftime('%Y-%m-%dT%H:%M')
+            if transaccion.fecha else timezone.now().strftime('%Y-%m-%dT%H:%M')
+        }
         form = MovimientoInventarioForm(instance=transaccion, initial=initial)
     return render(request, 'transacciones/transaccion_edit.html', {'form': form, 'transaccion': transaccion})
 
+
+# ---------------- ELIMINAR ----------------
 def eliminar_transaccion(request, id):
     transaccion = get_object_or_404(MovimientoInventario, id=id)
     if request.method == 'POST':
@@ -112,7 +128,8 @@ def eliminar_transaccion(request, id):
 # ---------------- EXPORTAR EXCEL ----------------
 try:
     from openpyxl import Workbook
-    from openpyxl.styles import Font, Alignment, PatternFill
+    from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+    from openpyxl.utils import get_column_letter
 except ImportError:
     Workbook = None
 
@@ -120,14 +137,15 @@ except ImportError:
 def exportar_transacciones_excel(request):
     """Exporta los movimientos filtrados/ordenados a un archivo XLSX con detalles."""
     if Workbook is None:
-        return HttpResponse("openpyxl no está instalado. Agrega 'openpyxl' a requirements.txt e instala las dependencias.", status=500)
+        return HttpResponse(
+            "openpyxl no está instalado. Agrega 'openpyxl' a requirements.txt e instala las dependencias.",
+            status=500
+        )
 
-    # Construimos el mismo queryset que en lista_transacciones, sin paginar
     qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario', 'bodega')
 
     q = (request.GET.get('q') or '').strip()
     if q:
-        from django.db.models import Q
         qs = qs.filter(
             Q(producto__nombre__icontains=q)
             | Q(proveedor__nombre__icontains=q)
@@ -171,7 +189,6 @@ def exportar_transacciones_excel(request):
     center = Alignment(horizontal='center', vertical='center')
 
     ws.append(headers)
-    from openpyxl.styles import Border, Side
     medium_side = Side(style='medium', color='64748B')
     header_border = Border(top=medium_side, left=medium_side, right=medium_side, bottom=medium_side)
     for cell in ws[1]:
@@ -182,6 +199,7 @@ def exportar_transacciones_excel(request):
 
     thin_side = Side(style='thin', color='CBD5E1')
     row_border = Border(top=thin_side, left=thin_side, right=thin_side, bottom=thin_side)
+
     for idx, m in enumerate(qs, start=2):
         row = [
             m.fecha.strftime('%Y-%m-%d %H:%M') if m.fecha else '',
@@ -190,46 +208,31 @@ def exportar_transacciones_excel(request):
             getattr(m.proveedor, 'nombre', '') if m.proveedor else '',
             getattr(m.usuario, 'username', '') if m.usuario else '',
             m.cantidad,
-            getattr(m.bodega, 'codigo', '') if hasattr(m, 'bodega') and m.bodega else '',
+            getattr(m.bodega, 'codigo', '') if m.bodega else '',
             m.lote or '',
             m.serie or '',
-            m.fecha_vencimiento.strftime('%Y-%m-%d') if getattr(m, 'fecha_vencimiento', None) else '',
+            m.fecha_vencimiento.strftime('%Y-%m-%d') if m.fecha_vencimiento else '',
             m.doc_referencia or '',
             m.motivo or '',
             (m.observaciones or '')[:1000],
         ]
         ws.append(row)
+
+        # Color alternado
         if idx % 2 == 0:
             alt_fill = PatternFill(start_color='F9FAFB', end_color='F9FAFB', fill_type='solid')
             for c in ws[idx]:
                 c.fill = alt_fill
-        # Bordes y alineaciones
-        for col_i, c in enumerate(ws[idx], start=1):
-            c.border = row_border
-            if col_i in (1,2,3,4,5,11,12):
-                c.alignment = Alignment(vertical='center')
-            if col_i in (6,):  # Cantidad
-                c.alignment = Alignment(horizontal='center', vertical='center')
-            if col_i == 13:  # Observaciones wrap
-                c.alignment = Alignment(wrap_text=True, vertical='top')
-        # Coloreado condicional de Tipo (columna 2)
-        tipo_cell = ws.cell(row=idx, column=2)
-        tipo_val = tipo_cell.value.lower() if isinstance(tipo_cell.value, str) else ''
-        if 'entrada' in tipo_val:
-            tipo_cell.fill = PatternFill(start_color='DCFCE7', end_color='DCFCE7', fill_type='solid')
-        elif 'salida' in tipo_val:
-            tipo_cell.fill = PatternFill(start_color='FEE2E2', end_color='FEE2E2', fill_type='solid')
-        elif 'ajuste' in tipo_val:
-            tipo_cell.fill = PatternFill(start_color='FEF9C3', end_color='FEF9C3', fill_type='solid')
 
-    # UX hoja: auto-filter, freeze panes y anchos fijos
+        # Bordes y alineación
+        for c in ws[idx]:
+            c.border = row_border
+            c.alignment = Alignment(vertical='center')
+
     ws.auto_filter.ref = ws.dimensions
     ws.freeze_panes = 'A2'
-    # Alturas de filas
     ws.row_dimensions[1].height = 24
-    for r in range(2, ws.max_row+1):
-        ws.row_dimensions[r].height = 18
-    from openpyxl.utils import get_column_letter
+
     widths = [18, 12, 28, 22, 18, 10, 16, 14, 18, 14, 16, 24, 40]
     for i, w in enumerate(widths, start=1):
         ws.column_dimensions[get_column_letter(i)].width = w
@@ -237,6 +240,6 @@ def exportar_transacciones_excel(request):
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     from datetime import datetime
     filename = f"movimientos_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx"
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    response['Content-Disposition'] = f'attachment; filename=\"{filename}\"'
     wb.save(response)
     return response
