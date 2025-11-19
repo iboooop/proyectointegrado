@@ -51,13 +51,25 @@ def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            # Obtener el perfil y guardar el rol en la sesión
-            from usuarios.models import Perfil
-            perfil = Perfil.objects.filter(usuario=user).first()
-            if perfil:
-                request.session['rol'] = perfil.rol
+
+            usuario_o_email = form.cleaned_data['usuario_o_email']
+            password = form.cleaned_data['password']
+
+            # Autenticar usuario por username o email (case-insensitive)
+            user = User.objects.filter(username__iexact=usuario_o_email).first() or User.objects.filter(email__iexact=usuario_o_email).first()
+            if user:
+                auth_user = authenticate(request, username=user.username, password=password)
+                if auth_user:
+                    login(request, auth_user)  # Iniciar sesión
+                    perfil = Perfil.objects.filter(usuario=user).first()
+                    request.session['usuario'] = user.username
+                    request.session['rol'] = perfil.rol if perfil else "Sin rol"
+                    # Redirigir al dashboard real (sin datos ficticios)
+                    return redirect('dashboard')
+                else:
+                    # Depuración servidor únicamente
+                    print("[DEBUG login_view] Autenticación fallida para usuario:", user.username)
+
             else:
                 request.session['rol'] = None
             messages.success(request, f'Bienvenido, {user.username}')

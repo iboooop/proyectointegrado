@@ -2,9 +2,17 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.BodegaListView.as_view(), name='bodegas_list'),
-    path('create/', views.BodegaCreateView.as_view(), name='bodegas_create'),
-    path('<int:pk>/', views.BodegaDetailView.as_view(), name='bodegas_detail'),
-    path('<int:pk>/edit/', views.BodegaUpdateView.as_view(), name='bodegas_edit'),
-    path('<int:pk>/delete/', views.BodegaDeleteView.as_view(), name='bodegas_delete'),
+
+    # --- LISTAR ---
+    path('', views.bodegas_list, name='bodegas_list'),
+
+    # --- CRUD (todas funciones, como en clientes) ---
+    path('crear/', views.bodegas_create, name='bodegas_create'),
+    path('<int:pk>/', views.bodegas_detail, name='bodegas_detail'),
+    path('<int:pk>/editar/', views.bodegas_edit, name='bodegas_edit'),
+    path('<int:pk>/eliminar/', views.bodegas_delete, name='bodegas_delete'),
+
+    # --- EXPORTAR ---
+    path('exportar/', views.exportar_bodegas_excel, name='bodegas_export'),
 ]
+

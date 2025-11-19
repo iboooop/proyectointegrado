@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.http import HttpResponse
 
 
+
 # ✅ Corrección: importamos Bodega desde la app bodegas, no desde transacciones
 from bodegas.models import Bodega
 from .models import MovimientoInventario
@@ -14,50 +15,54 @@ from .forms import MovimientoInventarioForm
 
 # ---------------- LISTA ----------------
 def lista_transacciones(request):
-    # Filtros de búsqueda
-    q = (request.GET.get('q') or '').strip()
+    qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario', 'bodega')
 
-    # Ordenación segura por campos permitidos
+    # Búsqueda
+    q = (request.GET.get('q') or '').strip()
+    if q:
+        qs = qs.filter(
+            Q(producto__nombre__icontains=q)
+            | Q(proveedor__nombre__icontains=q)
+            | Q(usuario__username__icontains=q)
+            | Q(tipo__icontains=q)
+            | Q(lote__icontains=q)
+            | Q(serie__icontains=q)
+            | Q(doc_referencia__icontains=q)
+            | Q(motivo__icontains=q)
+        )
+
+    # Orden
     sort = (request.GET.get('sort') or 'fecha').strip()
     direction = (request.GET.get('dir') or 'desc').strip().lower()
-
     sort_map = {
         'fecha': 'fecha',
         'tipo': 'tipo',
-        'producto': 'producto__nombre',
-        'proveedor': 'proveedor__nombre',
+        'producto__nombre': 'producto__nombre',
+        'proveedor__nombre': 'proveedor__nombre',
         'cantidad': 'cantidad',
-        'usuario': 'usuario',
+        'usuario__username': 'usuario__username',
         'lote': 'lote',
+        'serie': 'serie',
+        'fecha_vencimiento': 'fecha_vencimiento',
+        'doc_referencia': 'doc_referencia',
     }
-
-    base_qs = MovimientoInventario.objects.select_related('producto', 'proveedor').all()
-    if q:
-        base_qs = base_qs.filter(
-            Q(producto__nombre__icontains=q) |
-            Q(proveedor__nombre__icontains=q) |
-            Q(tipo__icontains=q) |
-            Q(usuario__username__icontains=q) |  # <-- CORRECTO
-            Q(lote__icontains=q) |
-            Q(observaciones__icontains=q)
-        )
-
     order_field = sort_map.get(sort, 'fecha')
     if direction == 'desc':
         order_field = f'-{order_field}'
-    base_qs = base_qs.order_by(order_field)
+    qs = qs.order_by(order_field)
 
-    # Paginación
-    allowed_page_sizes = [5, 10, 20, 50, 100]
+    # Tamaño de página persistente
+    allowed_sizes = [5, 10, 20, 50]
     try:
-        page_size = int(request.GET.get('page_size') or request.session.get('transacciones_page_size') or 10)
+        page_size = int(request.GET.get('page_size') or request.session.get('trans_page_size') or 10)
     except ValueError:
         page_size = 10
-    if page_size not in allowed_page_sizes:
+    if page_size not in allowed_sizes:
         page_size = 10
-    request.session['transacciones_page_size'] = page_size
+    request.session['trans_page_size'] = page_size
 
-    paginator = Paginator(base_qs, page_size)
+    paginator = Paginator(qs, page_size)
+
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -69,10 +74,10 @@ def lista_transacciones(request):
         'sort': sort,
         'dir': direction,
         'page_size': page_size,
-        'page_sizes': allowed_page_sizes,
+
+        'page_sizes': allowed_sizes,
     }
 
-    # Respuesta parcial para AJAX (solo tabla y paginación)
     if request.GET.get('partial') == '1' or request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return render(request, 'transacciones/partials/transaccion_table.html', context)
 

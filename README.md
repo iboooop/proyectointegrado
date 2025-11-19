@@ -20,7 +20,15 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 
 # 2️⃣ Actualizar pip y herramientas básicas
 ```bash
+python.exe -m pip install --upgrade pip
+```
+
+```bash
    pip install --upgrade pip setuptools wheel
+   ```
+
+```bash
+   pip install pyotp
    ```
 
 
@@ -52,6 +60,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
 # 6️⃣ Cargar datos iniciales
 ```bash
    python manage.py seed_sistema_erp
+   python manage.py seed_lilis
 ```
 
 

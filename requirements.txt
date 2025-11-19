@@ -5,6 +5,9 @@
 # Framework principal
 Django>=4.2,<5.0
 
+# Extensiones de Django
+django-extensions>=3.2
+
 # Variables de entorno (.env)
 python-dotenv>=1.0.0
 
@@ -13,6 +16,9 @@ mysqlclient>=2.1
 
 # Alternativa si mysqlclient falla en Windows
 mysql-connector-python>=8.0
+
+# Exportación a Excel
+openpyxl>=3.1
 
 # ===============================================================
 # Para regenerar este archivo después de instalar paquetes:

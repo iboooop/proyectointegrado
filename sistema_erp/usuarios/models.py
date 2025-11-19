@@ -11,6 +11,8 @@ class Perfil(models.Model):
         ('BODEGA', 'Operador de Bodega'),
         ('VENTAS', 'Operador de Ventas'),
         ('COMPRAS', 'Operador de Compras'),
+        ('EDITOR', 'Editor'),         # 👈 NUEVO
+        ('LECTOR', 'Lector'),         # 👈 NUEVO
     ]
 
     ESTADOS = [

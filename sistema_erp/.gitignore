@@ -1,0 +1,23 @@
+# ============================================
+# 🐍 PYTHON & DJANGO GITIGNORE
+# ============================================
+
+__pycache__/
+*.pyc
+*.py[cod]
+*/migrations/
+!*/migrations/__init__.py
+db.sqlite3
+*.log
+.env
+venv/
+.venv/
+env/
+media/
+staticfiles/
+.vscode/
+.idea/
+*.egg-info/
+dist/
+build/
+.DS_Store

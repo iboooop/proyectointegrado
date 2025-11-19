@@ -80,14 +80,17 @@
 
         <!-- Botones de acción -->
         <div class="mt-4 d-flex justify-content-end gap-2">
-          <!-- Editar -->
-          <a href="{% url 'editar_producto' producto.id %}" class="btn btn-warning-fixed btn-fixed">Editar</a>
-
-          <!-- Eliminar -->
-          <form action="{% url 'eliminar_producto' producto.id %}" method="post" onsubmit="return confirm('¿Seguro que deseas eliminar este producto?');">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger-fixed btn-fixed">Eliminar</button>
-          </form>
+          {% if request.user.perfil.rol != 'LECTOR' %}
+            <!-- Editar -->
+            <a href="{% url 'editar_producto' producto.id %}" class="btn btn-warning-fixed btn-fixed">Editar</a>
+          {% endif %}
+          {% if request.user.perfil.rol == 'ADMIN' %}
+            <!-- Eliminar -->
+            <form action="{% url 'eliminar_producto' producto.id %}" method="post" onsubmit="return confirm('¿Seguro que deseas eliminar este producto?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger-fixed btn-fixed">Eliminar</button>
+            </form>
+          {% endif %}
         </div>
       </div>
     </div>

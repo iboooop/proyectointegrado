@@ -43,7 +43,7 @@ class PerfilAdmin(admin.ModelAdmin):
     list_per_page = 20
     ordering = ('usuario',)
     inlines = [MovimientoUsuarioInline]
-
+    fields = ('usuario', 'rol', 'estado', 'telefono', 'mfa_habilitado', 'avatar')
 
 # ============================================================
 # Módulos del ERP

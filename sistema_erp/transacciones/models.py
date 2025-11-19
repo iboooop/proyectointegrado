@@ -10,6 +10,8 @@ class MovimientoInventario(models.Model):
         ('ENTRADA', 'Entrada'),
         ('SALIDA', 'Salida'),
         ('AJUSTE', 'Ajuste'),
+        ('VENTA', 'Venta'),  # ← NUEVO TIPO
+        ('TRANSFERENCIA', 'Transferencia entre bodegas'),  # ← NUEVO TIPO
     ]
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     proveedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, null=True, blank=True)

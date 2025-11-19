@@ -1,7 +1,9 @@
 from django.urls import path
 from .views import (
     dashboard_view, usuarios_list_view, usuarios_create_view,
-    usuarios_edit_view, usuarios_delete_view, export_usuarios_excel, usuarios_detail_view
+
+    usuarios_edit_view, usuarios_delete_view, export_usuarios_excel
+
 )
 
 urlpatterns = [
@@ -12,5 +14,6 @@ urlpatterns = [
     path('edit/<int:id>/', usuarios_edit_view, name='usuarios_edit'),
     path('delete/<int:id>/', usuarios_delete_view, name='usuarios_delete'),
     path('exportar/', export_usuarios_excel, name='usuarios_export'),
-    path('<int:id>/', usuarios_detail_view, name='usuarios_detail'),
+
+
 ]

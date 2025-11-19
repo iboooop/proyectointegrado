@@ -60,104 +60,37 @@
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <span>Listado de Productos</span>
-        <a href="{% url 'producto_agregar' %}" class="btn btn-success">+ Crear producto</a>
+        <div class="d-flex gap-2">
+          <a href="{% url 'productos_export' %}" class="btn btn-success">Exportar Excel</a>
+          {% if request.user.perfil.rol != 'LECTOR' %}
+            <a href="{% url 'producto_agregar' %}" class="btn btn-primary">+ Crear producto</a>
+          {% endif %}
+        </div>
       </div>
 
       <div class="card-body">
-        <!-- Buscador, paginador y orden -->
-        <form method="get" class="row g-2 align-items-end mb-3">
-          <div class="col-md-4">
-            <input type="text" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Buscar por nombre, stock, precio...">
-          </div>
-          <div class="col-md-2">
-            <select name="paginate_by" class="form-select" onchange="this.form.submit()">
-              <option value="5" {% if request.GET.paginate_by == '5' %}selected{% endif %}>5</option>
-              <option value="15" {% if request.GET.paginate_by == '15' %}selected{% endif %}>15</option>
-              <option value="30" {% if request.GET.paginate_by == '30' %}selected{% endif %}>30</option>
+
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <form id="searchForm" class="flex-grow-1 me-3" onsubmit="return false;">
+            <input type="text" id="searchInput" class="form-control" placeholder="Buscar producto..." value="{{ q }}">
+          </form>
+        
+          <form id="pageSizeForm" class="d-flex align-items-center gap-2" onsubmit="return false;">
+            <label for="pageSizeSelect" class="form-label m-0">Filas por página:</label>
+            <select id="pageSizeSelect" class="form-select" style="width: 140px;">
+              {% for n in page_sizes %}
+              <option value="{{ n }}" {% if page_size == n %}selected{% endif %}>{{ n }}</option>
+              {% endfor %}
             </select>
-          </div>
-          <div class="col-md-2 d-flex gap-2">
-            <button type="submit" class="btn btn-outline-primary">Buscar</button>
-            <a href="{% url 'lista_productos' %}" class="btn btn-outline-secondary">Limpiar filtro</a>
-          </div>
-        </form>
+          </form>
+        
+          <div class="text-muted small">Total: {{ paginator.count }} productos</div>
+        </div>
 
-        <table class="table table-hover align-middle">
-          <thead>
-            <tr>
-              <th>
-                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}sort=nombre&dir={% if request.GET.sort == 'nombre' and request.GET.dir == 'asc' %}desc{% else %}asc{% endif %}"
-                   class="sortable-header{% if request.GET.sort == 'nombre' %} active{% endif %}">
-                  Nombre
-                  {% if request.GET.sort == 'nombre' %}
-                    <span class="arrow">{% if request.GET.dir == 'asc' %}&#8593;{% else %}&#8595;{% endif %}</span>
-                  {% endif %}
-                </a>
-              </th>
-              <th>Categoría</th>
-              <th>
-                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}sort=precio&dir={% if request.GET.sort == 'precio' and request.GET.dir == 'asc' %}desc{% else %}asc{% endif %}"
-                   class="sortable-header{% if request.GET.sort == 'precio' %} active{% endif %}">
-                  Precio
-                  {% if request.GET.sort == 'precio' %}
-                    <span class="arrow">{% if request.GET.dir == 'asc' %}&#8593;{% else %}&#8595;{% endif %}</span>
-                  {% endif %}
-                </a>
-              </th>
-              <th>
-                <a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}sort=stock_actual&dir={% if request.GET.sort == 'stock_actual' and request.GET.dir == 'asc' %}desc{% else %}asc{% endif %}"
-                   class="sortable-header{% if request.GET.sort == 'stock_actual' %} active{% endif %}">
-                  Stock
-                  {% if request.GET.sort == 'stock_actual' %}
-                    <span class="arrow">{% if request.GET.dir == 'asc' %}&#8593;{% else %}&#8595;{% endif %}</span>
-                  {% endif %}
-                </a>
-              </th>
-              <th>Proveedor</th>
-              <th class="text-center">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for producto in productos %}
-            <tr>
-              <td>{{ producto.nombre }}</td>
-              <td>{{ producto.get_categoria_display }}</td>
-              <td>${{ producto.precio }}</td>
-              <td>{{ producto.stock_actual }} ({{ producto.get_stock_display }})</td>
-              <td>{{ producto.proveedor }}</td>
-              <td class="text-center">
-                <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
-              </td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="6" class="text-center text-muted py-4">
-                No hay productos registrados.
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+        <div id="productosTableWrap">
+          {% include 'productos/partials/producto_table.html' %}
+        </div>
 
-        <nav>
-          <ul class="pagination justify-content-center">
-            {% if page_obj.has_previous %}
-              <li class="page-item">
-                <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort }}&dir={{ request.GET.dir }}&{% endif %}page={{ page_obj.previous_page_number }}">Anterior</a>
-              </li>
-            {% endif %}
-            {% for num in page_obj.paginator.page_range %}
-              <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort }}&dir={{ request.GET.dir }}&{% endif %}page={{ num }}">{{ num }}</a>
-              </li>
-            {% endfor %}
-            {% if page_obj.has_next %}
-              <li class="page-item">
-                <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.paginate_by %}paginate_by={{ request.GET.paginate_by }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort }}&dir={{ request.GET.dir }}&{% endif %}page={{ page_obj.next_page_number }}">Siguiente</a>
-              </li>
-            {% endif %}
-          </ul>
-        </nav>
       </div>
     </div>
   </div>
@@ -166,6 +99,82 @@
     <span>&copy; 2025 Sistema ERP</span>
     <span>Soporte</span>
   </div> 
+
+  <script>
+  (function(){
+    const wrap = document.getElementById('productosTableWrap');
+    const searchInput = document.getElementById('searchInput');
+    const pageSizeSelect = document.getElementById('pageSizeSelect');
+    let debounceTimer = null;
+
+    async function fetchAndUpdate(url){
+      try {
+        const resp = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }});
+        const html = await resp.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newWrap = doc.querySelector('#productosTableWrap');
+        wrap.innerHTML = newWrap ? newWrap.innerHTML : html;
+        attachJumpHandler();
+      } catch (err) {
+        console.error('Error al actualizar:', err);
+        wrap.innerHTML = `<div class="alert alert-danger">Error al cargar los datos.</div>`;
+      }
+    }
+
+    function buildUrl(){
+      const p = new URLSearchParams(window.location.search);
+      const qVal = (searchInput?.value || '').trim();
+      if (qVal) p.set('q', qVal); else p.delete('q');
+      if (pageSizeSelect?.value) p.set('page_size', pageSizeSelect.value);
+      p.delete('page');
+      p.set('partial', '1');
+      return window.location.pathname + '?' + p.toString();
+    }
+
+    if (searchInput){
+      searchInput.addEventListener('input', function(){
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(()=>fetchAndUpdate(buildUrl()), 300);
+      });
+    }
+
+    if (pageSizeSelect){
+      pageSizeSelect.addEventListener('change', ()=>fetchAndUpdate(buildUrl()));
+    }
+
+    wrap.addEventListener('click', async e=>{
+      const a = e.target.closest('a.page-link, thead a');
+      if (a && a.getAttribute('href')){
+        e.preventDefault();
+        const clean = a.getAttribute('href');
+        await fetchAndUpdate(clean + '&partial=1');
+        window.history.replaceState({}, '', clean);
+      }
+    });
+
+    function attachJumpHandler(){
+      const form = wrap.querySelector('#jumpPageForm');
+      if (!form) return;
+      const input = form.querySelector('#jumpPageInput');
+      const btn = form.querySelector('#jumpGoBtn');
+      if (!btn) return;
+
+      btn.addEventListener('click', async function(){
+        let target = parseInt(input.value, 10);
+        if (isNaN(target) || target < 1) target = 1;
+        const max = parseInt(input.getAttribute('max'), 10) || 1;
+        if (target > max) target = max;
+        const p = new URLSearchParams(window.location.search);
+        p.set('page', target);
+        p.set('partial', '1');
+        await fetchAndUpdate(window.location.pathname + '?' + p.toString());
+      });
+    }
+
+    attachJumpHandler();
+  })();
+  </script>
 
 </body>
 </html>

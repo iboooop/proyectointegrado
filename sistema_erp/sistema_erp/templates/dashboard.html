@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 
@@ -20,7 +21,9 @@
         .card {
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             border-radius: 10px;
-            transition: transform 0.2s, box-shadow 0.2s;
+
+            transition: .2s;
+
         }
 
         .card:hover {
@@ -37,7 +40,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
+
+            gap: .5rem;
+
         }
 
         .card-header-with-icon i {
@@ -47,7 +52,9 @@
         .footer {
             background: #212529;
             color: #fff;
-            padding: 0.5rem 2rem;
+
+            padding: .5rem 2rem;
+
             margin-top: 2rem;
         }
 
@@ -55,9 +62,11 @@
             background: #f1f3f4;
             color: #212529;
             border-radius: 1em;
-            padding: 0.3em 0.8em;
+            padding: .3em .8em;
             font-weight: 600;
-            font-size: 0.85em;
+
+            font-size: .85em;
+
             border: 1px solid #e0e0e0;
             display: inline-block;
         }
@@ -66,7 +75,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.6em 1.2em;
+            padding: .6em 1.2em;
             border-bottom: 1px solid #eee;
         }
 
@@ -80,7 +89,8 @@
             pointer-events: none;
         }
 
-        /* Altura fija para las tarjetas inferiores */
+
+
         .card-fixed-height {
             height: 400px;
             display: flex;
@@ -92,15 +102,13 @@
             overflow-y: auto;
         }
 
-        /* Scrollbar personalizado */
+
+
         .card-fixed-height .card-body::-webkit-scrollbar {
             width: 6px;
         }
 
-        .card-fixed-height .card-body::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
+
 
         .card-fixed-height .card-body::-webkit-scrollbar-thumb {
             background: #888;
@@ -134,20 +142,20 @@
 
         <!-- FILA PRINCIPAL - 6 TARJETAS CON BOTONES -->
         <div class="row g-3">
+
             <!-- Productos -->
             <div class="col-xl-2 col-lg-4 col-md-6">
-                <div class="card">
-                    <div class="card-header text-center">
-                        <div class="card-header-with-icon">
-                            <i class="bi bi-box-seam"></i>
-                            <span>Productos</span>
-                        </div>
+
+                <div class="card text-center">
+                    <div class="card-header-with-icon card-header">
+                        <i class="bi bi-box-seam"></i><span>Productos</span>
                     </div>
-                    <div class="card-body text-center">
+                    <div class="card-body">
                         <h3>{{ total_productos }}</h3>
                         <p class="text-muted">registrados</p>
-                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'VENTAS' or request.session.rol == 'BODEGA' or request.session.rol == 'COMPRAS' %}
-                            <a href="/productos/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'LECTOR' or request.session.rol == 'EDITOR' %}
+                        <a href="/productos/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+
                         {% else %}
                             <span class="btn disabled-option w-100">No disponible</span>
                         {% endif %}
@@ -157,18 +165,17 @@
 
             <!-- Proveedores -->
             <div class="col-xl-2 col-lg-4 col-md-6">
-                <div class="card">
-                    <div class="card-header text-center">
-                        <div class="card-header-with-icon">
-                            <i class="bi bi-truck"></i>
-                            <span>Proveedores</span>
-                        </div>
+
+                <div class="card text-center">
+                    <div class="card-header-with-icon card-header">
+                        <i class="bi bi-truck"></i><span>Proveedores</span>
                     </div>
-                    <div class="card-body text-center">
+                    <div class="card-body">
                         <h3>{{ total_proveedores }}</h3>
-                        <p class="text-muted">activos</p>
-                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'COMPRAS' %}
-                            <a href="/proveedores/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                        <p class="text-muted">registrados</p>
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'LECTOR' or request.session.rol == 'EDITOR' %}
+                        <a href="/proveedores/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+
                         {% else %}
                             <span class="btn disabled-option w-100">No disponible</span>
                         {% endif %}
@@ -178,20 +185,19 @@
 
             <!-- Bodegas -->
             <div class="col-xl-2 col-lg-4 col-md-6">
-                <div class="card">
-                    <div class="card-header text-center">
-                        <div class="card-header-with-icon">
-                            <i class="bi bi-building"></i>
-                            <span>Bodegas</span>
-                        </div>
+
+                <div class="card text-center">
+                    <div class="card-header-with-icon card-header">
+                        <i class="bi bi-building"></i><span>Bodegas</span>
                     </div>
-                    <div class="card-body text-center">
+                    <div class="card-body">
                         <h3>{{ total_bodegas }}</h3>
                         <p class="text-muted">activas</p>
-                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' or request.session.rol == 'COMPRAS' %}
-                            <a href="/bodegas/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'LECTOR' or request.session.rol == 'EDITOR' %}
+                        <a href="/bodegas/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
                         {% else %}
-                            <span class="btn disabled-option w-100">No disponible</span>
+                        <span class="btn disabled-option w-100">No disponible</span>
+
                         {% endif %}
                     </div>
                 </div>
@@ -199,20 +205,18 @@
 
             <!-- Clientes -->
             <div class="col-xl-2 col-lg-4 col-md-6">
-                <div class="card">
-                    <div class="card-header text-center">
-                        <div class="card-header-with-icon">
-                            <i class="bi bi-people"></i>
-                            <span>Clientes</span>
-                        </div>
+
+                <div class="card text-center">
+                    <div class="card-header-with-icon card-header">
+                        <i class="bi bi-people"></i><span>Clientes</span>
                     </div>
-                    <div class="card-body text-center">
+                    <div class="card-body">
                         <h3>{{ total_clientes }}</h3>
-                        <p class="text-muted">registrados</p>
-                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'VENTAS' %}
-                            <a href="/clientes/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                        <p class="text-muted">activos</p>
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'LECTOR' or request.session.rol == 'EDITOR' %}
+                        <a href="/clientes/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
                         {% else %}
-                            <span class="btn disabled-option w-100">No disponible</span>
+                        <span class="btn disabled-option w-100">No disponible</span>
                         {% endif %}
                     </div>
                 </div>
@@ -220,18 +224,17 @@
 
             <!-- Inventario -->
             <div class="col-xl-2 col-lg-4 col-md-6">
-                <div class="card">
-                    <div class="card-header text-center">
-                        <div class="card-header-with-icon">
-                            <i class="bi bi-arrow-left-right"></i>
-                            <span>Inventario</span>
-                        </div>
+
+                <div class="card text-center">
+                    <div class="card-header-with-icon card-header">
+                        <i class="bi bi-arrow-left-right"></i><span>Inventario</span>
                     </div>
-                    <div class="card-body text-center">
+                    <div class="card-body">
                         <h3>{{ total_transacciones }}</h3>
                         <p class="text-muted">movimientos</p>
-                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'VENTAS' or request.session.rol == 'BODEGA' %}
-                            <a href="/transacciones/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'LECTOR' or request.session.rol == 'EDITOR' %}
+                        <a href="/transacciones/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+
                         {% else %}
                             <span class="btn disabled-option w-100">No disponible</span>
                         {% endif %}
@@ -241,18 +244,17 @@
 
             <!-- Usuarios -->
             <div class="col-xl-2 col-lg-4 col-md-6">
-                <div class="card">
-                    <div class="card-header text-center">
-                        <div class="card-header-with-icon">
-                            <i class="bi bi-person-badge"></i>
-                            <span>Usuarios</span>
-                        </div>
+
+                <div class="card text-center">
+                    <div class="card-header-with-icon card-header">
+                        <i class="bi bi-person-badge"></i><span>Usuarios</span>
                     </div>
-                    <div class="card-body text-center">
+                    <div class="card-body">
                         <h3>{{ total_usuarios }}</h3>
                         <p class="text-muted">del sistema</p>
-                        {% if request.session.rol == 'ADMIN' %}
-                            <a href="/usuarios/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'LECTOR' or request.session.rol == 'EDITOR' %}
+                        <a href="/usuarios/" class="btn btn-dark btn-sm w-100">Ver detalles</a>
+
                         {% else %}
                             <span class="btn disabled-option w-100">No disponible</span>
                         {% endif %}
@@ -261,15 +263,20 @@
             </div>
         </div>
 
-        <!-- FILA SECUNDARIA (con altura fija) -->
+
+        <!-- FILA SECUNDARIA -->
         <div class="row mt-4 g-3">
+
+
             <!-- Últimos Productos -->
             <div class="col-lg-4 col-md-6">
                 <div class="card card-fixed-height">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-box-seam me-2"></i>Últimos Productos Añadidos</span>
-                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'COMPRAS' %}
-                            <a href="/productos/" class="small">Ver todos</a>
+
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'LECTOR' or request.session.rol == 'EDITOR' %}
+                        <a href="/productos/" class="small">Ver todos</a>
+
                         {% endif %}
                     </div>
                     <div class="card-body px-2">
@@ -291,26 +298,100 @@
             <div class="col-lg-4 col-md-6">
                 <div class="card card-fixed-height">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-arrow-left-right me-2"></i>Transacciones de Inventario recientes</span>
-                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'BODEGA' %}
-                            <a href="/transacciones/" class="small">Ver todas</a>
+
+                        <span><i class="bi bi-arrow-left-right me-2"></i>Transacciones recientes</span>
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'LECTOR' or request.session.rol == 'EDITOR' %}
+                        <a href="/transacciones/" class="small">Ver todas</a>
+
                         {% endif %}
                     </div>
                     <div class="card-body px-2">
                         {% if ultimas_transacciones %}
-                            {% for transaccion in ultimas_transacciones %}
-                                <div class="mb-3 pb-2 border-bottom">
-                                    <div class="fw-bold d-flex justify-content-between align-items-center">
-                                        <span>{{ transaccion.producto }}</span>
-                                        <span class="pill">{{ transaccion.tipo }}</span>
-                                    </div>
-                                    <div class="text-muted small">
-                                        <i class="bi bi-calendar3"></i> {{ transaccion.fecha|date:"d M Y H:i" }}
+
+                        {% for transaccion in ultimas_transacciones %}
+                        <div class="mb-3 pb-2 border-bottom">
+                            <div class="fw-bold d-flex justify-content-between align-items-center">
+                                <span>{{ transaccion.producto }}</span>
+                                <span class="pill">{{ transaccion.tipo }}</span>
+                            </div>
+                            <div class="text-muted small">
+                                <i class="bi bi-calendar3"></i> {{ transaccion.fecha|date:"d M Y H:i" }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="alert alert-info mb-0">No hay transacciones recientes.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Últimos Clientes -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card card-fixed-height">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-people me-2"></i>Últimos Clientes</span>
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'LECTOR' or request.session.rol == 'EDITOR' %}
+                        <a href="/clientes/" class="small">Ver todos</a>
+                        {% endif %}
+                    </div>
+                    <div class="card-body px-2">
+                        <ul class="list-unstyled mb-0">
+                            {% for cliente in ultimos_clientes %}
+                            <li class="list-item-centered">
+                                <span>{{ cliente.nombre }}</span>
+                                <span
+                                    class="pill {% if cliente.estadoCondicion == 'activo' %}bg-success text-white{% elif cliente.estadoCondicion == 'suspendido' %}bg-warning{% else %}bg-secondary text-white{% endif %}">
+                                    {{ cliente.get_estadoCondicion_display }}
+                                </span>
+                            </li>
+                            {% empty %}
+                            <div class="alert alert-info mb-0">No hay clientes recientes.</div>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ESTADO DE BODEGAS -->
+        <div class="row mt-4 g-3 mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-building me-2"></i>Estado de Bodegas</span>
+                        {% if request.session.rol == 'ADMIN' or request.session.rol == 'LECTOR' or request.session.rol == 'EDITOR' %}
+                        <a href="/bodegas/" class="small">Ver todas</a>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        {% if bodegas %}
+                        <div class="row g-3">
+                            {% for bodega in bodegas %}
+                            <div class="col-md-4 col-lg-3">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title fw-bold">{{ bodega.nombre }}</h6>
+                                        <p class="card-text small text-muted mb-2">
+                                            <i class="bi bi-geo-alt"></i> {{ bodega.direccion|truncatewords:5 }}
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span
+                                                class="pill {% if bodega.estado == 'ACTIVO' %}bg-success text-white{% elif bodega.estado == 'MANTENIMIENTO' %}bg-warning{% else %}bg-secondary text-white{% endif %}">
+                                                {{ bodega.get_estado_display }}
+                                            </span>
+                                            <small class="text-muted">
+                                                <i class="bi bi-box"></i> {{ bodega.capacidad_maxima|default:"N/A" }}
+                                            </small>
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
+
                             {% endfor %}
+                        </div>
                         {% else %}
-                            <div class="alert alert-info mb-0">No hay transacciones recientes.</div>
+                        <div class="alert alert-info mb-0">No hay bodegas registradas.</div>
                         {% endif %}
                     </div>
                 </div>

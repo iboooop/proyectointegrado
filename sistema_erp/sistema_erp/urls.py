@@ -28,7 +28,9 @@ urlpatterns = [
     path('productos/', include('productos.urls')),
     path('proveedores/', include('proveedores.urls')),
     path('transacciones/', include('transacciones.urls')),
-    path('bodegas/', include('bodegas.urls')),         # <-- Agregado bodegas
+
+    path('bodegas/', include('bodegas.urls')),
+
     path('clientes/', include('clientes.urls')),
     # Catch-all: al final, cualquier otra URL muestra el 404 personalizado incluso en DEBUG
     re_path(r'^(?P<extra>.*)$', views.not_found_view, name='not_found'),
