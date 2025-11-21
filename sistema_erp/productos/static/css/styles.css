@@ -1,0 +1,78 @@
+body { background: #f8f9fa; }
+
+/* CARD */
+.card {
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+}
+
+/* -------- FOTO ---------- */
+.preview-wrapper {
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+  overflow: hidden;
+}
+
+.circle-img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 999px;
+}
+
+.btn-foto {
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background: #2563eb url('https://cdn-icons-png.flaticon.com/512/126/126477.png') center/18px no-repeat;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.btn-foto:hover {
+  background-color: #1e3aa8;
+}
+
+/* -------- TABS -------- */
+.nav-pills .nav-link {
+  border-radius: 20px;
+  background: #e7edff;
+  color: #2563eb;
+  font-weight: 500;
+  border: 1px solid #c7d4ff;
+}
+
+.nav-pills .nav-link.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+/* SKU */
+.input-sku-group input {
+  text-align: center;
+}
+
+/* Inputs */
+input, select, textarea {
+  border-radius: 8px !important;
+}
+
+textarea {
+  resize: none;
+}
+
+.btn {
+  border-radius: 8px;
+}

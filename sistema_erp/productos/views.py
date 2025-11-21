@@ -73,12 +73,21 @@ def lista_productos(request):
 # ---------------- CREAR ----------------
 def crear_producto(request):
     if request.method == 'POST':
-        form = ProductoForm(request.POST)
+        data = request.POST.copy()
+
+        # Combinar las dos partes del SKU en un solo campo
+        sku_letras = (data.get('sku_letras') or '').strip()
+        sku_nros = (data.get('sku_nros') or '').strip()
+        if sku_letras or sku_nros:
+            data['sku'] = f"{sku_letras}-{sku_nros}" if sku_nros else sku_letras
+
+        form = ProductoForm(data, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('lista_productos')
     else:
         form = ProductoForm()
+
     return render(request, 'productos/product_add.html', {'form': form})
 
 

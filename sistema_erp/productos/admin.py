@@ -21,10 +21,17 @@ def marcar_bajo(modeladmin, request, queryset):
 
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
-    form = ProductoForm  # <--- Usamos el form con validaciones
-    list_display = ('nombre', 'categoria', 'precio', 'stock_actual', 'fecha_vencimiento', 'lote', 'stock')
-    search_fields = ('nombre', 'categoria', 'lote')
-    list_filter = ('categoria', 'stock')
+    form = ProductoForm
+    list_display = (
+        'sku', 'nombre', 'categoria', 'marca', 'modelo',
+        'uom_compra', 'uom_venta', 'factor_conversion',
+        'costo_estandar', 'precio_venta', 'impuesto_iva',
+        'stock_minimo', 'stock_maximo', 'punto_reorden',
+        'perishable', 'control_por_lote', 'control_por_serie',
+        'proveedor', 'bodega', 'stock_actual',
+    )
+    search_fields = ('sku', 'nombre', 'categoria', 'marca', 'modelo')
+    list_filter = ('categoria', 'marca', 'proveedor', 'bodega', 'perishable', 'control_por_lote', 'control_por_serie')
     list_per_page = 20
     ordering = ('nombre',)
     inlines = [MovimientoInline]
