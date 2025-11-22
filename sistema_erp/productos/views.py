@@ -16,114 +16,157 @@ except ImportError:
 
 # ---------------- LISTAR ----------------
 def lista_productos(request):
-    qs = Producto.objects.select_related('proveedor').all()
+    qs = Producto.objects.select_related("proveedor").all()
 
-    # --- Búsqueda ---
-    q = (request.GET.get('q') or '').strip()
+    q = (request.GET.get("q") or "").strip()
     if q:
         qs = qs.filter(
             Q(nombre__icontains=q)
             | Q(categoria__icontains=q)
-            | Q(precio__icontains=q)
+            | Q(precio_venta__icontains=q)
             | Q(stock_actual__icontains=q)
             | Q(proveedor__nombre__icontains=q)
         )
 
-    # --- Orden ---
-    sort = (request.GET.get('sort') or 'nombre').strip()
-    direction = (request.GET.get('dir') or 'asc').strip().lower()
-    if direction == 'desc':
-        sort = f'-{sort}'
+    sort = (request.GET.get("sort") or "nombre").strip()
+    direction = (request.GET.get("dir") or "asc").strip().lower()
+    if direction == "desc":
+        sort = f"-{sort}"
     qs = qs.order_by(sort)
 
-    # --- Paginación ---
     allowed_sizes = [5, 10, 20, 50]
     try:
-        page_size = int(request.GET.get('page_size') or request.session.get('producto_page_size') or 10)
+        page_size = int(
+            request.GET.get("page") or request.session.get("producto_page_size") or 10
+        )
     except ValueError:
         page_size = 10
     if page_size not in allowed_sizes:
         page_size = 10
-    request.session['producto_page_size'] = page_size
+    request.session["producto_page_size"] = page_size
 
     paginator = Paginator(qs, page_size)
-    page_number = request.GET.get('page')
+    page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
     context = {
-        'productos': page_obj,
-        'page_obj': page_obj,
-        'paginator': paginator,
-        'q': q,
-        'sort': sort,
-        'dir': direction,
-        'page_size': page_size,
-        'page_sizes': allowed_sizes,
+        "productos": page_obj,
+        "page_obj": page_obj,
+        "paginator": paginator,
+        "q": q,
+        "sort": sort,
+        "dir": direction,
+        "page_size": page_size,
+        "page_sizes": allowed_sizes,
     }
 
-    # --- Render parcial (AJAX) ---
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('partial') == '1':
-        return render(request, 'productos/partials/producto_table.html', context)
+    if (
+        request.headers.get("x-requested-with") == "XMLHttpRequest"
+        or request.GET.get("partial") == "1"
+    ):
+        return render(request, "productos/partials/producto_table.html", context)
 
-    # --- Render completo ---
-    return render(request, 'productos/product_list.html', context)
-
+    return render(request, "productos/product_list.html", context)
 
 
 # ---------------- CREAR ----------------
 def crear_producto(request):
-    if request.method == 'POST':
+    active_tab = request.POST.get("active_tab", "paso1-tab")
+    mensaje = None
+    mensaje_tipo = None
+
+    if request.method == "POST":
         data = request.POST.copy()
 
-        # Combinar las dos partes del SKU en un solo campo
-        sku_letras = (data.get('sku_letras') or '').strip()
-        sku_nros = (data.get('sku_nros') or '').strip()
+        sku_letras = (data.get("sku_letras") or "").strip()
+        sku_nros = (data.get("sku_nros") or "").strip()
         if sku_letras or sku_nros:
-            data['sku'] = f"{sku_letras}-{sku_nros}" if sku_nros else sku_letras
+            data["sku"] = f"{sku_letras}{sku_nros}"
 
-        form = ProductoForm(data, request.FILES)
+        form = ProductoForm(data, files=request.FILES)
         if form.is_valid():
             form.save()
-            return redirect('lista_productos')
+            mensaje = "Producto creado exitosamente."
+            mensaje_tipo = "success"
+            form = ProductoForm()
+            active_tab = "paso1-tab"
+        else:
+            mensaje = "Corrige los errores indicados."
+            mensaje_tipo = "danger"
     else:
         form = ProductoForm()
 
-    return render(request, 'productos/product_add.html', {'form': form})
+    return render(
+        request,
+        "productos/product_add.html",
+        {
+            "form": form,
+            "active_tab": active_tab,
+            "mensaje": mensaje,
+            "mensaje_tipo": mensaje_tipo,
+        },
+    )
 
 
 # ---------------- DETALLE ----------------
 def detalle_producto(request, id):
-    # ✅ Corregido: buscar por idProducto, no por id
-    producto = get_object_or_404(Producto.objects.select_related('proveedor'), idProducto=id)
-    movimientos = MovimientoInventario.objects.filter(producto=producto).select_related('proveedor', 'usuario').order_by('-fecha')
+    producto = get_object_or_404(
+        Producto.objects.select_related("proveedor"), idProducto=id
+    )
+    movimientos = (
+        MovimientoInventario.objects.filter(producto=producto)
+        .select_related("proveedor", "usuario")
+        .order_by("-fecha")
+    )
 
-    return render(request, 'productos/product_detail.html', {
-        'producto': producto,
-        'movimientos': movimientos,
-    })
+    return render(
+        request,
+        "productos/product_detail.html",
+        {
+            "producto": producto,
+            "movimientos": movimientos,
+        },
+    )
 
 
 # ---------------- EDITAR ----------------
 def editar_producto(request, id):
-    # ✅ Corregido igual
     producto = get_object_or_404(Producto, idProducto=id)
-    if request.method == 'POST':
-        form = ProductoForm(request.POST, instance=producto)
+
+    if request.method == "POST":
+        data = request.POST.copy()
+
+        sku_letras = (data.get("sku_letras") or "").strip()
+        sku_nros = (data.get("sku_nros") or "").strip()
+        if sku_letras or sku_nros:
+            data["sku"] = f"{sku_letras}{sku_nros}"
+
+        form = ProductoForm(data, files=request.FILES, instance=producto)
         if form.is_valid():
             form.save()
-            return redirect('detalle_producto', id=producto.idProducto)
+            return redirect("detalle_producto", id=producto.idProducto)
     else:
-        form = ProductoForm(instance=producto)
-    return render(request, 'productos/product_edit.html', {'form': form, 'producto': producto})
+        # separar sku en letras/nros si quieres reutilizar los 2 inputs
+        initial = {
+            "sku_letras": producto.sku[:-4],
+            "sku_nros": producto.sku[-4:],
+        }
+        form = ProductoForm(instance=producto, initial=initial)
+
+    return render(
+        request,
+        "productos/product_edit.html",
+        {"form": form, "producto": producto},
+    )
 
 
 # ---------------- ELIMINAR ----------------
 def eliminar_producto(request, id):
     producto = get_object_or_404(Producto, idProducto=id)
-    if request.method == 'POST':
+    if request.method == "POST":
         producto.delete()
-        return redirect('lista_productos')
-    return redirect('detalle_producto', id=id)
+        return redirect("lista_productos")
+    return redirect("detalle_producto", id=id)
 
 
 # ---------------- EXPORTAR EXCEL ----------------
