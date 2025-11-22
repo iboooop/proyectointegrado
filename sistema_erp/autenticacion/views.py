@@ -52,7 +52,7 @@ def login_view(request):
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
 
-            usuario_o_email = form.cleaned_data['usuario_o_email']
+            usuario_o_email = form.cleaned_data['username']
             password = form.cleaned_data['password']
 
             # Autenticar usuario por username o email (case-insensitive)
