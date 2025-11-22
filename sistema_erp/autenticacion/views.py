@@ -49,38 +49,21 @@ def registro_view(request):
 # ------------------------------
 def login_view(request):
     if request.method == 'POST':
+        # Usar AuthenticationForm (campo 'username') y delegar validación/autenticación a él.
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
-
-            usuario_o_email = form.cleaned_data['usuario_o_email']
-            password = form.cleaned_data['password']
-
-            # Autenticar usuario por username o email (case-insensitive)
-            user = User.objects.filter(username__iexact=usuario_o_email).first() or User.objects.filter(email__iexact=usuario_o_email).first()
-            if user:
-                auth_user = authenticate(request, username=user.username, password=password)
-                if auth_user:
-                    login(request, auth_user)  # Iniciar sesión
-                    perfil = Perfil.objects.filter(usuario=user).first()
-                    request.session['usuario'] = user.username
-                    request.session['rol'] = perfil.rol if perfil else "Sin rol"
-                    # Redirigir al dashboard real (sin datos ficticios)
-                    return redirect('dashboard')
-                else:
-                    # Depuración servidor únicamente
-                    print("[DEBUG login_view] Autenticación fallida para usuario:", user.username)
-
-            else:
-                request.session['rol'] = None
+            user = form.get_user()
+            # Iniciar sesión y guardar info en sesión
+            login(request, user)
+            perfil = Perfil.objects.filter(usuario=user).first()
+            request.session['usuario'] = user.username
+            request.session['rol'] = perfil.rol if perfil else "Sin rol"
             messages.success(request, f'Bienvenido, {user.username}')
             return redirect('dashboard')
         else:
-            username = request.POST.get('username', '')
-            from django.contrib.auth.models import User
-            if username and not User.objects.filter(username=username).exists():
-                messages.error(request, 'El usuario no existe.')
-            else:
-                messages.error(request, 'Usuario o contraseña incorrectos.')
+            # Si no es válido, mostrar errores genéricos o los del formulario
+            # Evitar diferenciar demasiado por seguridad (no revelar si el usuario existe)
+            messages.error(request, 'Usuario o contraseña incorrectos.')
     else:
         form = AuthenticationForm()
     return render(request, 'autenticacion/login.html', {'form': form})
