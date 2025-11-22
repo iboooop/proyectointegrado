@@ -16,7 +16,7 @@ body {
 
 h1 {
     text-align: center;
-    color: #1cdd03;
+    color: #1cdd03 !important;
 }
 
 form {
