@@ -12,13 +12,6 @@ from usuarios.models import Perfil
 from .forms import LoginForm, RegistroForm
 from django.contrib.auth.forms import AuthenticationForm
 
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import User
-from .forms import LoginForm
-from autenticacion import Perfil
-
 # ------------------------------
 # Función para registrar un nuevo usuario
 # ------------------------------
@@ -56,42 +49,42 @@ def registro_view(request):
 # ------------------------------
 def login_view(request):
     if request.method == 'POST':
-        form = LoginForm(request.POST)
-
+        form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
+
             usuario_o_email = form.cleaned_data['usuario_o_email']
             password = form.cleaned_data['password']
 
-            # Buscar usuario por username o email
-            user = User.objects.filter(username__iexact=usuario_o_email).first() \
-                or User.objects.filter(email__iexact=usuario_o_email).first()
-
+            # Autenticar usuario por username o email (case-insensitive)
+            user = User.objects.filter(username__iexact=usuario_o_email).first() or User.objects.filter(email__iexact=usuario_o_email).first()
             if user:
-                # Autenticar
                 auth_user = authenticate(request, username=user.username, password=password)
-
-                if auth_user is not None:
-                    login(request, auth_user)
-
-                    # Obtener el perfil y su rol
-                    perfil = Perfil.objects.filter(usuario=auth_user).first()
-                    request.session['usuario'] = auth_user.username
+                if auth_user:
+                    login(request, auth_user)  # Iniciar sesión
+                    perfil = Perfil.objects.filter(usuario=user).first()
+                    request.session['usuario'] = user.username
                     request.session['rol'] = perfil.rol if perfil else "Sin rol"
-
+                    # Redirigir al dashboard real (sin datos ficticios)
                     return redirect('dashboard')
-
                 else:
-                    messages.error(request, "Contraseña incorrecta.")
-                    return redirect('login')
+                    # Depuración servidor únicamente
+                    print("[DEBUG login_view] Autenticación fallida para usuario:", user.username)
 
             else:
-                messages.error(request, "El usuario no existe.")
-                return redirect('login')
-
+                request.session['rol'] = None
+            messages.success(request, f'Bienvenido, {user.username}')
+            return redirect('dashboard')
+        else:
+            username = request.POST.get('username', '')
+            from django.contrib.auth.models import User
+            if username and not User.objects.filter(username=username).exists():
+                messages.error(request, 'El usuario no existe.')
+            else:
+                messages.error(request, 'Usuario o contraseña incorrectos.')
     else:
-        form = LoginForm()
-
+        form = AuthenticationForm()
     return render(request, 'autenticacion/login.html', {'form': form})
+
 # ------------------------------
 # Función para recuperar contraseña (envía un enlace por correo)
 # ------------------------------
