@@ -45,35 +45,9 @@
                 </div>
             </div>
 
+                </div>
+                </div>
         </div>
-      </div>
-
-      <div class="card-body">
-        <form method="get" class="row g-2 align-items-end mb-3">
-          <div class="col-md-5">
-            <input type="text" name="q" id="searchInput" value="{{ request.GET.q }}" class="form-control" placeholder="Buscar por nombre, apellido, username o email">
-          </div>
-          <div class="col-md-2">
-            <select name="page_size" class="form-select" id="pageSizeSelect" onchange="this.form.submit()">
-              {% for n in page_sizes %}
-                <option value="{{ n }}" {% if page_size == n %}selected{% endif %}>{{ n }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="col-md-2 d-flex gap-2">
-            <button type="submit" class="btn btn-outline-primary">Buscar</button>
-            <a href="{% url 'usuarios_list' %}" class="btn btn-outline-secondary">Limpiar filtro</a>
-          </div>
-          <div class="col-md-3 text-end text-muted small pt-2">
-            Total: {{ paginator.count }} registros
-          </div>
-        </form>
-
-        <div id="usersTableWrap">
-          {% include 'usuarios/partials/list_table.html' %}
-        </div>
-      </div>
-    </div>
 
     <script>
     // SweetAlert para éxito al crear (?created=1)
@@ -231,7 +205,7 @@
         };
     })();
     </script>
->>>>>>> 269c5e010624db413a2d803e1ed0db91c3008822
+
 {% include 'partials/footer.html' %}
 </body>
 </html>
