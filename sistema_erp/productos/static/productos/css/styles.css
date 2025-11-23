@@ -3,10 +3,14 @@ body.bg-light {
   background-color: #f3f4f8 !important;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.container {
+.container.my-4 {
   max-width: 1100px;
+  flex: 1 0 auto;
 }
 
 /* ====== Card principal ====== */
@@ -112,34 +116,60 @@ h6.fw-semibold {
 }
 
 .btn-primary {
-  background-color: #D10A11;
-  border-color: #D10A11;
+  background-color: #D10A11 !important;
+  border-color: #D10A11 !important;
 }
 
 .btn-primary:hover {
-  background-color: #a3090e;
-  border-color: #a3090e;
+  background-color: #a3090e !important;
+  border-color: #a3090e !important;
 }
 
 .btn-success {
-  background-color: #D10A11;
-  border-color: #D10A11;
+  background-color: #D10A11 !important;
+  border-color: #D10A11 !important;
 }
 
 .btn-success:hover {
-  background-color: #a3090e;
-  border-color: #a3090e;
+  background-color: #a3090e !important;
+  border-color: #a3090e !important;
 }
 
 .btn-outline-secondary {
-  color: #4b5563;
-  border-color: #d1d5db;
-  background-color: #ffffff;
+  color: #4b5563 !important;
+  border-color: #d1d5db !important;
+  background-color: #ffffff !important;
 }
 
 .btn-outline-secondary:hover {
-  background-color: #f3f4f6;
-  color: #111827;
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
+}
+
+/* Botones de navegación (Anterior / Siguiente / Ir) y paginador en rojo corporativo */
+.btn-outline-primary,
+.pagination .page-link {
+  border-radius: 999px !important;
+  border-color: #D10A11 !important;
+  color: #D10A11 !important;
+}
+
+.btn-outline-primary:hover,
+.pagination .page-link:hover {
+  background-color: #D10A11 !important;
+  border-color: #D10A11 !important;
+  color: #ffffff !important;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #D10A11 !important;
+  border-color: #D10A11 !important;
+  color: #ffffff !important;
+}
+
+.pagination .page-item.disabled .page-link {
+  border-color: #e5e7eb !important;
+  color: #9ca3af !important;
 }
 
 /* Botón "Volver al listado" */
@@ -227,6 +257,31 @@ h6.fw-semibold {
 .alert {
   border-radius: 12px;
   font-size: 0.85rem;
+}
+
+/* ====== Footer productos ====== */
+.productos-footer {
+  background-color: #230E00;
+  color: #f9fafb;
+  padding: 24px 16px;
+  margin-top: 40px;
+}
+
+.productos-footer a {
+  color: #fcd34d;
+  text-decoration: none;
+}
+
+.productos-footer a:hover {
+  text-decoration: underline;
+}
+
+.productos-footer-logo {
+  max-width: 140px;
+}
+
+.productos-footer small {
+  color: #e5e7eb;
 }
 
 /* ====== Responsive ====== */
