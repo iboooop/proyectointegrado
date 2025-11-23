@@ -66,8 +66,8 @@ def lista_transacciones(request):
     from django.utils import timezone
 
     hoy = timezone.localdate()
-    de_hoy = qs.filter(fecha__date=hoy)
-    movimientos_hoy = de_hoy.count()
+    # Contar TODOS los movimientos de hoy, no solo los del queryset filtrado
+    movimientos_hoy = MovimientoInventario.objects.filter(fecha__date=hoy).count()
     stock_total = qs.aggregate(total=models.Sum('cantidad'))['total'] or 0
     productos_unicos = qs.values('producto__sku').distinct().count()
 
