@@ -12,6 +12,12 @@ class MovimientoInventario(models.Model):
         ('VENTA', 'Venta'),
         ('TRANSFERENCIA', 'Transferencia entre bodegas'),
     ]
+    ESTADO_CHOICES = [
+        ('POR_CONFIRMAR', 'Por confirmar'),
+        ('EN_PROCESO', 'En proceso'),
+        ('CANCELADO', 'Cancelado'),
+        ('DESACTIVADO', 'Desactivado'),
+    ]
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     proveedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, null=True, blank=True)
     cliente = models.ForeignKey('clientes.Cliente', on_delete=models.SET_NULL, null=True, blank=True)
@@ -22,6 +28,9 @@ class MovimientoInventario(models.Model):
     tipo = models.CharField(max_length=20, choices=TIPO_MOVIMIENTO)
     cantidad = models.IntegerField()
     fecha = models.DateTimeField(default=timezone.now)
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='POR_CONFIRMAR')
+    fecha_activacion = models.DateTimeField(null=True, blank=True)
+    fecha_desactivacion = models.DateTimeField(null=True, blank=True)
     # Control avanzado
     manejo_lotes = models.BooleanField(default=False)
     manejo_series = models.BooleanField(default=False)

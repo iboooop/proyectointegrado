@@ -5,59 +5,168 @@
   <meta charset="UTF-8">
   <title>Detalle del Movimiento - {{ transaccion.producto.nombre }}</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="{% static 'transacciones/css/transacciones.css' %}" rel="stylesheet">
+  <link href="{% static 'productos/css/styles.css' %}" rel="stylesheet">
+  <style>
+    .detail-label { font-size: 0.8rem; font-weight: 600; color: #4b5563; margin-bottom: 2px; }
+    .detail-value { font-size: 0.9rem; color: #111827; }
+    .detail-section-title { font-size: 0.9rem; font-weight: 600; color: #121826; margin-bottom: 6px; }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body>
-  <div class="container my-5">
-    <a href="/transacciones/" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
+<body class="bg-light">
+  <div class="container my-4">
+    <a href="{% url 'lista_transacciones' %}" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
 
-    <div class="card">
-      <div class="card-header card-header-dark d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">{{ transaccion.producto.nombre }}</h4>
-        <span class="badge {% if transaccion.tipo == 'ENTRADA' %}bg-success{% elif transaccion.tipo == 'SALIDA' %}bg-danger{% else %}bg-secondary{% endif %}">
-            <strong>Estado: </strong>
-          {{ transaccion.tipo }}
-        </span>
-      </div>
-
+    <div class="card shadow-sm rounded-4">
       <div class="card-body">
-        <p><strong>Producto:</strong> {{ transaccion.producto.nombre }}</p>
-        <p><strong>Proveedor:</strong> {{ transaccion.proveedor|default:"—" }}</p>
-        <p><strong>Usuario:</strong> {{ transaccion.usuario.username|default:"—" }}</p>
-        <p><strong>Cantidad:</strong> {{ transaccion.cantidad }}</p>
-        <p><strong>Fecha:</strong> {{ transaccion.fecha|date:"d/m/Y H:i" }}</p>
-        <p><strong>Observaciones:</strong></p>
-        <p>{{ transaccion.observaciones|default:"Sin observaciones." }}</p>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0 fw-semibold">{{ transaccion.producto.nombre }}</h5>
+          <span class="badge bg-secondary">ID: {{ transaccion.id }}</span>
+        </div>
+
+        <div class="mb-3">
+          <div class="detail-label">Estado del movimiento</div>
+          <div class="detail-value">
+            {% if transaccion.estado == 'EN_PROCESO' %}
+              En proceso
+            {% elif transaccion.estado == 'ACTIVO' %}
+              Activo
+            {% elif transaccion.estado == 'CANCELADO' %}
+              Cancelado
+            {% elif transaccion.estado == 'DESACTIVADO' %}
+              Desactivado
+            {% else %}
+              {{ transaccion.estado|default:'—' }}
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <div class="mb-2">
+              <div class="detail-label">Tipo de movimiento</div>
+              <div class="detail-value">{{ transaccion.get_tipo_display }}</div>
+            </div>
+            <div class="mb-2">
+              <div class="detail-label">Proveedor</div>
+              <div class="detail-value">{{ transaccion.proveedor|default:'—' }}</div>
+            </div>
+            <div class="mb-2">
+              <div class="detail-label">Usuario</div>
+              <div class="detail-value">{{ transaccion.usuario.username|default:'—' }}</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-2">
+              <div class="detail-label">Cantidad</div>
+              <div class="detail-value">{{ transaccion.cantidad }}</div>
+            </div>
+            <div class="mb-2">
+              <div class="detail-label">Fecha</div>
+              <div class="detail-value">{{ transaccion.fecha|date:"d/m/Y H:i" }}</div>
+            </div>
+            <div class="mb-2">
+              <div class="detail-label">Bodega origen / destino</div>
+              <div class="detail-value">{{ transaccion.bodega_origen|default:'—' }}{% if transaccion.bodega_destino %} → {{ transaccion.bodega_destino }}{% endif %}</div>
+            </div>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <div class="detail-section-title">Control avanzado</div>
+            <div class="detail-label">Perecible</div>
+            <div class="detail-value">{% if transaccion.perecible %}Sí{% else %}No{% endif %}</div>
+            <div class="detail-label mt-2">Lote</div>
+            <div class="detail-value">{{ transaccion.lote|default:'—' }}</div>
+            <div class="detail-label mt-2">Serie</div>
+            <div class="detail-value">{{ transaccion.serie|default:'—' }}</div>
+            <div class="detail-label mt-2">Fecha de vencimiento</div>
+            <div class="detail-value">{{ transaccion.fecha_vencimiento|date:"d/m/Y"|default:'—' }}</div>
+          </div>
+          <div class="col-md-6">
+            <div class="detail-section-title">Documento y motivo</div>
+            <div class="detail-label">Documento referencia</div>
+            <div class="detail-value">{{ transaccion.doc_referencia|default:'—' }}</div>
+            <div class="detail-label mt-2">Archivo adjunto</div>
+            <div class="detail-value">
+              {% if transaccion.doc_referencia_file %}
+                <a href="{{ transaccion.doc_referencia_file.url }}" target="_blank">Ver documento</a>
+              {% else %}
+                —
+              {% endif %}
+            </div>
+            <div class="detail-label mt-2">Motivo</div>
+            <div class="detail-value">{{ transaccion.motivo|default:'—' }}</div>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="mb-3">
+          <div class="detail-section-title">Observaciones</div>
+          <div class="detail-value">{{ transaccion.observaciones|default:"Sin observaciones." }}</div>
+        </div>
 
         <div class="mt-4 d-flex justify-content-end gap-2">
           {% if request.user.perfil.rol != 'LECTOR' %}
-            <a href="{% url 'editar_transaccion' transaccion.id %}" class="btn btn-edit btn-sm">Editar</a>
+            <a href="{% url 'editar_transaccion' transaccion.id %}" class="btn btn-outline-secondary">Editar</a>
           {% endif %}
           {% if request.user.perfil.rol == 'ADMIN' %}
-            <form action="{% url 'eliminar_transaccion' transaccion.id %}" method="post" class="d-inline js-del-trx-detail">
+            <form action="{% url 'eliminar_transaccion' transaccion.id %}" method="post" id="form-eliminar-transaccion">
               {% csrf_token %}
-              <button type="submit" class="btn btn-delete btn-sm">Eliminar</button>
+              <button type="submit" class="btn btn-danger">Eliminar (Desactivar)</button>
             </form>
           {% endif %}
         </div>
       </div>
     </div>
   </div>
+
+  <footer class="productos-footer mt-4">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="productos-footer-logo">
+        <div>
+          <div class="fw-semibold text-uppercase mb-1" style="font-size:0.8rem;letter-spacing:0.08em;">Info de Contacto</div>
+          <div style="font-size:0.85rem;">Móvil: +569 6226 1712</div>
+          <div style="font-size:0.85rem;">E-Mail: ventas@lilis.cl</div>
+          <div style="font-size:0.85rem;" class="mt-2">
+            Ubícanos en: Paseo San Ramón<br>
+            Waldo Alcalde 401, local 8, San Ramón, Coquimbo
+          </div>
+        </div>
+      </div>
+      <div class="ms-auto text-end" style="font-size:0.8rem;">
+        <small>Derechos Reservados © 2022 Lilis.</small>
+      </div>
+    </div>
+  </footer>
+
   <script>
-    document.querySelectorAll('form.js-del-trx-detail').forEach(f=>{
-      f.addEventListener('submit', function(e){
+    document.addEventListener('DOMContentLoaded', function () {
+      const formEliminar = document.getElementById('form-eliminar-transaccion');
+      if (!formEliminar) return;
+
+      formEliminar.addEventListener('submit', function (e) {
         e.preventDefault();
+
         Swal.fire({
-          title: '¿Eliminar movimiento?',
-          text: 'Esta acción no se puede deshacer.',
+          title: '¿Desactivar movimiento?',
+          text: 'El movimiento quedará marcado como desactivado y no se eliminará físicamente.',
           icon: 'warning',
           showCancelButton: true,
-          confirmButtonText: 'Sí, eliminar',
-          cancelButtonText: 'Cancelar',
-          confirmButtonColor: '#dc3545',
-          cancelButtonColor: '#6c757d'
-        }).then(r=>{ if (r.isConfirmed) f.submit(); });
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#6b7280',
+          confirmButtonText: 'Sí, desactivar',
+          cancelButtonText: 'Cancelar'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            formEliminar.submit();
+          }
+        });
       });
     });
   </script>

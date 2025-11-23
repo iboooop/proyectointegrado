@@ -172,7 +172,10 @@
 
               <div class="d-flex justify-content-between mt-4">
                 <button type="button" onclick="activarTab('paso1-tab')" class="btn btn-outline-primary">Anterior</button>
-                <button type="button" onclick="activarTab('paso3-tab')" class="btn btn-primary">Siguiente</button>
+                <div>
+                  <button type="reset" id="resetPaso2Btn" class="btn btn-outline-secondary me-2">Limpiar</button>
+                  <button type="button" onclick="activarTab('paso3-tab')" class="btn btn-primary">Siguiente</button>
+                </div>
               </div>
             </div><!-- fin paso 2 -->
 
@@ -257,7 +260,7 @@
   <footer class="productos-footer">
     <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
       <div class="d-flex align-items-center gap-3">
-        <img src="{% static 'productos/assets/logolilis_ver1.png' %}" alt="Lilis" class="productos-footer-logo">
+        <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="productos-footer-logo">
         <div>
           <div class="fw-semibold text-uppercase mb-1" style="font-size:0.8rem;letter-spacing:0.08em;">Info de Contacto</div>
           <div style="font-size:0.85rem;">Móvil: +569 6226 1712</div>

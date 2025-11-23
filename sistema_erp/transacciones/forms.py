@@ -23,6 +23,7 @@ class MovimientoInventarioForm(forms.ModelForm):
         fields = [
             'fecha',
             'tipo',
+            'estado',
             'cantidad',
             'producto',
             'proveedor',
@@ -42,6 +43,7 @@ class MovimientoInventarioForm(forms.ModelForm):
 
         widgets = {
             'tipo': forms.Select(attrs={'class': 'form-select'}),
+            'estado': forms.Select(attrs={'class': 'form-select'}),
             'cantidad': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
             'producto': forms.Select(attrs={'class': 'form-select'}),
             'proveedor': forms.Select(attrs={'class': 'form-select'}),
@@ -63,6 +65,7 @@ class MovimientoInventarioForm(forms.ModelForm):
 
         self.fields['fecha'].label = 'Fecha y hora'
         self.fields['tipo'].label = 'Tipo de movimiento'
+        self.fields['estado'].label = 'Estado del movimiento'
         self.fields['cantidad'].label = 'Cantidad'
         self.fields['producto'].label = 'Producto (SKU)'
         self.fields['proveedor'].label = 'Proveedor'

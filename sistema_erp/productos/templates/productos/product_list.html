@@ -12,6 +12,24 @@
     .sort-pill { cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 0.82rem; color: #4b5563; padding: 4px 8px; border-radius: 999px; }
     .sort-pill.active { background-color: #f3f4ff; color: #111827; }
     .sort-pill svg { width: 12px; height: 12px; }
+    
+    /* FORZAR encabezados negros - máxima prioridad */
+    table th,
+    table th a,
+    table th a:visited,
+    table thead th,
+    table thead th a,
+    table thead th a:visited {
+      color: #000000 !important;
+      text-decoration: none !important;
+      font-weight: 600 !important;
+    }
+    
+    table th a:hover,
+    table thead th a:hover {
+      color: #000000 !important;
+      text-decoration: underline !important;
+    }
   </style>
 </head>
 <body class="bg-light">
@@ -50,20 +68,7 @@
           <div class="text-muted small">Total: {{ paginator.count }} productos</div>
         </div>
 
-        <div class="d-flex justify-content-end mb-2 gap-2">
-          <span class="sort-pill {% if sort == 'stock' %}active{% endif %}" data-sort="stock">
-            Stock
-            <span class="sort-icon" data-field="stock">
-              {% if sort == 'stock' %}{% if dir == 'desc' %}▼{% else %}▲{% endif %}{% else %}▲{% endif %}
-            </span>
-          </span>
-          <span class="sort-pill {% if sort == 'estado' %}active{% endif %}" data-sort="estado">
-            Estado
-            <span class="sort-icon" data-field="estado">
-              {% if sort == 'estado' %}{% if dir == 'desc' %}▼{% else %}▲{% endif %}{% else %}▲{% endif %}
-            </span>
-          </span>
-        </div>
+
 
         <div id="productosTableWrap">
           {% include 'productos/partials/producto_table.html' %}
@@ -142,7 +147,8 @@
       pageSizeSelect.addEventListener('change', ()=>fetchAndUpdate(buildUrl()));
     }
 
-    // Click en pills de orden (stock / estado)
+    // Click en pills de orden (desactivado - ya no hay pills)
+    /*
     if (sortPills.length){
       sortPills.forEach(pill => {
         pill.addEventListener('click', function(){
@@ -174,6 +180,7 @@
         });
       });
     }
+    */
 
     wrap.addEventListener('click', async e=>{
       const a = e.target.closest('a.page-link, thead a');

@@ -172,6 +172,34 @@ h6.fw-semibold {
   color: #9ca3af !important;
 }
 
+/* Encabezados de tabla (links de orden) en negro - FORZADO */
+table th,
+table th a,
+table th a:visited,
+table thead th,
+table thead th a,
+table thead th a:visited {
+  color: #000000 !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
+}
+
+table th a:hover,
+table thead th a:hover {
+  color: #000000 !important;
+  text-decoration: underline !important;
+}
+
+/* Asegurar que el contenedor de tabla ocupe todo el ancho */
+.table-responsive {
+  width: 100% !important;
+}
+
+.card-body {
+  width: 100% !important;
+  max-width: none !important;
+}
+
 /* Botón "Volver al listado" */
 .btn-outline-secondary.mb-3 {
   border-radius: 999px;
