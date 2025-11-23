@@ -155,21 +155,26 @@ def editar_producto(request, id):
 
         form = ProductoForm(data, files=request.FILES, instance=producto)
         if form.is_valid():
-            from django.utils import timezone
+            if not form.has_changed():
+                # No hay cambios reales en los datos del formulario
+                mensaje = "No realizaste ningún cambio."
+                mensaje_tipo = "warning"
+            else:
+                from django.utils import timezone
 
-            was_inactive = not producto.activo
-            producto = form.save(commit=False)
-            now = timezone.now()
+                was_inactive = not producto.activo
+                producto = form.save(commit=False)
+                now = timezone.now()
 
-            if producto.activo and was_inactive:
-                producto.fecha_activacion = now
-                producto.fecha_desactivacion = None
-            elif not producto.activo and was_inactive is False:
-                producto.fecha_desactivacion = now
+                if producto.activo and was_inactive:
+                    producto.fecha_activacion = now
+                    producto.fecha_desactivacion = None
+                elif not producto.activo and was_inactive is False:
+                    producto.fecha_desactivacion = now
 
-            producto.save()
-            mensaje = "Cambios guardados correctamente."
-            mensaje_tipo = "success"
+                producto.save()
+                mensaje = "Cambios guardados correctamente."
+                mensaje_tipo = "success"
         else:
             mensaje = "Corrige los errores indicados."
             mensaje_tipo = "danger"

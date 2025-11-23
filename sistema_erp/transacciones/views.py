@@ -12,7 +12,7 @@ from .forms import MovimientoInventarioForm
 
 # ---------------- LISTA ----------------
 def lista_transacciones(request):
-    qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario', 'bodega')
+    qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario', 'bodega_origen', 'bodega_destino')
 
     # Búsqueda
     q = (request.GET.get('q') or '').strip()
@@ -80,15 +80,33 @@ def lista_transacciones(request):
 
 # ---------------- CREAR ----------------
 def crear_transaccion(request):
+    mensaje = None
+    mensaje_tipo = None
+
     if request.method == 'POST':
         form = MovimientoInventarioForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('/transacciones/?created=1')
+            # Devolvemos un formulario limpio como en crear_producto
+            form = MovimientoInventarioForm()
+            mensaje = "Movimiento creado correctamente."
+            mensaje_tipo = "success"
+        else:
+            mensaje = "Corrige los errores indicados."
+            mensaje_tipo = "danger"
     else:
         initial = {'fecha': timezone.now().strftime('%Y-%m-%dT%H:%M')}
         form = MovimientoInventarioForm(initial=initial)
-    return render(request, 'transacciones/transaccion_add.html', {'form': form})
+
+    return render(
+        request,
+        'transacciones/transaccion_add.html',
+        {
+            'form': form,
+            'mensaje': mensaje,
+            'mensaje_tipo': mensaje_tipo,
+        },
+    )
 
 
 # ---------------- DETALLE ----------------
@@ -102,18 +120,36 @@ def detalle_transaccion(request, id):
 # ---------------- EDITAR ----------------
 def editar_transaccion(request, id):
     transaccion = get_object_or_404(MovimientoInventario, id=id)
+
+    mensaje = None
+    mensaje_tipo = None
+
     if request.method == 'POST':
         form = MovimientoInventarioForm(request.POST, instance=transaccion)
         if form.is_valid():
             form.save()
-            return redirect('/transacciones/?updated=1')
+            mensaje = "Movimiento actualizado correctamente."
+            mensaje_tipo = "success"
+        else:
+            mensaje = "Corrige los errores indicados."
+            mensaje_tipo = "danger"
     else:
         initial = {
             'fecha': transaccion.fecha.strftime('%Y-%m-%dT%H:%M')
             if transaccion.fecha else timezone.now().strftime('%Y-%m-%dT%H:%M')
         }
         form = MovimientoInventarioForm(instance=transaccion, initial=initial)
-    return render(request, 'transacciones/transaccion_edit.html', {'form': form, 'transaccion': transaccion})
+
+    return render(
+        request,
+        'transacciones/transaccion_edit.html',
+        {
+            'form': form,
+            'transaccion': transaccion,
+            'mensaje': mensaje,
+            'mensaje_tipo': mensaje_tipo,
+        },
+    )
 
 
 # ---------------- ELIMINAR ----------------
@@ -142,7 +178,7 @@ def exportar_transacciones_excel(request):
             status=500
         )
 
-    qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario', 'bodega')
+    qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario', 'bodega_origen', 'bodega_destino')
 
     q = (request.GET.get('q') or '').strip()
     if q:
@@ -182,7 +218,7 @@ def exportar_transacciones_excel(request):
 
     headers = [
         'Fecha', 'Tipo', 'Producto', 'Proveedor', 'Usuario', 'Cantidad',
-        'Bodega', 'Lote', 'Serie', 'Vence', 'Doc Ref', 'Motivo', 'Observaciones'
+        'Bodega origen', 'Bodega destino', 'Lote', 'Serie', 'Vence', 'Doc Ref', 'Motivo', 'Observaciones'
     ]
     header_fill = PatternFill(start_color='EAF2FF', end_color='EAF2FF', fill_type='solid')
     bold = Font(bold=True, color='1f2937')
@@ -208,7 +244,8 @@ def exportar_transacciones_excel(request):
             getattr(m.proveedor, 'nombre', '') if m.proveedor else '',
             getattr(m.usuario, 'username', '') if m.usuario else '',
             m.cantidad,
-            getattr(m.bodega, 'codigo', '') if m.bodega else '',
+            getattr(m.bodega_origen, 'codigo', '') if m.bodega_origen else '',
+            getattr(m.bodega_destino, 'codigo', '') if m.bodega_destino else '',
             m.lote or '',
             m.serie or '',
             m.fecha_vencimiento.strftime('%Y-%m-%d') if m.fecha_vencimiento else '',
@@ -233,7 +270,7 @@ def exportar_transacciones_excel(request):
     ws.freeze_panes = 'A2'
     ws.row_dimensions[1].height = 24
 
-    widths = [18, 12, 28, 22, 18, 10, 16, 14, 18, 14, 16, 24, 40]
+    widths = [18, 12, 28, 22, 18, 10, 16, 16, 14, 18, 14, 16, 24, 40]
     for i, w in enumerate(widths, start=1):
         ws.column_dimensions[get_column_letter(i)].width = w
 

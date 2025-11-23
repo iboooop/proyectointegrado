@@ -57,7 +57,7 @@
           <input type="hidden" name="active_tab" id="active_tab" value="{{ active_tab|default:'paso1-tab' }}">
 
           {% if mensaje %}
-            <div class="alert alert-{{ mensaje_tipo }}">{{ mensaje }}</div>
+            <div class="alert alert-{{ mensaje_tipo }} mb-3">{{ mensaje }}</div>
           {% endif %}
           {% if form.non_field_errors %}
             <div class="alert alert-danger">{{ form.non_field_errors }}</div>
@@ -413,18 +413,64 @@
         counter.textContent = textarea.value.length;
       }
 
-      // Al hacer submit, activar el tab del primer error si lo hay
-      document.getElementById('productoForm').addEventListener('submit', function() {
-        setTimeout(function() {
-          var errorTab2 = null;
-          if (document.querySelector('.text-danger')) {
-            var errorField2 = document.querySelector('.text-danger').closest('.tab-pane');
-            if (errorField2 && errorField2.id) {
-              errorTab2 = errorField2.id + '-tab';
-              activarTab(errorTab2);
+      // Al hacer submit, validar requeridos mínimos y activar el tab del primer error
+      document.getElementById('productoForm').addEventListener('submit', function(e) {
+        const formEl = this;
+
+        const requiredIds = [
+          'id_sku_letras',
+          'id_sku_nros',
+          'id_nombre',
+          'id_categoria',
+          'id_uom_compra',
+          'id_uom_venta',
+          'id_factor_conversion',
+          'id_costo_estandar',
+          'id_precio_venta',
+          'id_impuesto_iva'
+        ];
+
+        let firstInvalidPane = null;
+        let hasClientError = false;
+
+        requiredIds.forEach(id => {
+          const field = document.getElementById(id);
+          if (!field) return;
+          const wrapper = field.closest('.col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-8, .col-12');
+          const isHidden = field.offsetParent === null;
+          if (!isHidden && !field.value) {
+            hasClientError = true;
+            field.classList.add('is-invalid');
+            if (wrapper && !wrapper.querySelector('.client-error')) {
+              const err = document.createElement('div');
+              err.className = 'text-danger small client-error mt-1';
+              err.textContent = 'Este campo es obligatorio.';
+              wrapper.appendChild(err);
+            }
+            if (!firstInvalidPane) {
+              const pane = field.closest('.tab-pane');
+              if (pane && pane.id) {
+                firstInvalidPane = pane.id + '-tab';
+              }
+            }
+          } else {
+            field.classList.remove('is-invalid');
+            if (wrapper) {
+              wrapper.querySelectorAll('.client-error').forEach(el => el.remove());
             }
           }
-        }, 100);
+        });
+
+        if (hasClientError) {
+          e.preventDefault();
+          if (firstInvalidPane) activarTab(firstInvalidPane);
+          Swal.fire({
+            icon: 'error',
+            title: 'Revisa los campos obligatorios',
+            text: 'Faltan datos requeridos para registrar el producto.',
+            confirmButtonColor: '#D10A11'
+          });
+        }
       });
 
       // --- Lógica perecible y tipo de control ---
@@ -462,7 +508,10 @@
           if (form) {
             form.reset();
             if (counter) counter.textContent = '0';
+            // limpiar mensajes de error server-side y client-side
             document.querySelectorAll('.text-danger.small').forEach(el => el.textContent = '');
+            document.querySelectorAll('.client-error').forEach(el => el.remove());
+            form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
             activarTab('paso1-tab');
           }
         });
@@ -484,46 +533,8 @@
         });
       }
 
-      // Advertencia al intentar recargar o cerrar la página
-      let formDirty = false;
-      const form = document.getElementById('productoForm');
-      if (form) {
-        form.addEventListener('input', function () {
-          formDirty = true;
-        });
-
-        window.addEventListener('beforeunload', function (e) {
-          if (!formDirty) return;
-
-          // Navegadores modernos mostrarán su propio mensaje, pero SweetAlert
-          // se usará si el usuario intenta recargar explícitamente con un botón.
-          e.preventDefault();
-          e.returnValue = '';
-        });
-
-        // Interceptar recarga explícita vía botón o atajo personalizado
-        document.addEventListener('keydown', function (e) {
-          if ((e.key === 'F5') || (e.key.toLowerCase() === 'r' && (e.ctrlKey || e.metaKey))) {
-            if (!formDirty) return;
-            e.preventDefault();
-            Swal.fire({
-              title: '¿Reiniciar formulario?',
-              text: 'Si recargas la página se perderán todos los datos ingresados.',
-              icon: 'warning',
-              showCancelButton: true,
-              confirmButtonColor: '#d33',
-              cancelButtonColor: '#6b7280',
-              confirmButtonText: 'Sí, recargar',
-              cancelButtonText: 'Cancelar'
-            }).then((result) => {
-              if (result.isConfirmed) {
-                formDirty = false;
-                window.location.reload();
-              }
-            });
-          }
-        });
-      }
+      // Antes se mostraba un aviso de "abandonar el sitio" al recargar.
+      // Lo quitamos completamente para no molestar al guardar o refrescar.
     });
   </script>
 

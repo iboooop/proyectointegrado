@@ -4,128 +4,453 @@
 <head>
   <meta charset="UTF-8">
   <title>Registrar Movimiento de Inventario</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="{% static 'transacciones/css/transacciones.css' %}" rel="stylesheet">
+
+  <!-- Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+  <!-- Usamos directamente el mismo CSS que productos -->
+  <link href="{% static 'productos/css/styles.css' %}" rel="stylesheet">
+
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="trx-list">
-  <div class="container my-5">
-    <a href="{% url 'lista_transacciones' %}" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
 
-    <div class="card">
-      <div class="card-header card-header-dark">
-        <h4 class="mb-0">Registrar movimiento</h4>
-      </div>
+<body class="bg-light">
+  <div class="container my-4">
+    <a href="{% url 'lista_transacciones' %}" class="btn btn-outline-secondary mb-3">
+      &larr; Volver al listado
+    </a>
 
+    <div class="card shadow-sm rounded-4">
       <div class="card-body">
-        <form method="post" novalidate id="movForm">
+
+        <h5 class="mb-3 fw-semibold">Registrar movimiento de inventario</h5>
+
+        <!-- NAV TABS (mismos IDs que productos para reutilizar CSS) -->
+        <ul class="nav nav-pills mb-4" id="productTabs">
+          <li class="nav-item">
+            <button class="nav-link" id="paso1-tab" data-bs-toggle="pill" data-bs-target="#paso1" type="button">
+              1. Datos del movimiento
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="paso2-tab" data-bs-toggle="pill" data-bs-target="#paso2" type="button">
+              2. Control avanzado
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="paso3-tab" data-bs-toggle="pill" data-bs-target="#paso3" type="button">
+              3. Referencias / Observaciones
+            </button>
+          </li>
+        </ul>
+
+        <form
+          method="post"
+          id="movForm"
+          autocomplete="off"
+          enctype="multipart/form-data"
+          novalidate
+        >
           {% csrf_token %}
+          <input type="hidden" name="active_tab" id="active_tab" value="{{ active_tab|default:'paso1-tab' }}">
 
-          <div class="row g-3">
-            <div class="col-md-3">
-              <label class="form-label">{{ form.fecha.label }}</label>
-              {{ form.fecha }}
-              {% include 'transacciones/partials/field_errors.html' with field=form.fecha %}
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ form.tipo.label }}</label>
-              {{ form.tipo }}
-              {% include 'transacciones/partials/field_errors.html' with field=form.tipo %}
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">{{ form.cantidad.label }}</label>
-              {{ form.cantidad }}
-              {% include 'transacciones/partials/field_errors.html' with field=form.cantidad %}
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">{{ form.producto.label }}</label>
-              {{ form.producto }}
-              {% include 'transacciones/partials/field_errors.html' with field=form.producto %}
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">{{ form.proveedor.label }}</label>
-              {{ form.proveedor }}
-              {% include 'transacciones/partials/field_errors.html' with field=form.proveedor %}
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">{{ form.usuario.label }}</label>
-              {{ form.usuario }}
-              {% include 'transacciones/partials/field_errors.html' with field=form.usuario %}
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">{{ form.perfil.label }}</label>
-              {{ form.perfil }}
-              {% include 'transacciones/partials/field_errors.html' with field=form.perfil %}
-            </div>
-            <div class="col-12">
-              <label class="form-label">{{ form.observaciones.label }}</label>
-              {{ form.observaciones }}
-              {% include 'transacciones/partials/field_errors.html' with field=form.observaciones %}
-            </div>
-          </div>
+          {% if mensaje %}
+            <div class="alert alert-{{ mensaje_tipo }}">{{ mensaje }}</div>
+          {% endif %}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+          {% endif %}
 
-          <div class="d-flex justify-content-end mt-4 gap-2">
-            <button type="button" id="resetFormBtn" class="btn btn-outline-secondary">Limpiar</button>
-            <button type="submit" class="btn btn-create">Guardar movimiento</button>
-          </div>
+          <div class="tab-content">
+
+            <!-- PASO 1 -->
+            <div class="tab-pane fade" id="paso1">
+              <h6 class="fw-semibold mb-3">Datos del movimiento</h6>
+
+              <div class="row g-3">
+                <!-- Fecha (auto) -->
+                <div class="col-md-3">
+                  <label class="form-label">Fecha</label>
+                  <!-- si tu form ya tiene campo fecha, usa {{ form.fecha }} y pon initial en el form; aquí lo fuerzo como datetime-local -->
+                  <input
+                    type="datetime-local"
+                    id="id_fecha"
+                    name="fecha"
+                    class="form-control"
+                    value="{{ form.initial.fecha|default_if_none:'' }}"
+                    required
+                  >
+                  {% include 'transacciones/partials/field_errors.html' with field=form.fecha %}
+                </div>
+
+                <!-- Tipo (Entrada, Salida, Transferencia entre bodegas) -->
+                <div class="col-md-3">
+                  <label class="form-label">Tipo de movimiento</label>
+                  {{ form.tipo }}
+                  <div class="form-text">Entrada, Salida o Transferencia entre bodegas.</div>
+                  {% include 'transacciones/partials/field_errors.html' with field=form.tipo %}
+                </div>
+
+                <!-- Cantidad -->
+                <div class="col-md-2">
+                  <label class="form-label">{{ form.cantidad.label }}</label>
+                  {{ form.cantidad }}
+                  {% include 'transacciones/partials/field_errors.html' with field=form.cantidad %}
+                </div>
+
+                <!-- Producto (código / SKU) -->
+                <div class="col-md-4">
+                  <label class="form-label">Producto (SKU)</label>
+                  {{ form.producto }}
+                  <div class="form-text">Debe existir en la base de datos.</div>
+                  {% include 'transacciones/partials/field_errors.html' with field=form.producto %}
+                </div>
+
+                <!-- Proveedor (relacionado con producto) -->
+                <div class="col-md-4">
+                  <label class="form-label">Proveedor</label>
+                  {{ form.proveedor }}
+                  <div class="form-text">Proveedor relacionado al producto.</div>
+                  {% include 'transacciones/partials/field_errors.html' with field=form.proveedor %}
+                </div>
+
+                <!-- Bodega origen -->
+                <div class="col-md-4">
+                  <label class="form-label">Bodega (origen)</label>
+                  {{ form.bodega_origen }}
+                  {% include 'transacciones/partials/field_errors.html' with field=form.bodega_origen %}
+                </div>
+
+                <!-- Bodega destino: solo visible si tipo = Transferencia -->
+                <div class="col-md-4" id="bodega-destino-wrap" style="display:none;">
+                  <label class="form-label">Bodega a transferir</label>
+                  {{ form.bodega_destino }}
+                  {% include 'transacciones/partials/field_errors.html' with field=form.bodega_destino %}
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end gap-2 mt-4">
+                <button type="reset" id="resetPaso1Btn" class="btn btn-outline-secondary">Limpiar</button>
+                <button type="button" onclick="activarTab('paso2-tab')" class="btn btn-primary">Siguiente</button>
+              </div>
+            </div><!-- fin paso 1 -->
+
+            <!-- PASO 2 -->
+            <div class="tab-pane fade" id="paso2">
+              <h6 class="fw-semibold mb-3">Control avanzado</h6>
+
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <div class="form-check ms-1">
+                    {{ form.perecible }}
+                    <label class="form-check-label" for="id_perecible">Perecible (tiene vencimiento)</label>
+                  </div>
+                  {% include 'transacciones/partials/field_errors.html' with field=form.perecible %}
+                </div>
+              </div>
+
+              <div class="row g-3 mt-2">
+                <div class="col-md-4">
+                  <label class="form-label">Lote</label>
+                  {{ form.lote }}
+                  {% include 'transacciones/partials/field_errors.html' with field=form.lote %}
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Serie</label>
+                  {{ form.serie }}
+                  {% include 'transacciones/partials/field_errors.html' with field=form.serie %}
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Fecha de vencimiento</label>
+                  {{ form.fecha_vencimiento }}
+                  {% include 'transacciones/partials/field_errors.html' with field=form.fecha_vencimiento %}
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between mt-4">
+                <button type="button" onclick="activarTab('paso1-tab')" class="btn btn-outline-primary">Anterior</button>
+                <button type="button" onclick="activarTab('paso3-tab')" class="btn btn-primary">Siguiente</button>
+              </div>
+            </div><!-- fin paso 2 -->
+
+            <!-- PASO 3 -->
+            <div class="tab-pane fade" id="paso3">
+              <h6 class="fw-semibold mb-3">Documento de referencia y motivo</h6>
+
+              <div class="row g-3">
+                <!-- Documento de referencia (texto + archivo opcional) -->
+                <div class="col-md-6">
+                  <label class="form-label">Documento de referencia</label>
+                  {{ form.doc_referencia }}
+                  <div class="form-text">
+                    Puede ser:
+                    N° factura de compra, guía de despacho, boleta, nota de crédito,
+                    orden de producción o ID de transferencia.
+                  </div>
+                  {% include 'transacciones/partials/field_errors.html' with field=form.doc_referencia %}
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Adjuntar documento (opcional)</label>
+                  <div>
+                    <button
+                      type="button"
+                      class="btn btn-upload"
+                      onclick="document.getElementById('id_doc_referencia_file').click();"
+                    >
+                      <span class="btn-upload-icon">↑</span>
+                      <span>Subir documento</span>
+                    </button>
+                    <div class="form-text">
+                      PDF, JPG o PNG, máx. 5MB (opcional).
+                    </div>
+                  </div>
+                  <div style="display:none;">
+                    {{ form.doc_referencia_file }}
+                  </div>
+                  <!-- Miniatura del archivo adjunto -->
+                  <div class="mt-2" id="doc-preview" style="display:none;">
+                    <div class="d-flex align-items-center gap-2">
+                      <div id="doc-preview-thumb" class="border rounded" style="width:64px;height:64px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;"></div>
+                      <div>
+                        <div id="doc-preview-name" class="small fw-semibold"></div>
+                        <div id="doc-preview-size" class="small text-muted"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row g-3 mt-2">
+                <div class="col-md-6">
+                  <label class="form-label">Motivo</label>
+                  {{ form.motivo }}
+                  {% include 'transacciones/partials/field_errors.html' with field=form.motivo %}
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Observaciones</label>
+                  {{ form.observaciones }}
+                  {% include 'transacciones/partials/field_errors.html' with field=form.observaciones %}
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between mt-4">
+                <button type="button" onclick="activarTab('paso2-tab')" class="btn btn-outline-primary">Anterior</button>
+                <div>
+                  <button type="reset" class="btn btn-outline-secondary me-2">Limpiar</button>
+                  <button type="submit" class="btn btn-success">Crear movimiento</button>
+                </div>
+              </div>
+            </div><!-- fin paso 3 -->
+
+          </div><!-- fin tab-content -->
         </form>
+
       </div>
     </div>
   </div>
 
+  <!-- Footer idéntico al de productos -->
+  <footer class="productos-footer">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <img src="{% static 'productos/assets/logolilis_ver1.png' %}" alt="Lilis" class="productos-footer-logo">
+        <div>
+          <div class="fw-semibold text-uppercase mb-1" style="font-size:0.8rem;letter-spacing:0.08em;">Info de Contacto</div>
+          <div style="font-size:0.85rem;">Móvil: +569 6226 1712</div>
+          <div style="font-size:0.85rem;">E-Mail: ventas@lilis.cl</div>
+          <div style="font-size:0.85rem;" class="mt-2">
+            Ubícanos en: Paseo San Ramón<br>
+            Waldo Alcalde 401, local 8, San Ramón, Coquimbo
+          </div>
+        </div>
+      </div>
+      <div class="ms-auto text-end" style="font-size:0.8rem;">
+        <small>Derechos Reservados © 2022 Lilis.</small>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
   <script>
-    // Mostrar éxito si venimos con ?created=1 (en caso de redirigir nuevamente a esta vista)
-    (function(){
-      const params = new URLSearchParams(window.location.search);
-      if(params.get('created')==='1'){
-        Swal.fire({
-          icon: 'success',
-          title: 'Movimiento creado',
-          text: 'Se registró correctamente.',
-          timer: 2000,
-          timerProgressBar: true,
-          showConfirmButton: false,
-          confirmButtonColor: '#2563eb'
-        });
-        params.delete('created');
-        const newUrl = window.location.pathname + (params.toString()? '?' + params.toString() : '');
-        window.history.replaceState({}, '', newUrl);
-      }
-    })();
-
-    // Tabs simples
-    document.querySelectorAll('.step-pill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.step-pill').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const step = btn.getAttribute('data-step');
-        document.querySelectorAll('.step-content').forEach(c => {
-          c.classList.toggle('d-none', c.getAttribute('data-step') !== step);
-        });
-      });
-    });
-
-    // Mostrar campos según flags (opcional si se quiere ocultar cuando no se usan)
-    const loteInput = document.getElementById('id_lote');
-    const serieInput = document.getElementById('id_serie');
-    const vencInput = document.getElementById('id_fecha_vencimiento');
-    function toggleConditional() {
-      loteInput.parentElement.style.opacity = document.getElementById('id_manejo_lotes').checked ? '1' : '.5';
-      serieInput.parentElement.style.opacity = document.getElementById('id_manejo_series').checked ? '1' : '.5';
-      vencInput.parentElement.style.opacity = document.getElementById('id_perecible').checked ? '1' : '.5';
+    function activarTab(id) {
+      const tabEl = document.getElementById(id);
+      if (!tabEl) return;
+      new bootstrap.Tab(tabEl).show();
+      const hidden = document.getElementById('active_tab');
+      if (hidden) hidden.value = id;
     }
-    ['id_manejo_lotes','id_manejo_series','id_perecible'].forEach(id => {
-      const el = document.getElementById(id);
-      if(el) el.addEventListener('change', toggleConditional);
-    });
-    toggleConditional();
 
-    // Limpiar formulario
-    document.getElementById('resetFormBtn').addEventListener('click', () => {
-      document.getElementById('movForm').reset();
-      // volver a primer paso
-      document.querySelector('[data-step="1"].step-pill').click();
-      toggleConditional();
+    document.addEventListener("DOMContentLoaded", function () {
+      // 1) Activar tab correcto (como en productos)
+      var errorTab = null;
+      const firstError = document.querySelector('.text-danger.small');
+      if (firstError) {
+        const pane = firstError.closest('.tab-pane');
+        if (pane && pane.id) errorTab = pane.id + '-tab';
+      }
+      const backendTab = document.getElementById('active_tab').value;
+      const lastTabId = errorTab || backendTab || 'paso1-tab';
+      activarTab(lastTabId);
+
+      // 2) Autocompletar fecha/hora si el campo está vacío
+      const fechaInput = document.getElementById('id_fecha');
+      if (fechaInput && !fechaInput.value) {
+        const now = new Date();
+        const pad = n => n.toString().padStart(2, '0');
+        const localISO = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        fechaInput.value = localISO;
+      }
+
+      // 3) Mostrar campo bodega destino sólo para "Transferencia entre bodegas"
+      const tipoSelect = document.getElementById('id_tipo');
+      const bodegaDestinoWrap = document.getElementById('bodega-destino-wrap');
+      function toggleBodegaDestino() {
+        if (!tipoSelect || !bodegaDestinoWrap) return;
+        const val = tipoSelect.value;
+        // Ajusta este texto EXACTO al choice que uses en tu modelo/form
+        if (val === 'TRANSFERENCIA' || val === 'TRANSFERENCIA_BODEGAS' || val === 'Transferencia entre bodegas') {
+          bodegaDestinoWrap.style.display = '';
+        } else {
+          bodegaDestinoWrap.style.display = 'none';
+        }
+      }
+      if (tipoSelect) {
+        tipoSelect.addEventListener('change', toggleBodegaDestino);
+        toggleBodegaDestino();
+      }
+
+      // 4) Botón limpiar paso 1: resetea todo y vuelve al step1
+      const resetPaso1 = document.getElementById('resetPaso1Btn');
+      if (resetPaso1) {
+        resetPaso1.addEventListener('click', function (e) {
+          e.preventDefault();
+          const form = document.getElementById('movForm');
+          if (form) {
+            form.reset();
+            activarTab('paso1-tab');
+            toggleBodegaDestino();
+          }
+        });
+      }
+
+      // Botón limpiar paso 2: resetea todo y vuelve al paso 2
+      const resetPaso2 = document.getElementById('resetPaso2Btn');
+      if (resetPaso2) {
+        resetPaso2.addEventListener('click', function (e) {
+          e.preventDefault();
+          const form2 = document.getElementById('movForm');
+          if (form2) {
+            form2.reset();
+            activarTab('paso2-tab');
+            toggleBodegaDestino();
+          }
+        });
+      }
+
+      // 5) Validaciones mínimas en submit (además de las del form Django).
+      // Sólo para UX, las validaciones reales se hacen en el servidor.
+      const form = document.getElementById('movForm');
+      if (form) {
+        form.addEventListener('submit', function (e) {
+          // campos obligatorios según tu descripción
+          const requiredIds = [
+            'id_fecha',
+            'id_tipo',
+            'id_cantidad',
+            'id_producto',
+            'id_proveedor',
+            'id_bodega_origen',
+            'id_lote',
+            'id_serie',
+            'id_doc_referencia',
+            'id_motivo'
+          ];
+
+          let firstInvalidPane = null;
+          let hasClientError = false;
+
+          requiredIds.forEach(id => {
+            const field = document.getElementById(id);
+            if (!field) return;
+            const wrapper = field.closest('.col-md-3, .col-md-4, .col-md-6, .col-12, .col-md-2');
+            // si el campo es visible y está vacío
+            const isHidden = field.offsetParent === null; // no visible
+            if (!isHidden && !field.value) {
+              hasClientError = true;
+              field.classList.add('is-invalid');
+              if (wrapper && !wrapper.querySelector('.client-error')) {
+                const err = document.createElement('div');
+                err.className = 'text-danger small client-error mt-1';
+                err.textContent = 'Este campo es obligatorio.';
+                wrapper.appendChild(err);
+              }
+              if (!firstInvalidPane) {
+                const pane = field.closest('.tab-pane');
+                if (pane && pane.id) {
+                  firstInvalidPane = pane.id + '-tab';
+                }
+              }
+            } else {
+              field.classList.remove('is-invalid');
+              if (wrapper) {
+                wrapper.querySelectorAll('.client-error').forEach(el => el.remove());
+              }
+            }
+          });
+
+          if (hasClientError) {
+            e.preventDefault();
+            if (firstInvalidPane) activarTab(firstInvalidPane);
+            Swal.fire({
+              icon: 'error',
+              title: 'Revisa los campos obligatorios',
+              text: 'Faltan datos requeridos para registrar el movimiento.',
+              confirmButtonColor: '#D10A11'
+            });
+          }
+        });
+      }
+
+      // 6) Miniatura del documento adjunto (PDF o imagen)
+      const docInput = document.getElementById('id_doc_referencia_file');
+      const docPreview = document.getElementById('doc-preview');
+      const docThumb = document.getElementById('doc-preview-thumb');
+      const docName = document.getElementById('doc-preview-name');
+      const docSize = document.getElementById('doc-preview-size');
+
+      if (docInput && docPreview && docThumb && docName && docSize) {
+        docInput.addEventListener('change', function () {
+          const file = this.files[0];
+          if (!file) {
+            docPreview.style.display = 'none';
+            docThumb.innerHTML = '';
+            docName.textContent = '';
+            docSize.textContent = '';
+            return;
+          }
+
+          docName.textContent = file.name;
+          docSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
+
+          const ext = file.name.split('.').pop().toLowerCase();
+          if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              docThumb.innerHTML = '<img src="' + e.target.result + '" alt="preview" style="max-width:100%;max-height:100%;object-fit:cover;">';
+            };
+            reader.readAsDataURL(file);
+          } else {
+            docThumb.innerHTML = 'PDF';
+          }
+
+          docPreview.style.display = '';
+        });
+      }
     });
   </script>
 </body>

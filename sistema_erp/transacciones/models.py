@@ -9,18 +9,16 @@ class MovimientoInventario(models.Model):
     TIPO_MOVIMIENTO = [
         ('ENTRADA', 'Entrada'),
         ('SALIDA', 'Salida'),
-        ('AJUSTE', 'Ajuste'),
-        ('VENTA', 'Venta'),  # ← NUEVO TIPO
-        ('TRANSFERENCIA', 'Transferencia entre bodegas'),  # ← NUEVO TIPO
+        ('VENTA', 'Venta'),
+        ('TRANSFERENCIA', 'Transferencia entre bodegas'),
     ]
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     proveedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, null=True, blank=True)
-    cliente = models.ForeignKey('clientes.Cliente', on_delete=models.SET_NULL, null=True, blank=True)  # referencia al app clientes
-    bodega_origen = models.ForeignKey('bodegas.Bodega', on_delete=models.SET_NULL, null=True, blank=True, related_name='movimientos_origen')  # referencia al app bodegas
-    bodega_destino = models.ForeignKey('bodegas.Bodega', on_delete=models.SET_NULL, null=True, blank=True, related_name='movimientos_destino')  # referencia al app bodegas
+    cliente = models.ForeignKey('clientes.Cliente', on_delete=models.SET_NULL, null=True, blank=True)
+    bodega_origen = models.ForeignKey('bodegas.Bodega', on_delete=models.SET_NULL, null=True, blank=True, related_name='movimientos_origen')
+    bodega_destino = models.ForeignKey('bodegas.Bodega', on_delete=models.SET_NULL, null=True, blank=True, related_name='movimientos_destino')
     usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     perfil = models.ForeignKey(Perfil, on_delete=models.SET_NULL, null=True, blank=True)
-    bodega = models.ForeignKey('bodegas.Bodega', on_delete=models.SET_NULL, null=True, blank=True)
     tipo = models.CharField(max_length=20, choices=TIPO_MOVIMIENTO)
     cantidad = models.IntegerField()
     fecha = models.DateTimeField(default=timezone.now)
@@ -34,6 +32,7 @@ class MovimientoInventario(models.Model):
 
     # Referencias
     doc_referencia = models.CharField(max_length=120, blank=True)
+    doc_referencia_file = models.FileField(upload_to='transacciones/docs/', blank=True, null=True)
     motivo = models.CharField(max_length=200, blank=True)
     observaciones = models.TextField(blank=True)
 
