@@ -38,13 +38,13 @@ body.trx-list { background: #f5f7fb; }
 .btn-create:hover { background-color: #1d4ed8; }
 
 .btn-edit {
-	background-color: #0d6efd;
+	background-color: #D10A11;
 	color: #fff;
 	border: none;
 	border-radius: 10px;
 	padding: 6px 12px;
 }
-.btn-edit:hover { background-color: #0b5ed7; }
+.btn-edit:hover { background-color: #D10A11; }
 
 .btn-delete {
 	background-color: #dc3545;
@@ -99,8 +99,8 @@ body.trx-list .badge.bg-secondary {
 	color: #374151;
 }
 .pagination .page-item.active .page-link {
-	background-color: #2563eb;
-	border-color: #2563eb;
+	background-color: #D10A11;
+	border-color: #D10A11;
 }
 
 /* Inputs */
@@ -119,9 +119,9 @@ body.trx-list .badge.bg-secondary {
 	color: #3b4a64;
 }
 .step-pill.active {
-	border-color: #2563eb;
+	border-color: #D10A11;
 	background: #eaf1ff;
-	color: #1d4ed8;
+	color: #D10A11;
 	box-shadow: 0 2px 8px rgba(37,99,235,.15);
 }
 .step-content { transition: opacity .2s ease; }

@@ -1,52 +1,516 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <title>Editar Producto</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body { background: #f8f9fa; }
-    .card { border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .card-header { background: #212529; color: white; }
-    
-  </style>
+
+  <!-- Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+
+  <!-- Custom CSS (mismo que crear) -->
+  <link href="{% static 'productos/css/styles.css' %}" rel="stylesheet">
 </head>
-<body>
-  <div class="container my-5">
-    <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-outline-secondary mb-3">&larr; Volver al detalle</a>
 
-    <div class="card">
-      <div class="card-header">
-        <h4 class="mb-0">Editar Producto</h4>
-      </div>
+<body class="bg-light">
 
+  <div class="container my-4">
+    <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-outline-secondary mb-3">
+      &larr; Volver al detalle
+    </a>
+
+    <div class="card shadow-sm rounded-4">
       <div class="card-body">
-        <form method="post" novalidate>
-          {% csrf_token %}
-          
-          {% for field in form %}
-          <div class="mb-3">
-            <label class="form-label fw-semibold">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-              <div class="text-danger small mt-1">
-                {{ field.errors|join:", " }}
-              </div>
-            {% endif %}
-          </div>
-          {% endfor %}
 
-          <div class="d-flex justify-content-end mt-4">
-            <button type="submit" class="btn btn-primary me-2">Guardar cambios</button>
-            <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-outline-secondary">Cancelar</a>
-          </div>
+        <h5 class="mb-3 fw-semibold">Editar Producto</h5>
+
+        <!-- NAV TABS (mismos pasos que crear) -->
+        <ul class="nav nav-pills mb-4" id="productTabs">
+          <li class="nav-item">
+            <button class="nav-link" id="paso1-tab" data-bs-toggle="pill" data-bs-target="#paso1" type="button">
+              1. Identificación y precios
+            </button>
+          </li>
+
+          <li class="nav-item">
+            <button class="nav-link" id="paso2-tab" data-bs-toggle="pill" data-bs-target="#paso2" type="button">
+              2. Stock y control
+            </button>
+          </li>
+
+          <li class="nav-item">
+            <button class="nav-link" id="paso3-tab" data-bs-toggle="pill" data-bs-target="#paso3" type="button">
+              3. Relaciones y derivados
+            </button>
+          </li>
+        </ul>
+
+        <form method="post"
+              id="productoForm"
+              autocomplete="off"
+              enctype="multipart/form-data"
+              novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="active_tab" id="active_tab" value="{{ active_tab|default:'paso1-tab' }}">
+
+          {% if mensaje %}
+            <div class="alert alert-{{ mensaje_tipo }}">{{ mensaje }}</div>
+          {% endif %}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="tab-content">
+
+            <!-- TAB 1 -->
+            <div class="tab-pane fade" id="paso1">
+
+              <h6 class="fw-semibold mb-2">Identificación</h6>
+
+              <!-- SKU -->
+              <div class="row g-3">
+                <div class="col-md-5">
+                  <label class="form-label">SKU</label>
+                  <div class="input-group input-sku-group">
+                    <input
+                      type="text"
+                      id="id_sku_letras"
+                      name="sku_letras"
+                      maxlength="6"
+                      class="form-control"
+                      required
+                      placeholder="ABC123"
+                      value="{{ request.POST.sku_letras|default:producto.sku|slice:':-4' }}"
+                    >
+                    <span class="input-group-text">-</span>
+                    <input
+                      type="text"
+                      id="id_sku_nros"
+                      name="sku_nros"
+                      maxlength="10"
+                      class="form-control"
+                      required
+                      placeholder="0001"
+                      value="{{ request.POST.sku_nros|default:producto.sku|slice:'-4:' }}"
+                    >
+                  </div>
+                  {% if form.sku.errors %}
+                    <div class="text-danger small mt-1">
+                      {% for error in form.sku.errors %}{{ error }}<br>{% endfor %}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- nombre y ean -->
+              <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                  <label class="form-label">Nombre</label>
+                  {{ form.nombre }}
+                  {% if form.nombre.errors %}
+                    <div class="text-danger small">{{ form.nombre.errors.0 }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Código EAN/UPC</label>
+                  {{ form.ean_upc }}
+                  {% if form.ean_upc.errors %}
+                    <div class="text-danger small">{{ form.ean_upc.errors.0 }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- descripcion + categoria -->
+              <div class="row g-3 mt-1">
+                <div class="col-md-8">
+                  <label class="form-label">Descripción</label>
+                  {{ form.descripcion }}
+                  <div class="form-text">
+                    <span id="desc-count">0</span>/255
+                  </div>
+                  {% if form.descripcion.errors %}
+                    <div class="text-danger small">{{ form.descripcion.errors.0 }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Categoría</label>
+                  {{ form.categoria }}
+                  {% if form.categoria.errors %}
+                    <div class="text-danger small">{{ form.categoria.errors.0 }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- marca y modelo -->
+              <div class="row g-3 mt-1">
+                <div class="col-md-4">
+                  <label class="form-label">Marca</label>
+                  {{ form.marca }}
+                  {% if form.marca.errors %}
+                    <div class="text-danger small">{{ form.marca.errors.0 }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Modelo</label>
+                  {{ form.modelo }}
+                  {% if form.modelo.errors %}
+                    <div class="text-danger small">{{ form.modelo.errors.0 }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- unidades -->
+              <h6 class="fw-semibold mt-4 mb-2">Unidades y precios</h6>
+
+              <div class="row g-3">
+                <div class="col-md-3">
+                  <label class="form-label">Unidad compra</label>
+                  {{ form.uom_compra }}
+                  {% if form.uom_compra.errors %}
+                    <div class="text-danger small">{{ form.uom_compra.errors.0 }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Unidad venta</label>
+                  {{ form.uom_venta }}
+                  {% if form.uom_venta.errors %}
+                    <div class="text-danger small">{{ form.uom_venta.errors.0 }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Factor conversión</label>
+                  {{ form.factor_conversion }}
+                  {% if form.factor_conversion.errors %}
+                    <div class="text-danger small">{{ form.factor_conversion.errors.0 }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Costo estándar</label>
+                  {{ form.costo_estandar }}
+                  {% if form.costo_estandar.errors %}
+                    <div class="text-danger small">{{ form.costo_estandar.errors.0 }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="row g-3 mt-1">
+                <div class="col-md-3">
+                  <label class="form-label">Precio venta</label>
+                  {{ form.precio_venta }}
+                  {% if form.precio_venta.errors %}
+                    <div class="text-danger small">{{ form.precio_venta.errors.0 }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">IVA (%)</label>
+                  {{ form.impuesto_iva }}
+                  {% if form.impuesto_iva.errors %}
+                    <div class="text-danger small">{{ form.impuesto_iva.errors.0 }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end gap-2 mt-4">
+                <button type="button" onclick="activarTab('paso2-tab')" class="btn btn-primary">Siguiente</button>
+              </div>
+
+            </div><!-- fin tab1 -->
+
+            <!-- TAB 2 -->
+            <div class="tab-pane fade" id="paso2">
+
+              <h6 class="fw-semibold mb-3">Stock y control</h6>
+
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label">Stock mínimo</label>
+                  {{ form.stock_minimo }}
+                  {% if form.stock_minimo.errors %}
+                    <div class="text-danger small">{{ form.stock_minimo.errors.0 }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Stock máximo</label>
+                  {{ form.stock_maximo }}
+                  {% if form.stock_maximo.errors %}
+                    <div class="text-danger small">{{ form.stock_maximo.errors.0 }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Punto reorden</label>
+                  {{ form.punto_reorden }}
+                  {% if form.punto_reorden.errors %}
+                    <div class="text-danger small">{{ form.punto_reorden.errors.0 }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="row g-3 mt-2">
+                <div class="col-md-4">
+                  <div class="form-check ms-1">
+                    {{ form.perishable }}
+                    <label class="form-check-label" for="id_perishable">Perecible</label>
+                  </div>
+                  {% if form.perishable.errors %}
+                    <div class="text-danger small">{{ form.perishable.errors.0 }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="row g-3 mt-2">
+                <div class="col-md-12">
+                  <label class="form-label fw-semibold">Tipo de control</label>
+                  <div class="d-flex gap-4 ms-1 mt-1">
+                    <div class="form-check">
+                      {{ form.control_por_lote }}
+                      <label class="form-check-label" for="id_control_por_lote">Control por lote</label>
+                    </div>
+                    <div class="form-check">
+                      {{ form.control_por_serie }}
+                      <label class="form-check-label" for="id_control_por_serie">Control por serie</label>
+                    </div>
+                  </div>
+                  {% if form.control_por_lote.errors %}
+                    <div class="text-danger small">{{ form.control_por_lote.errors.0 }}</div>
+                  {% endif %}
+                  {% if form.control_por_serie.errors %}
+                    <div class="text-danger small">{{ form.control_por_serie.errors.0 }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between mt-4">
+                <button type="button" onclick="activarTab('paso1-tab')" class="btn btn-outline-primary">Anterior</button>
+                <button type="button" onclick="activarTab('paso3-tab')" class="btn btn-primary">Siguiente</button>
+              </div>
+
+            </div><!-- fin tab2 -->
+
+            <!-- TAB 3 -->
+            <div class="tab-pane fade" id="paso3">
+
+              <h6 class="fw-semibold mb-3">Relaciones y soporte</h6>
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Imagen (archivo)</label>
+                  {{ form.imagen }}
+                  {% if form.imagen.errors %}
+                    <div class="text-danger small">{{ form.imagen.errors.0 }}</div>
+                  {% endif %}
+
+                  <div class="thumbnail-wrapper mt-2">
+                    <div class="thumbnail-box" id="preview-box">
+                      {% if producto.imagen %}
+                        <img src="{{ producto.imagen.url }}" alt="preview">
+                      {% else %}
+                        <span>🖼️</span>
+                      {% endif %}
+                    </div>
+
+                    <div>
+                      <button
+                        type="button"
+                        class="btn btn-upload"
+                        onclick="document.getElementById('id_imagen').click();"
+                      >
+                        <span class="btn-upload-icon">↑</span>
+                        <span>Subir imagen</span>
+                      </button>
+                      <div class="form-text">JPG o PNG, máx. 2MB (solo referencial).</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Imagen URL</label>
+                  {{ form.imagen_url }}
+                  {% if form.imagen_url.errors %}
+                    <div class="text-danger small">{{ form.imagen_url.errors.0 }}</div>
+                  {% endif %}
+
+                  <label class="form-label mt-3">Ficha técnica URL</label>
+                  {{ form.ficha_tecnica_url }}
+                  {% if form.ficha_tecnica_url.errors %}
+                    <div class="text-danger small">{{ form.ficha_tecnica_url.errors.0 }}</div>
+                  {% endif %}
+
+                  <div class="form-check mt-3 ms-1">
+                    {{ form.activo }}
+                    <label class="form-check-label" for="id_activo">Producto activo</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between mt-4">
+                <button type="button" onclick="activarTab('paso2-tab')" class="btn btn-outline-primary">Anterior</button>
+                <div>
+                  <button type="submit" class="btn btn-success me-2">Guardar cambios</button>
+                  <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+              </div>
+
+            </div><!-- fin tab3 -->
+
+          </div><!-- fin tab-content -->
+
         </form>
+
       </div>
     </div>
-</div>
-  <div class="footer d-flex justify-content-between align-items-center">
-    <span>&copy; 2025 Sistema ERP</span>
-    <span>Soporte</span>
-  </div> 
+  </div>
+  <footer class="productos-footer">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="productos-footer-logo">
+        <div>
+          <div class="fw-semibold text-uppercase mb-1" style="font-size:0.8rem;letter-spacing:0.08em;">Info de Contacto</div>
+          <div style="font-size:0.85rem;">Móvil: +569 6226 1712</div>
+          <div style="font-size:0.85rem;">E-Mail: ventas@lilis.cl</div>
+          <div style="font-size:0.85rem;" class="mt-2">
+            Ubícanos en: Paseo San Ramón<br>
+            Waldo Alcalde 401, local 8, San Ramón, Coquimbo
+          </div>
+        </div>
+      </div>
+      <div class="ms-auto text-end" style="font-size:0.8rem;">
+        <small>Derechos Reservados © 2022 Lilis.</small>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    function activarTab(id) {
+      const tabEl = document.getElementById(id);
+      if (!tabEl) return;
+      new bootstrap.Tab(tabEl).show();
+      document.getElementById('active_tab').value = id;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      // Activar tab correcto en base a errores / localStorage / backend
+      var errorTab = null;
+      if (document.querySelector('.text-danger')) {
+        var errorField = document.querySelector('.text-danger').closest('.tab-pane');
+        if (errorField && errorField.id) {
+          errorTab = errorField.id + '-tab';
+        }
+      }
+      const backendTab = document.getElementById('active_tab').value;
+      const lastTabId = errorTab || backendTab || 'paso1-tab';
+      activarTab(lastTabId);
+
+      // Contador de caracteres de descripción
+      const textarea = document.getElementById("id_descripcion");
+      const counter = document.getElementById("desc-count");
+      if (textarea && counter) {
+        textarea.addEventListener("input", function () {
+          counter.textContent = textarea.value.length;
+        });
+        counter.textContent = textarea.value.length;
+      }
+
+      // Al hacer submit, activar el tab del primer error si lo hay
+      document.getElementById('productoForm').addEventListener('submit', function() {
+        setTimeout(function() {
+          var errorTab2 = null;
+          if (document.querySelector('.text-danger')) {
+            var errorField2 = document.querySelector('.text-danger').closest('.tab-pane');
+            if (errorField2 && errorField2.id) {
+              errorTab2 = errorField2.id + '-tab';
+              activarTab(errorTab2);
+            }
+          }
+        }, 100);
+      });
+
+      // --- Lógica perecible y tipo de control ---
+      const chkPerecible = document.getElementById('id_perishable');
+      const chkLote = document.getElementById('id_control_por_lote');
+      const chkSerie = document.getElementById('id_control_por_serie');
+
+      if (chkPerecible && chkLote && chkSerie) {
+        chkPerecible.addEventListener('change', function () {
+          if (this.checked) {
+            chkLote.checked = true;
+            chkSerie.checked = false;
+          }
+        });
+
+        chkLote.addEventListener('change', function () {
+          if (this.checked) {
+            chkSerie.checked = false;
+          }
+        });
+
+        chkSerie.addEventListener('change', function () {
+          if (this.checked) {
+            chkLote.checked = false;
+          }
+        });
+      }
+
+      // Preview de imagen en la miniatura
+      const fileInput = document.getElementById('id_imagen');
+      const previewBox = document.getElementById('preview-box');
+      if (fileInput && previewBox) {
+        fileInput.addEventListener('change', function () {
+          const file = this.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            previewBox.innerHTML = '<img src="' + e.target.result + '" alt="preview">';
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      // Advertencia al intentar recargar o cerrar la página en EDITAR
+      let formDirty = false;
+      const form = document.getElementById('productoForm');
+      if (form) {
+        form.addEventListener('input', function () {
+          formDirty = true;
+        });
+
+        window.addEventListener('beforeunload', function (e) {
+          if (!formDirty) return;
+          e.preventDefault();
+          e.returnValue = '';
+        });
+
+        // Interceptar F5 / Ctrl+R para usar SweetAlert personalizado
+        document.addEventListener('keydown', function (e) {
+          if ((e.key === 'F5') || (e.key.toLowerCase() === 'r' && (e.ctrlKey || e.metaKey))) {
+            if (!formDirty) return;
+            e.preventDefault();
+            Swal.fire({
+              title: '¿Descartar cambios?',
+              text: 'Si recargas la página se perderán los cambios no guardados.',
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: '#d33',
+              cancelButtonColor: '#6b7280',
+              confirmButtonText: 'Sí, recargar',
+              cancelButtonText: 'Cancelar'
+            }).then((result) => {
+              if (result.isConfirmed) {
+                formDirty = false;
+                window.location.reload();
+              }
+            });
+          }
+        });
+      }
+    });
+  </script>
+
 </body>
 </html>

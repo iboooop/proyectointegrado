@@ -6,7 +6,7 @@ from productos.models import Producto
 class ProductoInline(admin.TabularInline):
     model = Producto
     extra = 0
-    fields = ('nombre', 'categoria', 'precio', 'stock_actual', 'fecha_vencimiento')
+    fields = ('nombre', 'categoria', 'precio_venta', 'stock_actual')
     show_change_link = True
 
 @admin.action(description="Marcar proveedores seleccionados como ACTIVOS")

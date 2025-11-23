@@ -17,106 +17,192 @@ except ImportError:
 # ---------------- LISTAR ----------------
 def lista_productos(request):
 
-    qs = Producto.objects.select_related('proveedor').all()
+    qs = Producto.objects.select_related("proveedor").all()
 
-    # --- Búsqueda ---
-    q = (request.GET.get('q') or '').strip()
+
+    q = (request.GET.get("q") or "").strip()
     if q:
         qs = qs.filter(
             Q(nombre__icontains=q)
-            | Q(categoria__icontains=q)
-            | Q(precio__icontains=q)
-            | Q(stock_actual__icontains=q)
+            | Q(sku__icontains=q)
             | Q(proveedor__nombre__icontains=q)
+            | Q(stock_actual__icontains=q)
+            | Q(categoria__icontains=q)
         )
 
-    # --- Orden ---
-    sort = (request.GET.get('sort') or 'nombre').strip()
-    direction = (request.GET.get('dir') or 'asc').strip().lower()
-    if direction == 'desc':
-        sort = f'-{sort}'
-    qs = qs.order_by(sort)
+    sort = (request.GET.get("sort") or "nombre").strip()
+    direction = (request.GET.get("dir") or "asc").strip().lower()
 
-    # --- Paginación ---
+    # Normalizar campos permitidos para evitar errores de ordenación
+    allowed_sorts = {
+        "sku": "sku",
+        "nombre": "nombre",
+        "stock": "stock_actual",
+        "estado": "activo",
+    }
+    sort_field = allowed_sorts.get(sort, "nombre")
+    if direction == "desc":
+        sort_field = f"-{sort_field}"
+    qs = qs.order_by(sort_field)
+
     allowed_sizes = [5, 10, 20, 50]
     try:
-        page_size = int(request.GET.get('page_size') or request.session.get('producto_page_size') or 10)
+        page_size = int(
+            request.GET.get("page") or request.session.get("producto_page_size") or 10
+        )
     except ValueError:
         page_size = 10
     if page_size not in allowed_sizes:
         page_size = 10
-    request.session['producto_page_size'] = page_size
+    request.session["producto_page_size"] = page_size
 
     paginator = Paginator(qs, page_size)
-    page_number = request.GET.get('page')
+    page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
     context = {
-        'productos': page_obj,
-        'page_obj': page_obj,
-        'paginator': paginator,
-        'q': q,
-        'sort': sort,
-        'dir': direction,
-        'page_size': page_size,
-        'page_sizes': allowed_sizes,
+        "productos": page_obj,
+        "page_obj": page_obj,
+        "paginator": paginator,
+        "q": q,
+        "sort": sort,
+        "dir": direction,
+        "page_size": page_size,
+        "page_sizes": allowed_sizes,
     }
 
-    # --- Render parcial (AJAX) ---
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('partial') == '1':
-        return render(request, 'productos/partials/producto_table.html', context)
+    if (
+        request.headers.get("x-requested-with") == "XMLHttpRequest"
+        or request.GET.get("partial") == "1"
+    ):
+        return render(request, "productos/partials/producto_table.html", context)
 
-    # --- Render completo ---
-    return render(request, 'productos/product_list.html', context)
-
+    return render(request, "productos/product_list.html", context)
 
 
 
 # ---------------- CREAR ----------------
 def crear_producto(request):
-    if request.method == 'POST':
-        form = ProductoForm(request.POST)
+    active_tab = request.POST.get("active_tab", "paso1-tab")
+    mensaje = None
+    mensaje_tipo = None
+
+    if request.method == "POST":
+        data = request.POST.copy()
+
+        sku_letras = (data.get("sku_letras") or "").strip()
+        sku_nros = (data.get("sku_nros") or "").strip()
+        if sku_letras or sku_nros:
+            data["sku"] = f"{sku_letras}{sku_nros}"
+
+        form = ProductoForm(data, files=request.FILES)
         if form.is_valid():
             form.save()
-            return redirect('lista_productos')
+            mensaje = "Producto creado exitosamente."
+            mensaje_tipo = "success"
+            form = ProductoForm()
+            active_tab = "paso1-tab"
+        else:
+            mensaje = "Corrige los errores indicados."
+            mensaje_tipo = "danger"
     else:
         form = ProductoForm()
-    return render(request, 'productos/product_add.html', {'form': form})
+
+    return render(
+        request,
+        "productos/product_add.html",
+        {
+            "form": form,
+            "active_tab": active_tab,
+            "mensaje": mensaje,
+            "mensaje_tipo": mensaje_tipo,
+        },
+    )
 
 
 # ---------------- DETALLE ----------------
 def detalle_producto(request, id):
-    # ✅ Corregido: buscar por idProducto, no por id
-    producto = get_object_or_404(Producto.objects.select_related('proveedor'), idProducto=id)
-    movimientos = MovimientoInventario.objects.filter(producto=producto).select_related('proveedor', 'usuario').order_by('-fecha')
+    producto = get_object_or_404(
+        Producto.objects.select_related("proveedor"), idProducto=id
+    )
+    movimientos = (
+        MovimientoInventario.objects.filter(producto=producto)
+        .select_related("proveedor", "usuario")
+        .order_by("-fecha")
+    )
 
-    return render(request, 'productos/product_detail.html', {
-        'producto': producto,
-        'movimientos': movimientos,
-    })
+    return render(
+        request,
+        "productos/product_detail.html",
+        {
+            "producto": producto,
+            "movimientos": movimientos,
+        },
+    )
 
 
 # ---------------- EDITAR ----------------
 def editar_producto(request, id):
-    # ✅ Corregido igual
     producto = get_object_or_404(Producto, idProducto=id)
-    if request.method == 'POST':
-        form = ProductoForm(request.POST, instance=producto)
+
+    mensaje = None
+    mensaje_tipo = None
+
+    if request.method == "POST":
+        data = request.POST.copy()
+
+        sku_letras = (data.get("sku_letras") or "").strip()
+        sku_nros = (data.get("sku_nros") or "").strip()
+        if sku_letras or sku_nros:
+            data["sku"] = f"{sku_letras}{sku_nros}"
+
+        form = ProductoForm(data, files=request.FILES, instance=producto)
         if form.is_valid():
-            form.save()
-            return redirect('detalle_producto', id=producto.idProducto)
+            from django.utils import timezone
+
+            was_inactive = not producto.activo
+            producto = form.save(commit=False)
+            now = timezone.now()
+
+            if producto.activo and was_inactive:
+                producto.fecha_activacion = now
+                producto.fecha_desactivacion = None
+            elif not producto.activo and was_inactive is False:
+                producto.fecha_desactivacion = now
+
+            producto.save()
+            mensaje = "Cambios guardados correctamente."
+            mensaje_tipo = "success"
+        else:
+            mensaje = "Corrige los errores indicados."
+            mensaje_tipo = "danger"
     else:
-        form = ProductoForm(instance=producto)
-    return render(request, 'productos/product_edit.html', {'form': form, 'producto': producto})
+        # separar sku en letras/nros si quieres reutilizar los 2 inputs
+        initial = {
+            "sku_letras": producto.sku[:-4],
+            "sku_nros": producto.sku[-4:],
+        }
+        form = ProductoForm(instance=producto, initial=initial)
+
+    return render(
+        request,
+        "productos/product_edit.html",
+        {"form": form, "producto": producto, "mensaje": mensaje, "mensaje_tipo": mensaje_tipo},
+    )
 
 
 # ---------------- ELIMINAR ----------------
 def eliminar_producto(request, id):
     producto = get_object_or_404(Producto, idProducto=id)
-    if request.method == 'POST':
-        producto.delete()
-        return redirect('lista_productos')
-    return redirect('detalle_producto', id=id)
+    if request.method == "POST":
+        from django.utils import timezone
+
+        producto.activo = False
+        producto.fecha_desactivacion = timezone.now()
+        # No tocamos fecha_activacion aquí para conservar el histórico de alta
+        producto.save(update_fields=["activo", "fecha_desactivacion"])
+        return redirect("lista_productos")
+    return redirect("detalle_producto", id=id)
 
 
 # ---------------- EXPORTAR EXCEL ----------------
@@ -124,13 +210,48 @@ def exportar_productos_excel(request):
     if Workbook is None:
         return HttpResponse("openpyxl no está instalado.", status=500)
 
-    qs = Producto.objects.select_related('proveedor').all().order_by('idProducto')
+    # Aplicar los mismos filtros de búsqueda y orden que en lista_productos
+    qs = Producto.objects.select_related("proveedor").all()
+
+    q = (request.GET.get("q") or "").strip()
+    if q:
+        qs = qs.filter(
+            Q(nombre__icontains=q)
+            | Q(sku__icontains=q)
+            | Q(proveedor__nombre__icontains=q)
+            | Q(stock_actual__icontains=q)
+            | Q(activo__icontains=(q.lower() in ["activo", "activos", "inactivo", "inactivos"]))
+        )
+
+    sort = (request.GET.get("sort") or "nombre").strip()
+    direction = (request.GET.get("dir") or "asc").strip().lower()
+    allowed_sorts = {
+        "sku": "sku",
+        "nombre": "nombre",
+        "stock": "stock_actual",
+        "estado": "activo",
+    }
+    sort_field = allowed_sorts.get(sort, "nombre")
+    if direction == "desc":
+        sort_field = f"-{sort_field}"
+    qs = qs.order_by(sort_field)
 
     wb = Workbook()
     ws = wb.active
     ws.title = 'Productos'
 
-    headers = ['ID', 'Nombre', 'Categoría', 'Proveedor', 'Precio', 'Stock', 'Fecha Vencimiento', 'Lote', 'Bodega']
+    # Encabezados alineados con las columnas principales de la grilla
+    headers = [
+        'ID',
+        'SKU',
+        'Nombre',
+        'Categoría',
+        'Proveedor',
+        'Stock actual',
+        'Estado',
+        'Fecha activación',
+        'Fecha desactivación',
+    ]
     header_fill = PatternFill(start_color='EAF2FF', end_color='EAF2FF', fill_type='solid')
     bold = Font(bold=True, color='1f2937')
     center = Alignment(horizontal='center', vertical='center')
@@ -150,14 +271,14 @@ def exportar_productos_excel(request):
     for idx, p in enumerate(qs, start=2):
         row = [
             p.idProducto,
+            p.sku,
             p.nombre,
             p.categoria,
             getattr(p.proveedor, 'nombre', '') if p.proveedor else '',
-            p.precio,
             p.stock_actual,
-            p.fecha_vencimiento.strftime('%Y-%m-%d') if p.fecha_vencimiento else '',
-            p.lote or '',
-            getattr(p.bodega, 'nombre', '') if p.bodega else '',
+            'Activo' if p.activo else 'Inactivo',
+            p.fecha_activacion.strftime('%Y-%m-%d %H:%M') if p.fecha_activacion else '',
+            p.fecha_desactivacion.strftime('%Y-%m-%d %H:%M') if p.fecha_desactivacion else '',
         ]
         ws.append(row)
 
@@ -175,7 +296,7 @@ def exportar_productos_excel(request):
     ws.freeze_panes = 'A2'
     ws.row_dimensions[1].height = 24
 
-    widths = [8, 24, 18, 24, 12, 10, 16, 14, 20]
+    widths = [8, 14, 26, 18, 24, 12, 12, 20, 20]
     for i, w in enumerate(widths, start=1):
         ws.column_dimensions[get_column_letter(i)].width = w
 

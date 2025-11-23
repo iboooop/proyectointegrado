@@ -1,0 +1,300 @@
+/* ====== Layout general ====== */
+body.bg-light {
+  background-color: #f3f4f8 !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container.my-4 {
+  max-width: 1100px;
+  flex: 1 0 auto;
+}
+
+/* ====== Card principal ====== */
+.card {
+  border-radius: 18px;
+  border: 1px solid #e2e5f0;
+}
+
+.card-body {
+  padding: 24px 28px;
+}
+
+/* ====== Título / subtítulos ====== */
+.card-body h5,
+.card-body h6 {
+  color: #121826;
+}
+
+h6.fw-semibold {
+  font-size: 0.95rem;
+}
+
+/* ====== Nav Pills (tabs) ====== */
+#productTabs {
+  background: #F8F5EC;
+  border-radius: 999px;
+  padding: 4px;
+}
+
+#productTabs .nav-link {
+  border-radius: 999px;
+  color: #C4A75B;
+  font-weight: 500;
+  padding: 0.45rem 1.4rem;
+  font-size: 0.9rem;
+  border: none;
+}
+
+#productTabs .nav-link.active {
+  background-color: #D10A11;
+  color: #ffffff;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.15),
+    0 6px 12px rgba(15, 23, 42, 0.15);
+}
+
+/* ====== Labels y campos ====== */
+.form-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 2px;
+}
+
+.form-control,
+.form-select {
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+  background-color: #ffffff;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #7b7d83;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+/* Campo SKU con separador */
+.input-sku-group .form-control {
+  border-radius: 10px;
+}
+
+.input-sku-group .input-group-text {
+  border-radius: 0;
+  border-top: 1px solid #d1d5db;
+  border-bottom: 1px solid #d1d5db;
+}
+
+/* Textarea descripción */
+#id_descripcion {
+  min-height: 90px;
+  resize: vertical;
+}
+
+/* Texto de ayuda */
+.form-text {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* Errores */
+.text-danger.small {
+  font-size: 0.78rem;
+}
+
+/* ====== Botones ====== */
+.btn {
+  border-radius: 999px;
+  font-weight: 500;
+  font-size: 0.88rem;
+  padding-inline: 1.4rem;
+}
+
+.btn-primary {
+  background-color: #D10A11 !important;
+  border-color: #D10A11 !important;
+}
+
+.btn-primary:hover {
+  background-color: #a3090e !important;
+  border-color: #a3090e !important;
+}
+
+.btn-success {
+  background-color: #D10A11 !important;
+  border-color: #D10A11 !important;
+}
+
+.btn-success:hover {
+  background-color: #a3090e !important;
+  border-color: #a3090e !important;
+}
+
+.btn-outline-secondary {
+  color: #4b5563 !important;
+  border-color: #d1d5db !important;
+  background-color: #ffffff !important;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
+}
+
+/* Botones de navegación (Anterior / Siguiente / Ir) y paginador en rojo corporativo */
+.btn-outline-primary,
+.pagination .page-link {
+  border-radius: 999px !important;
+  border-color: #D10A11 !important;
+  color: #D10A11 !important;
+}
+
+.btn-outline-primary:hover,
+.pagination .page-link:hover {
+  background-color: #D10A11 !important;
+  border-color: #D10A11 !important;
+  color: #ffffff !important;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #D10A11 !important;
+  border-color: #D10A11 !important;
+  color: #ffffff !important;
+}
+
+.pagination .page-item.disabled .page-link {
+  border-color: #e5e7eb !important;
+  color: #9ca3af !important;
+}
+
+/* Botón "Volver al listado" */
+.btn-outline-secondary.mb-3 {
+  border-radius: 999px;
+}
+
+/* ====== Pestañas (contenido) ====== */
+.tab-pane {
+  padding-top: 6px;
+}
+
+/* ====== Secciones internas ====== */
+.fw-semibold.mt-4 {
+  margin-bottom: 4px !important;
+}
+
+/* ====== Ícono miniatura imagen ====== */
+
+.thumbnail-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* “Icono” de miniatura (puede mostrar preview si hay imagen) */
+.thumbnail-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  background-color: #eef2ff;
+  border: 1px dashed #D10A11;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #D10A11;
+  font-size: 1.3rem;
+}
+
+/* La imagen, cuando la tengas enlazada */
+.thumbnail-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Botón para subir imagen */
+.btn-upload {
+  border-radius: 999px;
+  padding: 0.35rem 1.1rem;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #ddcca2;
+  border-color: #ddcca2;
+  color: #fff;
+}
+
+.btn-upload:hover {
+  background-color: #C4A75B;
+  border-color: #C4A75B;
+}
+
+/* Icono dentro del botón */
+.btn-upload-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #D10A11;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+}
+
+/* Input file oculto para usar el botón custom */
+#id_imagen_file {
+  display: none;
+}
+
+/* ====== Alerts ====== */
+.alert {
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+
+/* ====== Footer productos ====== */
+.productos-footer {
+  background-color: #230E00;
+  color: #f9fafb;
+  padding: 24px 16px;
+  margin-top: 40px;
+}
+
+.productos-footer a {
+  color: #fcd34d;
+  text-decoration: none;
+}
+
+.productos-footer a:hover {
+  text-decoration: underline;
+}
+
+.productos-footer-logo {
+  max-width: 140px;
+}
+
+.productos-footer small {
+  color: #e5e7eb;
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 768px) {
+  .card-body {
+    padding: 18px 14px;
+  }
+  #productTabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+  #productTabs .nav-link {
+    white-space: nowrap;
+    font-size: 0.8rem;
+  }
+}
