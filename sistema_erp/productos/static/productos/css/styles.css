@@ -31,14 +31,14 @@ h6.fw-semibold {
 
 /* ====== Nav Pills (tabs) ====== */
 #productTabs {
-  background: #f5f7fb;
+  background: #F8F5EC;
   border-radius: 999px;
   padding: 4px;
 }
 
 #productTabs .nav-link {
   border-radius: 999px;
-  color: #4b5563;
+  color: #C4A75B;
   font-weight: 500;
   padding: 0.45rem 1.4rem;
   font-size: 0.9rem;
@@ -46,7 +46,7 @@ h6.fw-semibold {
 }
 
 #productTabs .nav-link.active {
-  background-color: #2563eb;
+  background-color: #D10A11;
   color: #ffffff;
   box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.15),
     0 6px 12px rgba(15, 23, 42, 0.15);
@@ -71,7 +71,7 @@ h6.fw-semibold {
 
 .form-control:focus,
 .form-select:focus {
-  border-color: #2563eb;
+  border-color: #7b7d83;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
 }
 
@@ -112,23 +112,23 @@ h6.fw-semibold {
 }
 
 .btn-primary {
-  background-color: #2563eb;
-  border-color: #2563eb;
+  background-color: #D10A11;
+  border-color: #D10A11;
 }
 
 .btn-primary:hover {
-  background-color: #1d4ed8;
-  border-color: #1d4ed8;
+  background-color: #a3090e;
+  border-color: #a3090e;
 }
 
 .btn-success {
-  background-color: #16a34a;
-  border-color: #16a34a;
+  background-color: #D10A11;
+  border-color: #D10A11;
 }
 
 .btn-success:hover {
-  background-color: #15803d;
-  border-color: #15803d;
+  background-color: #a3090e;
+  border-color: #a3090e;
 }
 
 .btn-outline-secondary {
@@ -172,12 +172,12 @@ h6.fw-semibold {
   height: 52px;
   border-radius: 10px;
   background-color: #eef2ff;
-  border: 1px dashed #6366f1;
+  border: 1px dashed #D10A11;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  color: #4f46e5;
+  color: #D10A11;
   font-size: 1.3rem;
 }
 
@@ -196,14 +196,14 @@ h6.fw-semibold {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background-color: #2563eb;
-  border-color: #2563eb;
+  background-color: #ddcca2;
+  border-color: #ddcca2;
   color: #fff;
 }
 
 .btn-upload:hover {
-  background-color: #1d4ed8;
-  border-color: #1d4ed8;
+  background-color: #C4A75B;
+  border-color: #C4A75B;
 }
 
 /* Icono dentro del botón */
@@ -211,7 +211,7 @@ h6.fw-semibold {
   width: 16px;
   height: 16px;
   border-radius: 999px;
-  background: #1d4ed8;
+  background: #D10A11;
   display: inline-flex;
   align-items: center;
   justify-content: center;
