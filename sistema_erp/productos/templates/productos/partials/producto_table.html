@@ -1,22 +1,28 @@
 <table class="table table-hover align-middle">
   <thead>
     <tr>
-      <th><a href="?sort=nombre&dir={% if sort == 'nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}">Nombre</a></th>
-      <th><a href="?sort=categoria&dir={% if sort == 'categoria' and dir == 'asc' %}desc{% else %}asc{% endif %}">Categoría</a></th>
-      <th><a href="?sort=precio&dir={% if sort == 'precio' and dir == 'asc' %}desc{% else %}asc{% endif %}">Precio</a></th>
-      <th><a href="?sort=stock_actual&dir={% if sort == 'stock_actual' and dir == 'asc' %}desc{% else %}asc{% endif %}">Stock</a></th>
-      <th><a href="?sort=proveedor&dir={% if sort == 'proveedor' and dir == 'asc' %}desc{% else %}asc{% endif %}">Proveedor</a></th>
+      <th>SKU</th>
+      <th>Nombre</th>
+      <th>Proveedor</th>
+      <th class="text-end">Stock</th>
+      <th class="text-center">Estado</th>
       <th class="text-center">Acciones</th>
     </tr>
   </thead>
   <tbody>
     {% for producto in productos %}
-    <tr>
+    <tr class="{% if not producto.activo %}table-light text-muted{% endif %}">
+      <td>{{ producto.sku }}</td>
       <td>{{ producto.nombre }}</td>
-      <td>{{ producto.get_categoria_display }}</td>
-      <td>${{ producto.precio }}</td>
-      <td>{{ producto.stock_actual }} ({{ producto.get_stock_display }})</td>
       <td>{{ producto.proveedor }}</td>
+      <td class="text-end">{{ producto.stock_actual }}</td>
+      <td class="text-center">
+        {% if producto.activo %}
+          <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle px-3 py-1 rounded-pill">Activo</span>
+        {% else %}
+          <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-1 rounded-pill">Inactivo</span>
+        {% endif %}
+      </td>
       <td class="text-center">
         <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
       </td>

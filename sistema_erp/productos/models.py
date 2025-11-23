@@ -91,6 +91,11 @@ class Producto(models.Model):
     # Derivados / solo lectura
     stock_actual = models.IntegerField(default=0, editable=False)
 
+    # Estado del producto
+    activo = models.BooleanField(default=False)
+    fecha_activacion = models.DateTimeField(blank=True, null=True)
+    fecha_desactivacion = models.DateTimeField(blank=True, null=True)
+
     def __str__(self):
         return f"{self.sku} - {self.nombre} ({self.categoria})"
 

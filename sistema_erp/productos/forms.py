@@ -32,6 +32,7 @@ class ProductoForm(forms.ModelForm):
             "imagen",          
             "imagen_url",
             "ficha_tecnica_url",
+            "activo",
         ]
         widgets = {
             "sku": forms.TextInput(
@@ -119,6 +120,7 @@ class ProductoForm(forms.ModelForm):
             "ficha_tecnica_url": forms.URLInput(
                 attrs={"class": "form-control", "placeholder": "https://..."}
             ),
+            "activo": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
 
     # --------- Validaciones ---------
