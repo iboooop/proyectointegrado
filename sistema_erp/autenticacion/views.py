@@ -10,7 +10,6 @@ from django.core.mail import send_mail
 from django.contrib import messages
 from usuarios.models import Perfil
 from .forms import LoginForm, RegistroForm
-from django.contrib.auth.forms import AuthenticationForm
 
 # ------------------------------
 # Función para registrar un nuevo usuario
@@ -49,23 +48,41 @@ def registro_view(request):
 # ------------------------------
 def login_view(request):
     if request.method == 'POST':
-        # Usar AuthenticationForm (campo 'username') y delegar validación/autenticación a él.
-        form = AuthenticationForm(request, data=request.POST)
+        # Usar nuestro LoginForm personalizado (usuario o email)
+        form = LoginForm(request.POST)
         if form.is_valid():
-            user = form.get_user()
-            # Iniciar sesión y guardar info en sesión
-            login(request, user)
-            perfil = Perfil.objects.filter(usuario=user).first()
-            request.session['usuario'] = user.username
-            request.session['rol'] = perfil.rol if perfil else "Sin rol"
-            messages.success(request, f'Bienvenido, {user.username}')
-            return redirect('dashboard')
+            usuario_o_email = form.cleaned_data.get('usuario_o_email')
+            password = form.cleaned_data.get('password')
+
+            # Intentar autenticar por username
+            user = authenticate(request, username=usuario_o_email, password=password)
+
+            # Si no se autenticó por username, intentar buscar por email
+            if not user:
+                try:
+                    user_obj = User.objects.get(email=usuario_o_email)
+                    user = authenticate(request, username=user_obj.username, password=password)
+                except User.DoesNotExist:
+                    user = None
+
+            if user is not None:
+                login(request, user)
+                perfil = Perfil.objects.filter(usuario=user).first()
+                request.session['usuario'] = user.username
+                request.session['rol'] = perfil.rol if perfil else "Sin rol"
+                messages.success(request, f'Bienvenido, {user.username}')
+                return redirect('dashboard')
+            else:
+                # Añadir error al formulario (non-field error) para mostrarlo inline en la plantilla
+                form.add_error(None, 'Nombre de usuario o contraseña incorrectos.')
         else:
-            # Si no es válido, mostrar errores genéricos o los del formulario
-            # Evitar diferenciar demasiado por seguridad (no revelar si el usuario existe)
-            messages.error(request, 'Usuario o contraseña incorrectos.')
+            # Form inválido: los errores del formulario se mostrarán en la plantilla
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, error)
     else:
-        form = AuthenticationForm()
+        form = LoginForm()
+
     return render(request, 'autenticacion/login.html', {'form': form})
 
 # ------------------------------

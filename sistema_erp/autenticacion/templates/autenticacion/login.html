@@ -94,6 +94,13 @@
             box-shadow: 0 0 0 3px rgba(209, 10, 17, 0.15);
         }
 
+        /* Estilo para mensajes de error por campo (texto rojo pequeño) */
+        .field-error {
+            color: #dc3545; /* rojo similar a bootstrap */
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
         .login-container .btn {
             border-radius: 999px;
             font-weight: 500;
@@ -301,9 +308,41 @@
                     {% endfor %}
                 {% endif %}
                 
-                <form method="post">
+                <form method="post" novalidate>
                     {% csrf_token %}
-                    {{ form.as_p }}
+
+                    {# Mostrar errores no asociados a un campo (ej. credenciales incorrectas) #}
+                    {% if form.non_field_errors %}
+                        {% for error in form.non_field_errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="mb-3">
+                        {{ form.usuario_o_email.label_tag }}
+                        {{ form.usuario_o_email }}
+                        {% if form.usuario_o_email.errors %}
+                            {% for error in form.usuario_o_email.errors %}
+                                <div class="field-error">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.password.label_tag }}
+                        {{ form.password }}
+                        {% if form.password.errors %}
+                            {% for error in form.password.errors %}
+                                <div class="field-error">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-check mb-3">
+                        {{ form.recordarme }}
+                        {{ form.recordarme.label_tag }}
+                    </div>
+
                     <div style="display:flex; gap:12px; justify-content:center; align-items:center; margin-top:16px; flex-wrap:wrap;">
                         <button type="submit" class="btn btn-primary">Iniciar sesión</button>
                     </div>

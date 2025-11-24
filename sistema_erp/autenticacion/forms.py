@@ -2,9 +2,34 @@ from django import forms
 import re
 
 class LoginForm(forms.Form):
-    usuario_o_email = forms.CharField(max_length=150, required=True, label="Usuario o correo")
-    password = forms.CharField(widget=forms.PasswordInput, required=True, label="Contraseña")
-    recordarme = forms.BooleanField(required=False, label="Recordarme")
+    usuario_o_email = forms.CharField(
+        max_length=150,
+        required=True,
+        label="Usuario o correo",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Usuario o correo'
+        }),
+        error_messages={
+            'required': 'Este campo es obligatorio.'
+        }
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Contraseña'
+        }),
+        required=True,
+        label="Contraseña",
+        error_messages={
+            'required': 'Este campo es obligatorio.'
+        }
+    )
+    recordarme = forms.BooleanField(
+        required=False,
+        label="Recordarme",
+        widget=forms.CheckboxInput(attrs={ 'class': 'form-check-input' })
+    )
 
 
 class RegistroForm(forms.Form):
