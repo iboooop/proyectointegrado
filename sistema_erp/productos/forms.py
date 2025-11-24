@@ -170,14 +170,15 @@ class ProductoForm(forms.ModelForm):
         return ean_upc
 
     def clean_nombre(self):
-        nombre = self.cleaned_data["nombre"]
+        nombre = (self.cleaned_data.get("nombre") or "").strip()
         if not nombre or len(nombre) < 3:
             raise ValidationError("El nombre debe tener al menos 3 caracteres.")
         if len(nombre) > 255:
             raise ValidationError("El nombre no puede superar los 255 caracteres.")
         import re
-        if not re.match(r'^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$', nombre):
-            raise ValidationError("Ingrese solo letras y espacios en el nombre.")
+        # Permitir letras (incluye acentos y Ñ), números y espacios
+        if not re.match(r'^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9 ]+$', nombre):
+            raise ValidationError("Ingrese solo letras, números y espacios en el nombre.")
         return nombre
 
     def clean_descripcion(self):
