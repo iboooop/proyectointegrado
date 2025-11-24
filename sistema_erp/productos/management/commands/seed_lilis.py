@@ -8,7 +8,8 @@ from productos.models import Producto
 from usuarios.models import Perfil
 
 CATEGORIES = ['ALFAJORES', 'CONFITERIA', 'CHOCOLATES', 'GALLETAS']
-ROLES = ['ADMIN', 'BODEGA', 'VENTAS', 'COMPRAS']
+
+ROLES = ['ADMIN', 'BODEGA', 'VENTAS', 'COMPRAS', 'EDITOR', 'LECTOR']
 
 
 class Command(BaseCommand):
@@ -173,20 +174,25 @@ class Command(BaseCommand):
                 'GALLETAS': 'Galleta Tradicional'
             }[categoria]
 
-            productos.append(
-                Producto(
-                    nombre=f"{nombre_base} Lilis {i:03d}",
-                    categoria=categoria,
-                    descripcion=f"Producto {nombre_base.lower()} hecho a mano.",
-                    precio=round(random.uniform(500, 5000), 2),
-                    stock_actual=random.randint(0, 300),
-                    lote=f"L{i:04d}",
-                    proveedor=random.choice(Proveedor.objects.all()),
-                    stock=random.choice(['ALTO','BAJO']),
-                    sku=f"SKU{i:05d}",
-                    ean_upc=str(random.randint(10**12, 10**13 - 1)),
-                )
-            )
+            # Campos adaptados a modelos típicos; evitan valores vacíos y duplicados en SKU
+            kwargs = {
+                "nombre": f"{nombre_base} Lilis {i:03d}",
+                "categoria": categoria,
+                "descripcion": f"Producto {nombre_base.lower()} hecho a mano.",
+                "precio_venta": round(random.uniform(500, 5000), 2),
+                "stock_actual": random.randint(0, 300),
+                "lote": f"L{i:04d}",
+                "proveedor": random.choice(list(Proveedor.objects.all())) if Proveedor.objects.exists() else None,
+                "stock": random.choice(['ALTO','BAJO']) if "stock" in [f.name for f in Producto._meta.get_fields()] else None,
+                "sku": f"SKU{i:05d}",
+                "ean_upc": str(random.randint(10**12, 10**13 - 1)),
+            }
+
+            # Limpiar None keys que no existan en el modelo
+            model_fields = {f.name for f in Producto._meta.get_fields()}
+            clean_kwargs = {k: v for k, v in kwargs.items() if k in model_fields and v is not None}
+
+            productos.append(Producto(**clean_kwargs))
 
         Producto.objects.bulk_create(productos)
         self.stdout.write(f"✔ {len(productos)} productos creados.")

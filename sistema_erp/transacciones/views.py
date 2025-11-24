@@ -5,10 +5,6 @@ from django.core.paginator import Paginator
 from django.utils import timezone
 from django.http import HttpResponse
 
-
-
-# ✅ Corrección: importamos Bodega desde la app bodegas, no desde transacciones
-from bodegas.models import Bodega
 from .models import MovimientoInventario
 from .forms import MovimientoInventarioForm
 
@@ -16,7 +12,7 @@ from .forms import MovimientoInventarioForm
 
 # ---------------- LISTA ----------------
 def lista_transacciones(request):
-    qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario', 'bodega_origen', 'bodega_destino')
+    qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario')
 
     # Filtros de texto (SKU/nombre producto, proveedor, usuario, tipo, bodega, lote, serie, doc ref, motivo)
     q = (request.GET.get('q') or '').strip()
@@ -27,8 +23,6 @@ def lista_transacciones(request):
             | Q(proveedor__nombre__icontains=q)
             | Q(usuario__username__icontains=q)
             | Q(tipo__icontains=q)
-            | Q(bodega_origen__nombre__icontains=q)
-            | Q(bodega_destino__nombre__icontains=q)
             | Q(lote__icontains=q)
             | Q(serie__icontains=q)
             | Q(fecha_vencimiento__icontains=q)
@@ -148,9 +142,7 @@ def crear_transaccion(request):
 
 # ---------------- DETALLE ----------------
 def detalle_transaccion(request, id):
-    transaccion = get_object_or_404(
-        MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario'), id=id
-    )
+    transaccion = get_object_or_404(MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario'), id=id)
     return render(request, 'transacciones/transaccion_detail.html', {'transaccion': transaccion})
 
 
@@ -235,7 +227,7 @@ def exportar_transacciones_excel(request):
             status=500
         )
 
-    qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario', 'bodega_origen', 'bodega_destino')
+    qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario')
 
     q = (request.GET.get('q') or '').strip()
     if q:
@@ -275,7 +267,7 @@ def exportar_transacciones_excel(request):
 
     headers = [
         'Fecha', 'Tipo', 'Producto', 'Proveedor', 'Usuario', 'Cantidad',
-        'Bodega origen', 'Bodega destino', 'Lote', 'Serie', 'Vence', 'Doc Ref', 'Motivo', 'Observaciones'
+        'Lote', 'Serie', 'Vence', 'Doc Ref', 'Motivo', 'Observaciones'
     ]
     header_fill = PatternFill(start_color='EAF2FF', end_color='EAF2FF', fill_type='solid')
     bold = Font(bold=True, color='1f2937')
@@ -301,8 +293,6 @@ def exportar_transacciones_excel(request):
             getattr(m.proveedor, 'nombre', '') if m.proveedor else '',
             getattr(m.usuario, 'username', '') if m.usuario else '',
             m.cantidad,
-            getattr(m.bodega_origen, 'codigo', '') if m.bodega_origen else '',
-            getattr(m.bodega_destino, 'codigo', '') if m.bodega_destino else '',
             m.lote or '',
             m.serie or '',
             m.fecha_vencimiento.strftime('%Y-%m-%d') if m.fecha_vencimiento else '',
