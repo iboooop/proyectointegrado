@@ -1,8 +1,6 @@
-<<<<<<< HEAD
 
-=======
 {% load static %}
->>>>>>> origin/feature/production-TC
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -20,19 +18,7 @@
   </style>
 </head>
 
-<<<<<<< HEAD
-<body>
 
-  <div class="container">
-
-    <a href="{% url 'clientes_list' %}" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
-
-    <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-
-        <h5>Cliente: {{ cliente.nombre }}</h5>
-        <div>
-=======
 <body class="bg-light">
   <div class="container my-4">
     <a href="{% url 'clientes_list' %}" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
@@ -76,7 +62,7 @@
 
         <!-- Botones de acción -->
         <div class="mt-4 d-flex justify-content-end gap-2">
->>>>>>> origin/feature/production-TC
+
           {% if request.user.perfil.rol != 'LECTOR' %}
             <a href="{% url 'clientes_edit' cliente.idCliente %}" class="btn btn-outline-secondary">Editar</a>
           {% endif %}
@@ -88,48 +74,7 @@
           {% endif %}
         </div>
       </div>
-<<<<<<< HEAD
 
-      <div class="card-body">
-        <p><strong>RUT:</strong> {{ cliente.rut }}</p>
-        <p><strong>Dirección:</strong> {{ cliente.direccion }}</p>
-        <p><strong>Teléfono:</strong> {{ cliente.telefono }}</p>
-        <p><strong>Email:</strong> {{ cliente.email }}</p>
-        <p><strong>Estado:</strong> {{ cliente.estadoCondicion }}</p>
-        <p><strong>Fecha registro:</strong> {{ cliente.fecha_registro|date:"d M Y H:i" }}</p>
-
-        <a href="{% url 'clientes_list' %}" class="btn btn-cancel">Volver</a>
-
-      </div>
-    </div>
-  </div>
-
-
-  <script>
-    function getCookie(name) { let cookieValue = null; if (document.cookie && document.cookie !== '') { const cookies = document.cookie.split(';'); for (let c of cookies) { const cookie = c.trim(); if (cookie.substring(0, name.length + 1) === (name + '=')) { cookieValue = decodeURIComponent(cookie.substring(name.length + 1)); break; } } } return cookieValue; }
-    const csrftoken = getCookie('csrftoken');
-
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('form.form-delete').forEach(form => {
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const name = form.dataset.name || 'el registro';
-          Swal.fire({
-            title: `¿Eliminar ${name}?`,
-
-            text: 'Esta acción no se puede deshacer.',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar',
-
-            cancelButtonText: 'Cancelar'
-          }).then(result => {
-            if (result.isConfirmed) {
-              Swal.fire({ title: 'Eliminando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-              form.submit();
-            }
-          });
-=======
     </div>
   </div>
 
@@ -174,7 +119,7 @@
           if (result.isConfirmed) {
             formEliminar.submit();
           }
->>>>>>> origin/feature/production-TC
+
         });
       });
     });

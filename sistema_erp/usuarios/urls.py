@@ -1,13 +1,9 @@
 from django.urls import path
 from .views import (
     dashboard_view, usuarios_list_view, usuarios_create_view,
-<<<<<<< HEAD
 
-    usuarios_edit_view, usuarios_delete_view, export_usuarios_excel
-
-=======
     usuarios_detail_view, usuarios_edit_view, usuarios_delete_view, export_usuarios_excel
->>>>>>> origin/feature/production-TC
+
 )
 
 urlpatterns = [

@@ -39,65 +39,7 @@
     <div class="container" style="padding-left: 32px; padding-right: 32px;">
         <a href="{% url 'usuarios_list' %}" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
 
-<<<<<<< HEAD
 
-    <div class="card">
-      <div class="card-header">
-        <h4 class="mb-0">Editar Usuario</h4>
-      </div>
-
-      <div class="card-body">
-        <form method="post" enctype="multipart/form-data" novalidate>
-          {% csrf_token %}
-          {% for field in usuario_form %}
-            <div class="mb-3">
-              <label class="form-label fw-semibold">{{ field.label }}</label>
-              {{ field }}
-              {% if field.errors %}
-                <div class="text-danger small mt-1">
-                  {{ field.errors|join:", " }}
-                </div>
-              {% endif %}
-            </div>
-
-
-            {% if messages %}
-                {% for m in messages %}
-                    {% if m.tags == 'success' %}
-                        <div class="d-none" data-swal-success="{{ m }}"></div>
-                    {% else %}
-                        <div class="alert alert-{{ m.tags }} mb-2">{{ m }}</div>
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-
-            <form method="post" enctype="multipart/form-data" novalidate>
-                {% csrf_token %}
-
-                <!-- Errores globales -->
-                {% if usuario_form.non_field_errors %}
-                <div class="alert alert-danger">
-                    {{ usuario_form.non_field_errors|join:", " }}
-                </div>
-                {% endif %}
-                {% if perfil_form.non_field_errors %}
-                <div class="alert alert-danger">
-                    {{ perfil_form.non_field_errors|join:", " }}
-                </div>
-                {% endif %}
-
-                <h5 class="mb-4">Avatar</h5>
-                <div class="row mb-4">
-                    <div class="col-md-6 d-flex align-items-center gap-3">
-                        <div class="avatar-circle">
-                            <img id="avatarPreview" class="avatar-img" 
-                                 src="{% if perfil_form.instance.avatar %}{{ perfil_form.instance.avatar.url }}{% else %}https://ui-avatars.com/api/?name={{ usuario_form.instance.first_name|default:'Usuario' }}+{{ usuario_form.instance.last_name|default:'' }}&background=dee2e6&color=495057&size=120{% endif %}" 
-                                 alt="Avatar">
-                            <button type="button" class="btn btn-outline-primary avatar-edit-btn" data-bs-toggle="modal" data-bs-target="#avatarModal">Editar</button>
-                        </div>
-                        {% if perfil_form.avatar.errors %}
-                        <div class="text-danger">{{ perfil_form.avatar.errors|join:", " }}</div>
-=======
         <div class="card shadow-sm rounded-4">
             <div class="card-body">
                 <h5 class="mb-4 fw-semibold">Editar Usuario</h5>
@@ -108,7 +50,7 @@
                             <div class="d-none" data-swal-success="{{ m }}"></div>
                         {% else %}
                             <div class="alert alert-{{ m.tags }} mb-2">{{ m }}</div>
->>>>>>> origin/feature/production-TC
+
                         {% endif %}
                     {% endfor %}
                 {% endif %}

@@ -21,11 +21,7 @@ class MovimientoInventarioForm(forms.ModelForm):
     class Meta:
         model = MovimientoInventario
         fields = [
-<<<<<<< HEAD
 
-            'fecha', 'tipo', 'cantidad', 'producto', 'proveedor', 'usuario', 'perfil', 'observaciones'
-
-=======
             'fecha',
             'tipo',
             'estado',
@@ -44,7 +40,7 @@ class MovimientoInventarioForm(forms.ModelForm):
             'doc_referencia_file',
             'motivo',
             'observaciones',
->>>>>>> origin/feature/production-TC
+
         ]
 
         widgets = {

@@ -3,12 +3,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-<<<<<<< HEAD
-  <title>Registrar Movimiento</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <link href="{% static 'transacciones/css/transacciones.css' %}" rel="stylesheet">
-=======
   <title>Registrar Movimiento de Inventario</title>
 
   <!-- Bootstrap -->
@@ -20,25 +15,18 @@
   <!-- Usamos directamente el mismo CSS que productos -->
   <link href="{% static 'productos/css/styles.css' %}" rel="stylesheet">
 
->>>>>>> origin/feature/production-TC
+
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </head>
 
-<<<<<<< HEAD
-    <div class="card">
 
-      <div class="card-header card-header-dark">
-        <h4 class="mb-0">Registrar movimiento</h4>
-
-      </div>
-=======
 <body class="bg-light">
   <div class="container my-4">
     <a href="{% url 'lista_transacciones' %}" class="btn btn-outline-secondary mb-3">
       &larr; Volver al listado
     </a>
->>>>>>> origin/feature/production-TC
+
 
     <div class="card shadow-sm rounded-4">
       <div class="card-body">
@@ -74,57 +62,7 @@
           {% csrf_token %}
           <input type="hidden" name="active_tab" id="active_tab" value="{{ active_tab|default:'paso1-tab' }}">
 
-<<<<<<< HEAD
 
-          <div class="row g-3">
-            <div class="col-md-3">
-              <label class="form-label">{{ form.fecha.label }}</label>
-              {{ form.fecha }}
-              {% include 'transacciones/partials/field_errors.html' with field=form.fecha %}
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{ form.tipo.label }}</label>
-              {{ form.tipo }}
-              {% include 'transacciones/partials/field_errors.html' with field=form.tipo %}
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">{{ form.cantidad.label }}</label>
-              {{ form.cantidad }}
-              {% include 'transacciones/partials/field_errors.html' with field=form.cantidad %}
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">{{ form.producto.label }}</label>
-              {{ form.producto }}
-              {% include 'transacciones/partials/field_errors.html' with field=form.producto %}
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">{{ form.proveedor.label }}</label>
-              {{ form.proveedor }}
-              {% include 'transacciones/partials/field_errors.html' with field=form.proveedor %}
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">{{ form.usuario.label }}</label>
-              {{ form.usuario }}
-              {% include 'transacciones/partials/field_errors.html' with field=form.usuario %}
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">{{ form.perfil.label }}</label>
-              {{ form.perfil }}
-              {% include 'transacciones/partials/field_errors.html' with field=form.perfil %}
-            </div>
-            <div class="col-12">
-              <label class="form-label">{{ form.observaciones.label }}</label>
-              {{ form.observaciones }}
-              {% include 'transacciones/partials/field_errors.html' with field=form.observaciones %}
-            </div>
-          </div>
-
-          <div class="d-flex justify-content-end mt-4 gap-2">
-            <button type="button" id="resetFormBtn" class="btn btn-outline-secondary">Limpiar</button>
-            <button type="submit" class="btn btn-create">Guardar movimiento</button>
-
-          </div>
-=======
           {% if mensaje %}
             <div class="alert alert-{{ mensaje_tipo }}">{{ mensaje }}</div>
           {% endif %}
@@ -318,15 +256,14 @@
             </div><!-- fin paso 3 -->
 
           </div><!-- fin tab-content -->
->>>>>>> origin/feature/production-TC
+
         </form>
 
       </div>
     </div>
   </div>
 
-<<<<<<< HEAD
-=======
+
   <!-- Footer idéntico al de productos -->
   <footer class="productos-footer">
     <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
@@ -349,7 +286,7 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
->>>>>>> origin/feature/production-TC
+
 
   <script>
     function activarTab(id) {
