@@ -451,7 +451,6 @@ class Command(BaseCommand):
             {
                 "producto": productos[0], 
                 "proveedor": proveedores[0], 
-                "bodega_destino": bodegas[0],
                 "usuario": User.objects.get(username="admin"), 
                 "perfil": perfiles[0], 
                 "tipo": "ENTRADA", 
@@ -461,7 +460,6 @@ class Command(BaseCommand):
             {
                 "producto": productos[1], 
                 "cliente": clientes[0],
-                "bodega_origen": bodegas[1],
                 "usuario": User.objects.get(username="ventas"), 
                 "perfil": perfiles[3], 
                 "tipo": "VENTA", 
@@ -471,7 +469,6 @@ class Command(BaseCommand):
             {
                 "producto": productos[2], 
                 "proveedor": proveedores[0], 
-                "bodega_destino": bodegas[0],
                 "usuario": User.objects.get(username="compras"), 
                 "perfil": perfiles[2], 
                 "tipo": "ENTRADA", 
@@ -480,8 +477,6 @@ class Command(BaseCommand):
             },
             {
                 "producto": productos[0], 
-                "bodega_origen": bodegas[0],
-                "bodega_destino": bodegas[2],
                 "usuario": User.objects.get(username="bodega"), 
                 "perfil": perfiles[1], 
                 "tipo": "TRANSFERENCIA", 
@@ -491,7 +486,6 @@ class Command(BaseCommand):
             {
                 "producto": productos[3], 
                 "cliente": clientes[1],
-                "bodega_origen": bodegas[2],
                 "usuario": User.objects.get(username="ventas"), 
                 "perfil": perfiles[3], 
                 "tipo": "VENTA", 

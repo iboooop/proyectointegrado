@@ -2,87 +2,57 @@ from django import forms
 from django.core.exceptions import ValidationError
 from .models import MovimientoInventario
 
-
 class MovimientoInventarioForm(forms.ModelForm):
-    # Fecha y hora capturadas automáticamente, pero visibles/formateadas
-    fecha = forms.DateTimeField(
-        input_formats=['%Y-%m-%dT%H:%M'],
-        widget=forms.DateTimeInput(
-            attrs={
-                'class': 'form-control',
-                'type': 'datetime-local',
-                'step': '60',
-            },
-            format='%Y-%m-%dT%H:%M',
-        ),
-        required=True,
-    )
-
     class Meta:
         model = MovimientoInventario
         fields = [
-
-            'fecha',
-            'tipo',
-            'estado',
-            'cantidad',
-            'producto',
-            'proveedor',
-            'bodega_origen',
-            'bodega_destino',
-            'manejo_lotes',
-            'manejo_series',
-            'perecible',
-            'lote',
-            'serie',
-            'fecha_vencimiento',
-            'doc_referencia',
-            'doc_referencia_file',
-            'motivo',
-            'observaciones',
-
+            'producto', 'proveedor', 'fecha', 'estado', 'tipo',
+            'cantidad', 'lote', 'serie', 'fecha_vencimiento', 'doc_referencia',
+            'doc_referencia_file', 'motivo', 'observaciones'
         ]
-
         widgets = {
-            'tipo': forms.Select(attrs={'class': 'form-select'}),
-            'estado': forms.Select(attrs={'class': 'form-select'}),
-            'cantidad': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
             'producto': forms.Select(attrs={'class': 'form-select'}),
             'proveedor': forms.Select(attrs={'class': 'form-select'}),
-            'bodega_origen': forms.Select(attrs={'class': 'form-select'}),
-            'bodega_destino': forms.Select(attrs={'class': 'form-select'}),
-            'manejo_lotes': forms.CheckboxInput(attrs={'class': 'form-check-input', 'id': 'id_manejo_lotes'}),
-            'manejo_series': forms.CheckboxInput(attrs={'class': 'form-check-input', 'id': 'id_manejo_series'}),
-            'perecible': forms.CheckboxInput(attrs={'class': 'form-check-input', 'id': 'id_perecible'}),
+            'fecha': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+            'estado': forms.Select(attrs={'class': 'form-select'}),
+            'tipo': forms.Select(attrs={'class': 'form-select'}),
+            'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
             'lote': forms.TextInput(attrs={'class': 'form-control'}),
             'serie': forms.TextInput(attrs={'class': 'form-control'}),
             'fecha_vencimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'doc_referencia': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nº factura, guía, nota de crédito, orden, etc.'}),
-            'motivo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Diferencia inventario, devolución cliente, etc.'}),
-            'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Notas de operación, recibo, daño, etc.'}),
-
-
+            'doc_referencia': forms.TextInput(attrs={'class': 'form-control'}),
+            'doc_referencia_file': forms.FileInput(attrs={'class': 'form-control'}),
+            'motivo': forms.TextInput(attrs={'class': 'form-control'}),
+            'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # etiquetas y campos de bodegas eliminados (app 'bodegas' removida)
 
-        self.fields['fecha'].label = 'Fecha y hora'
-        self.fields['tipo'].label = 'Tipo de movimiento'
-        self.fields['estado'].label = 'Estado del movimiento'
-        self.fields['cantidad'].label = 'Cantidad'
-        self.fields['producto'].label = 'Producto (SKU)'
-        self.fields['proveedor'].label = 'Proveedor'
-        self.fields['bodega_origen'].label = 'Bodega origen'
-        self.fields['bodega_destino'].label = 'Bodega a transferir'
-        self.fields['doc_referencia'].label = 'Documento de referencia'
-        self.fields['motivo'].label = 'Motivo'
+        # Asegurarse de que los campos referenciados existan en el form antes de ajustar labels
+        if 'fecha' in self.fields:
+            self.fields['fecha'].label = 'Fecha y hora'
+        if 'tipo' in self.fields:
+            self.fields['tipo'].label = 'Tipo de movimiento'
+        if 'estado' in self.fields:
+            self.fields['estado'].label = 'Estado del movimiento'
+        if 'cantidad' in self.fields:
+            self.fields['cantidad'].label = 'Cantidad'
+        if 'producto' in self.fields:
+            self.fields['producto'].label = 'Producto (SKU)'
+        if 'proveedor' in self.fields:
+            self.fields['proveedor'].label = 'Proveedor'
+        if 'doc_referencia' in self.fields:
+            self.fields['doc_referencia'].label = 'Documento de referencia'
+        if 'motivo' in self.fields:
+            self.fields['motivo'].label = 'Motivo'
 
         # Captura automática de fecha/hora inicial
-        if not self.initial.get('fecha') and not self.data:
+        if 'fecha' in self.fields and not self.initial.get('fecha') and not self.data:
             from django.utils import timezone
-
             now = timezone.localtime()
+            # widget datetime-local espera formato 'YYYY-MM-DDTHH:MM'
             self.initial['fecha'] = now.strftime('%Y-%m-%dT%H:%M')
 
     # ---------- Validaciones ----------
@@ -122,12 +92,6 @@ class MovimientoInventarioForm(forms.ModelForm):
         if cantidad <= 0:
             raise ValidationError("La cantidad debe ser mayor a 0.")
         return cantidad
-
-    def clean_bodega(self):
-        bodega = self.cleaned_data.get("bodega")
-        if not bodega:
-            raise ValidationError("Debes seleccionar la bodega desde donde se realiza el movimiento.")
-        return bodega
 
     def clean_doc_referencia(self):
         doc = self.cleaned_data.get("doc_referencia", "").strip()

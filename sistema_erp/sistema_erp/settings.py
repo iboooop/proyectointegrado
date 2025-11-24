@@ -49,8 +49,6 @@ INSTALLED_APPS = [
     'autenticacion',
     'sistema_erp',
     'django_extensions',
-    'bodegas',
-    'clientes',
 ]
 
 # ===========================

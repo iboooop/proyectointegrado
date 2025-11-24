@@ -4,7 +4,6 @@ from productos.models import Producto
 from proveedores.models import Proveedor
 from django.contrib.auth.models import User
 from usuarios.models import Perfil
-from bodegas.models import Bodega
 
 class MovimientoInventario(models.Model):
     TIPO_MOVIMIENTO = [
@@ -21,9 +20,7 @@ class MovimientoInventario(models.Model):
     ]
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     proveedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, null=True, blank=True)
-    cliente = models.ForeignKey('clientes.Cliente', on_delete=models.SET_NULL, null=True, blank=True)
-    bodega_origen = models.ForeignKey('bodegas.Bodega', on_delete=models.SET_NULL, null=True, blank=True, related_name='movimientos_origen')
-    bodega_destino = models.ForeignKey('bodegas.Bodega', on_delete=models.SET_NULL, null=True, blank=True, related_name='movimientos_destino')
+
     usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     perfil = models.ForeignKey(Perfil, on_delete=models.SET_NULL, null=True, blank=True)
     tipo = models.CharField(max_length=20, choices=TIPO_MOVIMIENTO)
