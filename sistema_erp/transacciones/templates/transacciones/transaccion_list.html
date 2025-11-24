@@ -46,6 +46,30 @@
     .table th:nth-child(10), .table td:nth-child(10) { min-width: 120px; } /* Doc ref */
     .table th:nth-child(11), .table td:nth-child(11) { min-width: 100px; } /* Estado */
     .table th:nth-child(12), .table td:nth-child(12) { min-width: 120px; } /* Acciones */
+
+    /* Forzar footer abajo y eliminar espacio blanco bajo el footer */
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    /* El contenedor principal debe crecer para empujar el footer abajo */
+    .container-fluid.px-3.my-4 {
+      flex: 1 0 auto;
+    }
+    footer.productos-footer {
+      flex-shrink: 0;
+      width: 100%;
+      margin: 0;
+      /* asegura que cubra todo el ancho y no deje líneas blancas */
+      box-sizing: border-box;
+      /* opcional: quitar border-top si existe */
+      border-top: none;
+    }
   </style>
 
 </head>
@@ -118,10 +142,8 @@
         </div>
 
 
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/feature/production-TC
+
         <div id="trxTableWrap">
           {% include 'transacciones/partials/transaccion_table.html' %}
         </div>
@@ -242,30 +264,25 @@
     attachJumpHandler();
   })();
   </script>
-<<<<<<< HEAD
->>>>>>> 269c5e010624db413a2d803e1ed0db91c3008822
-{% include 'partials/footer.html' %}
-=======
 
   <footer class="productos-footer">
-    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
-      <div class="d-flex align-items-center gap-3">
-        <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="productos-footer-logo">
-        <div>
-          <div class="fw-semibold text-uppercase mb-1" style="font-size:0.8rem;letter-spacing:0.08em;">Info de Contacto</div>
-          <div style="font-size:0.85rem;">Móvil: +569 6226 1712</div>
-          <div style="font-size:0.85rem;">E-Mail: ventas@lilis.cl</div>
-          <div style="font-size:0.85rem;" class="mt-2">
-            Ubícanos en: Paseo San Ramón<br>
-            Waldo Alcalde 401, local 8, San Ramón, Coquimbo
+        <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+          <div class="d-flex align-items-center gap-3">
+            <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="productos-footer-logo">
+            <div>
+              <div class="fw-semibold text-uppercase mb-1" style="font-size:0.8rem;letter-spacing:0.08em;">Info de Contacto</div>
+              <div style="font-size:0.85rem;">Móvil: +569 6226 1712</div>
+              <div style="font-size:0.85rem;">E-Mail: ventas@lilis.cl</div>
+              <div style="font-size:0.85rem;" class="mt-2">
+                Ubícanos en: Paseo San Ramón<br>
+                Waldo Alcalde 401, local 8, San Ramón, Coquimbo
+              </div>
+            </div>
+          </div>
+          <div class="ms-auto text-end" style="font-size:0.8rem;">
+            <small>Derechos Reservados © 2022 Lilis.</small>
           </div>
         </div>
-      </div>
-      <div class="ms-auto text-end" style="font-size:0.8rem;">
-        <small>Derechos Reservados © 2022 Lilis.</small>
-      </div>
-    </div>
-  </footer>
->>>>>>> origin/feature/production-TC
+    </footer>
 </body>
 </html>

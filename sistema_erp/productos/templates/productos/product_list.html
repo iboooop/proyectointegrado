@@ -31,56 +31,89 @@
       color: #000000 !important;
       text-decoration: underline !important;
     }
+
+    /* Forzar footer siempre abajo (sticky footer usando flex layout) */
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    /* Asegurar que el wrapper ocupe toda la altura y distribuya contenido */
+    .page-wrapper,
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    /* El contenido principal crece y empuja el footer hacia abajo */
+    .page-content {
+      flex: 1 0 auto;
+    }
+    /* Footer fijo al final, ocupa todo el ancho */
+    footer.productos-footer {
+      margin-top: auto;
+      flex-shrink: 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* Ajustes internos del footer (coincidir con proveedor_list) */
+    footer.productos-footer .container {
+      padding-top: 1.25rem;
+      padding-bottom: 1.25rem;
+    }
   </style>
 </head>
-<body class="bg-light">
+<body class="bg-light page-wrapper">
 
 
-  <div class="container-fluid px-3 my-4" style="max-width: 1400px;">
-    <a href="/" class="btn btn-outline-secondary mb-3">&larr; Volver al dashboard</a>
+  <div class="page-content">
+    <div class="container-fluid px-3 my-4" style="max-width: 1400px;">
+      <a href="/" class="btn btn-outline-secondary mb-3">&larr; Volver al dashboard</a>
 
 
-    <div class="card shadow-sm rounded-4">
-      <div class="card-body">
+      <div class="card shadow-sm rounded-4">
+        <div class="card-body">
 
-        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-          <div>
-            <h5 class="mb-0 list-header-title">Listado de Productos</h5>
+          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div>
+              <h5 class="mb-0 list-header-title">Listado de Productos</h5>
+            </div>
+            <div class="d-flex gap-2">
+              <a href="{% url 'productos_export' %}?q={{ q }}&sort={{ sort }}&dir={{ dir }}" class="btn btn-outline-secondary btn-outline-danger-soft">Exportar Excel</a>
+              {% if request.user.perfil.rol != 'LECTOR' %}
+                <a href="{% url 'producto_agregar' %}" class="btn btn-danger">+ Crear producto</a>
+              {% endif %}
+            </div>
           </div>
-          <div class="d-flex gap-2">
-            <a href="{% url 'productos_export' %}?q={{ q }}&sort={{ sort }}&dir={{ dir }}" class="btn btn-outline-secondary btn-outline-danger-soft">Exportar Excel</a>
-            {% if request.user.perfil.rol != 'LECTOR' %}
-              <a href="{% url 'producto_agregar' %}" class="btn btn-danger">+ Crear producto</a>
-            {% endif %}
+
+          <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <form id="searchForm" class="flex-grow-1 me-3" onsubmit="return false;">
+              <input type="text" id="searchInput" class="form-control" placeholder="Buscar por SKU o nombre..." value="{{ q }}">
+            </form>
+          
+            <form id="pageSizeForm" class="d-flex align-items-center gap-2" onsubmit="return false;">
+              <label for="pageSizeSelect" class="form-label m-0">Filas por página:</label>
+              <select id="pageSizeSelect" class="form-select" style="width: 140px;">
+                {% for n in page_sizes %}
+                <option value="{{ n }}" {% if page_size == n %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+              </select>
+            </form>
+          
+            <div class="text-muted small">Total: {{ paginator.count }} productos</div>
           </div>
+
+
+
+          <div id="productosTableWrap">
+            {% include 'productos/partials/producto_table.html' %}
+          </div>
+
         </div>
-
-        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-          <form id="searchForm" class="flex-grow-1 me-3" onsubmit="return false;">
-            <input type="text" id="searchInput" class="form-control" placeholder="Buscar por SKU o nombre..." value="{{ q }}">
-          </form>
-        
-          <form id="pageSizeForm" class="d-flex align-items-center gap-2" onsubmit="return false;">
-            <label for="pageSizeSelect" class="form-label m-0">Filas por página:</label>
-            <select id="pageSizeSelect" class="form-select" style="width: 140px;">
-              {% for n in page_sizes %}
-              <option value="{{ n }}" {% if page_size == n %}selected{% endif %}>{{ n }}</option>
-              {% endfor %}
-            </select>
-          </form>
-        
-          <div class="text-muted small">Total: {{ paginator.count }} productos</div>
-        </div>
-
-
-
-        <div id="productosTableWrap">
-          {% include 'productos/partials/producto_table.html' %}
-        </div>
-
       </div>
     </div>
   </div>
+
   <footer class="productos-footer">
     <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
       <div class="d-flex align-items-center gap-3">

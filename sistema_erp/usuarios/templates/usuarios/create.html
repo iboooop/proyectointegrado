@@ -2,292 +2,212 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
     <meta charset="UTF-8">
     <title>Crear Usuario</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{% static 'productos/css/styles.css' %}" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* Eliminar espacio bajo el footer */
-        html, body {
-          height: 100%;
-        }
-        body {
-          margin: 0;
-          padding: 0;
-        }
-
-        .page-wrapper {
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-        }
-        .page-content {
-          flex: 1 0 auto;
-        }
-        footer.productos-footer {
-          flex-shrink: 0;
-          margin-bottom: 0 !important;
-          padding-bottom: 0 !important;
-        }
+      /* copiar estilos mínimos que afectan layout y tamaños como en proveedor_add.html */
+      .thumbnail-wrapper { display:flex; gap:12px; align-items:flex-start; }
+      .thumbnail-box { width:64px; height:64px; border-radius:10px; overflow:hidden; background:#e9ecef; display:flex; align-items:center; justify-content:center; }
+      .btn-upload { background:#f0e7d1; border: none; color:#7a3f22; padding:6px 10px; border-radius:20px; }
     </style>
 </head>
-<body class="bg-light page-wrapper">
-    <div class="page-content">
-    <div class="container container-padded">
-        <a href="{% url 'usuarios_list' %}" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
 
-        {% if show_messages and messages %}
-            <div id="swal-messages" class="d-none">
-                {% for message in messages %}
-                <div class="swal-msg" data-type="{{ message.tags|default:'info' }}" data-text="{{ message|escapejs }}"></div>
-                {% endfor %}
+<body class="bg-light">
+  <div class="container my-4" style="max-width: 1400px;">
+    <a href="{% url 'usuarios_list' %}" class="btn btn-outline-secondary mb-3">
+      &larr; Volver al listado
+    </a>
+
+    <div class="card shadow-sm rounded-4">
+      <div class="card-body">
+
+        <h5 class="mb-4 fw-semibold">Crear Usuario</h5>
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+          {% if usuario_form.non_field_errors %}
+            <div class="alert alert-danger">
+              {{ usuario_form.non_field_errors|join:"," }}
             </div>
-        {% endif %}
+          {% endif %}
+          {% if perfil_form.non_field_errors %}
+            <div class="alert alert-danger">
+              {{ perfil_form.non_field_errors|join:"," }}
+            </div>
+          {% endif %}
 
-        <div class="card shadow-sm rounded-4">
-            <div class="card-body">
-                <h5 class="mb-4 fw-semibold">Crear Usuario</h5>
-                
-                <form method="post" enctype="multipart/form-data" novalidate>
-                    {% csrf_token %}
-                    {% if usuario_form.non_field_errors %}
-                    <div class="alert alert-danger">
-                        {{ usuario_form.non_field_errors|join:"," }}
-                    </div>
-                    {% endif %}
-                    {% if perfil_form.non_field_errors %}
-                    <div class="alert alert-danger">
-                        {{ perfil_form.non_field_errors|join:"," }}
-                    </div>
-                    {% endif %}
+          <h6 class="fw-semibold mb-3">Avatar</h6>
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <label class="form-label">Imagen de perfil</label>
+              <input type="file" id="id_avatar" name="avatar" accept="image/*" class="form-control" style="display:none;">
+              {% if perfil_form.avatar.errors %}
+              <div class="text-danger small">{{ perfil_form.avatar.errors|join:"," }}</div>
+              {% endif %}
 
-                    <h6 class="fw-semibold mb-3">Avatar</h6>
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label">Imagen de perfil</label>
-                            <input type="file" id="id_avatar" name="avatar" accept="image/*" class="form-control" style="display:none;">
-                            {% if perfil_form.avatar.errors %}
-                            <div class="text-danger small">{{ perfil_form.avatar.errors|join:"," }}</div>
-                            {% endif %}
-
-                            <!-- Miniatura + botón subir imagen -->
-                            <div class="thumbnail-wrapper mt-2">
-                                <div class="thumbnail-box" id="preview-box">
-                                    <img id="avatarPreview" src="https://ui-avatars.com/api/?name=Nuevo+Usuario&background=dee2e6&color=495057&size=120" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">
-                                </div>
-
-                                <div>
-                                    <button
-                                        type="button"
-                                        class="btn btn-upload"
-                                        onclick="document.getElementById('id_avatar').click();"
-                                    >
-                                        <span class="btn-upload-icon">↑</span>
-                                        <span>Subir imagen</span>
-                                    </button>
-                                    <div class="form-text">JPG o PNG, máx. 2MB.</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                <h6 class="fw-semibold mb-3">Identificación</h6>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="first_name" class="form-label">Nombre</label>
-                        {{ usuario_form.first_name }}
-                        {% if usuario_form.first_name.errors %}
-                        <div class="text-danger">
-                            {{ usuario_form.first_name.errors|join:", " }}
-                        </div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="last_name" class="form-label">Apellido</label>
-                        {{ usuario_form.last_name }}
-                        {% if usuario_form.last_name.errors %}
-                        <div class="text-danger">
-                            {{ usuario_form.last_name.errors|join:", " }}
-                        </div>
-                        {% endif %}
-                    </div>
+              <div class="thumbnail-wrapper mt-2">
+                <div class="thumbnail-box" id="preview-box">
+                  <img id="avatarPreview" src="https://ui-avatars.com/api/?name=Nuevo+Usuario&background=dee2e6&color=495057&size=120" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">
                 </div>
 
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="username" class="form-label">Username</label>
-                        {{ usuario_form.username }}
-                        {% if usuario_form.username.errors %}
-                        <div class="text-danger">
-                            {{ usuario_form.username.errors|join:", " }}
-                        </div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="email" class="form-label">Email</label>
-                        {{ usuario_form.email }}
-                        {% if usuario_form.email.errors %}
-                        <div class="text-danger">
-                            {{ usuario_form.email.errors|join:", " }}
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="password" class="form-label">Contraseña</label>
-                        {{ usuario_form.password }}
-                        {% if usuario_form.password.errors %}
-                        <div class="text-danger">
-                            {{ usuario_form.password.errors|join:", " }}
-                        </div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="confirm_password" class="form-label">Confirmar Contraseña</label>
-                        {{ usuario_form.confirm_password }}
-                        {% if usuario_form.confirm_password.errors %}
-                        <div class="text-danger">
-                            {{ usuario_form.confirm_password.errors|join:", " }}
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <h6 class="fw-semibold mb-3">Estado y acceso</h6>
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="telefono" class="form-label">Teléfono</label>
-                        {{ perfil_form.telefono }}
-                        {% if perfil_form.telefono.errors %}
-                        <div class="text-danger">
-                            {{ perfil_form.telefono.errors|join:", " }}
-                        </div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="rol" class="form-label">Rol</label>
-                        {{ perfil_form.rol }}
-                        {% if perfil_form.rol.errors %}
-                        <div class="text-danger">
-                            {{ perfil_form.rol.errors|join:", " }}
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="estado" class="form-label">Estado</label>
-                        {{ perfil_form.estado }}
-                        {% if perfil_form.estado.errors %}
-                        <div class="text-danger">
-                            {{ perfil_form.estado.errors|join:", " }}
-                        </div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="mfa_habilitado" class="form-label">MFA habilitado</label>
-                        {{ perfil_form.mfa_habilitado }}
-                        {% if perfil_form.mfa_habilitado.errors %}
-                        <div class="text-danger">
-                            {{ perfil_form.mfa_habilitado.errors|join:", " }}
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="sesiones_activas" class="form-label">Sesiones activas</label>
-                        {{ perfil_form.sesiones_activas }}
-                        {% if perfil_form.sesiones_activas.errors %}
-                        <div class="text-danger">
-                            {{ perfil_form.sesiones_activas.errors|join:", " }}
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-end gap-2 mt-4">
-                    <a href="{% url 'usuarios_list' %}" class="btn btn-outline-secondary">Cancelar</a>
-                    <button type="submit" class="btn btn-primary">Crear</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    </div>
-
-    <footer class="productos-footer mt-4">
-        <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
-            <div class="d-flex align-items-center gap-3">
-                <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="productos-footer-logo">
                 <div>
-                    <div class="fw-semibold text-uppercase mb-1" style="font-size:0.8rem;letter-spacing:0.08em;">Info de Contacto</div>
-                    <div style="font-size:0.85rem;">Móvil: +569 6226 1712</div>
-                    <div style="font-size:0.85rem;">E-Mail: ventas@lilis.cl</div>
-                    <div style="font-size:0.85rem;" class="mt-2">
-                        Ubícanos en: Paseo San Ramón<br>
-                        Waldo Alcalde 401, local 8, San Ramón, Coquimbo
-                    </div>
+                  <button type="button" class="btn btn-upload" onclick="document.getElementById('id_avatar').click();">
+                    <span class="btn-upload-icon">↑</span>
+                    <span>Subir imagen</span>
+                  </button>
+                  <div class="form-text">JPG o PNG, máx. 2MB.</div>
                 </div>
+              </div>
             </div>
-            <div class="ms-auto text-end" style="font-size:0.8rem;">
-                <small>Derechos Reservados © 2022 Lilis.</small>
-            </div>
-        </div>
-    </footer>
+          </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function(){
-            const msgs = document.querySelectorAll('#swal-messages .swal-msg');
-            msgs.forEach((el) => {
-                const type = el.getAttribute('data-type') || 'info';
-                const text = el.getAttribute('data-text') || '';
-                const icon = type === 'error' ? 'error' : (type === 'success' ? 'success' : (type === 'warning' ? 'warning' : 'info'));
-                const title = type === 'success' ? 'Operación exitosa' : (type === 'error' ? 'Ocurrió un problema' : (type === 'warning' ? 'Atención' : 'Información'));
-                Swal.fire({
-                    icon,
-                    title,
-                    text,
-                    confirmButtonColor: '#d33',
-                    timer: 2200,
-                    timerProgressBar: true,
-                    showConfirmButton: false
-                });
-            });
-        });
-    </script>
-    <script>
-    // Previsualización de avatar
+          <h6 class="fw-semibold mb-3">Identificación</h6>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="first_name" class="form-label">Nombre</label>
+              {{ usuario_form.first_name }}
+              {% if usuario_form.first_name.errors %}
+              <div class="text-danger">{{ usuario_form.first_name.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label for="last_name" class="form-label">Apellido</label>
+              {{ usuario_form.last_name }}
+              {% if usuario_form.last_name.errors %}
+              <div class="text-danger">{{ usuario_form.last_name.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="username" class="form-label">Username</label>
+              {{ usuario_form.username }}
+              {% if usuario_form.username.errors %}
+              <div class="text-danger">{{ usuario_form.username.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label for="email" class="form-label">Email</label>
+              {{ usuario_form.email }}
+              {% if usuario_form.email.errors %}
+              <div class="text-danger">{{ usuario_form.email.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="password" class="form-label">Contraseña</label>
+              {{ usuario_form.password }}
+              {% if usuario_form.password.errors %}
+              <div class="text-danger">{{ usuario_form.password.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label for="confirm_password" class="form-label">Confirmar Contraseña</label>
+              {{ usuario_form.confirm_password }}
+              {% if usuario_form.confirm_password.errors %}
+              <div class="text-danger">{{ usuario_form.confirm_password.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <h6 class="fw-semibold mb-3">Estado y acceso</h6>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="telefono" class="form-label">Teléfono</label>
+              {{ perfil_form.telefono }}
+              {% if perfil_form.telefono.errors %}
+              <div class="text-danger">{{ perfil_form.telefono.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label for="rol" class="form-label">Rol</label>
+              {{ perfil_form.rol }}
+              {% if perfil_form.rol.errors %}
+              <div class="text-danger">{{ perfil_form.rol.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="estado" class="form-label">Estado</label>
+              {{ perfil_form.estado }}
+              {% if perfil_form.estado.errors %}
+              <div class="text-danger">{{ perfil_form.estado.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label for="mfa_habilitado" class="form-label">MFA habilitado</label>
+              {{ perfil_form.mfa_habilitado }}
+              {% if perfil_form.mfa_habilitado.errors %}
+              <div class="text-danger">{{ perfil_form.mfa_habilitado.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="sesiones_activas" class="form-label">Sesiones activas</label>
+              {{ perfil_form.sesiones_activas }}
+              {% if perfil_form.sesiones_activas.errors %}
+              <div class="text-danger">{{ perfil_form.sesiones_activas.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-4">
+            <a href="{% url 'usuarios_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Crear</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="productos-footer">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="productos-footer-logo">
+        <div>
+          <div class="fw-semibold text-uppercase mb-1" style="font-size:0.8rem;letter-spacing:0.08em;">Info de Contacto</div>
+          <div style="font-size:0.85rem;">Móvil: +569 6226 1712</div>
+          <div style="font-size:0.85rem;">E-Mail: ventas@lilis.cl</div>
+          <div style="font-size:0.85rem;" class="mt-2">
+            Ubícanos en: Paseo San Ramón<br>
+            Waldo Alcalde 401, local 8, San Ramón, Coquimbo
+          </div>
+        </div>
+      </div>
+      <div class="ms-auto text-end" style="font-size:0.8rem;">
+        <small>Derechos Reservados © 2022 Lilis.</small>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // preview avatar
     const avatarInput = document.getElementById('id_avatar');
     const avatarPreview = document.getElementById('avatarPreview');
-
     if (avatarInput) {
-        avatarInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                if (!file.type.startsWith('image/')) {
-                    alert('Solo se permiten imágenes.');
-                    return;
-                }
-                if (file.size > 2 * 1024 * 1024) {
-                    alert('El tamaño máximo permitido es 2MB.');
-                    return;
-                }
-                const reader = new FileReader();
-                reader.onload = function(ev) {
-                    avatarPreview.src = ev.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+      avatarInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          if (!file.type.startsWith('image/')) { alert('Solo se permiten imágenes.'); return; }
+          if (file.size > 2 * 1024 * 1024) { alert('El tamaño máximo permitido es 2MB.'); return; }
+          const reader = new FileReader();
+          reader.onload = function(ev) { avatarPreview.src = ev.target.result; };
+          reader.readAsDataURL(file);
+        }
+      });
     }
-    </script>
->>>>>>> 269c5e010624db413a2d803e1ed0db91c3008822
+  </script>
 </body>
 </html>
