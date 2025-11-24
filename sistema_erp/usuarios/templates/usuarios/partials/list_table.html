@@ -1,88 +1,47 @@
 {% load static %}
 <div class="table-responsive">
-    <table class="table table-hover align-middle table-lg">
+    <table class="table table-hover align-middle">
         <thead>
             <tr>
-                {# Helper for sort links #}
-                {% with qs_params="q="|add:q %}
+                {% with qs_base='q='|add:q|add:'&page_size='|add:page_size %}
                 <th>
-                    <a href="?{{ qs_params }}&sort=usuario__username&dir={% if sort == 'usuario__username' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-                        Username
-                        {% if sort == 'usuario__username' %}
-                            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                        {% endif %}
+                    <a href="?{{ qs_base }}&sort=usuario__username&dir={% if sort == 'usuario__username' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+                        Username {% if sort == 'usuario__username' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
                     </a>
                 </th>
                 <th>
-                    <a href="?{{ qs_params }}&sort=usuario__email&dir={% if sort == 'usuario__email' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-                        Email
-                        {% if sort == 'usuario__email' %}
-                            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                        {% endif %}
+                    <a href="?{{ qs_base }}&sort=usuario__email&dir={% if sort == 'usuario__email' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+                        Email {% if sort == 'usuario__email' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
                     </a>
                 </th>
                 <th>
-                    <a href="?{{ qs_params }}&sort=usuario__first_name&dir={% if sort == 'usuario__first_name' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-                        Nombre
-                        {% if sort == 'usuario__first_name' %}
-                            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                        {% endif %}
+                    <a href="?{{ qs_base }}&sort=usuario__first_name&dir={% if sort == 'usuario__first_name' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+                        Nombre {% if sort == 'usuario__first_name' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
                     </a>
                 </th>
                 <th>
-                    <a href="?{{ qs_params }}&sort=usuario__last_name&dir={% if sort == 'usuario__last_name' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-                        Apellido
-                        {% if sort == 'usuario__last_name' %}
-                            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                        {% endif %}
+                    <a href="?{{ qs_base }}&sort=usuario__last_name&dir={% if sort == 'usuario__last_name' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+                        Apellido {% if sort == 'usuario__last_name' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
                     </a>
                 </th>
                 <th>
-                    <a href="?{{ qs_params }}&sort=telefono&dir={% if sort == 'telefono' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-                        Teléfono
-                        {% if sort == 'telefono' %}
-                            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                        {% endif %}
+                    <a href="?{{ qs_base }}&sort=telefono&dir={% if sort == 'telefono' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+                        Teléfono {% if sort == 'telefono' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
                     </a>
                 </th>
-                <th>
-                    <a href="?{{ qs_params }}&sort=rol&dir={% if sort == 'rol' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-                        Rol
-                        {% if sort == 'rol' %}
-                            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                        {% endif %}
+                <th class="text-center">
+                    <a href="?{{ qs_base }}&sort=rol&dir={% if sort == 'rol' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+                        Rol {% if sort == 'rol' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
                     </a>
                 </th>
-                <th>
-                    <a href="?{{ qs_params }}&sort=estado&dir={% if sort == 'estado' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-                        Estado
-                        {% if sort == 'estado' %}
-                            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                        {% endif %}
+                <th class="text-center">
+                    <a href="?{{ qs_base }}&sort=estado&dir={% if sort == 'estado' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+                        Estado {% if sort == 'estado' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
                     </a>
                 </th>
-                <th>
-                    <a href="?{{ qs_params }}&sort=mfa_habilitado&dir={% if sort == 'mfa_habilitado' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-                        MFA
-                        {% if sort == 'mfa_habilitado' %}
-                            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                        {% endif %}
-                    </a>
-                </th>
-                <th>
-                    <a href="?{{ qs_params }}&sort=usuario__last_login&dir={% if sort == 'usuario__last_login' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-                        Último acceso
-                        {% if sort == 'usuario__last_login' %}
-                            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                        {% endif %}
-                    </a>
-                </th>
-                <th>
-                    <a href="?{{ qs_params }}&sort=sesiones_activas&dir={% if sort == 'sesiones_activas' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-                        Sesiones
-                        {% if sort == 'sesiones_activas' %}
-                            <span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>
-                        {% endif %}
+                <th class="text-center">
+                    <a href="?{{ qs_base }}&sort=usuario__last_login&dir={% if sort == 'usuario__last_login' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+                        Último acceso {% if sort == 'usuario__last_login' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
                     </a>
                 </th>
                 <th class="text-center">Acciones</th>
@@ -91,45 +50,46 @@
         </thead>
         <tbody>
             {% for perfil in perfiles %}
-            <tr>
+            <tr class="{% if perfil.estado != 'ACTIVO' %}table-light text-muted{% endif %}">
                 <td>{{ perfil.usuario.username }}</td>
                 <td>{{ perfil.usuario.email }}</td>
                 <td>{{ perfil.usuario.first_name }}</td>
                 <td>{{ perfil.usuario.last_name }}</td>
                 <td>{{ perfil.telefono|default:"—" }}</td>
-                <td>{{ perfil.rol }}</td>
-                <td>
-                    {% if perfil.estado == 'ACTIVO' %}
-                    <span class="badge bg-success">ACTIVO</span>
-                    {% elif perfil.estado == 'INACTIVO' %}
-                    <span class="badge bg-warning">INACTIVO</span>
+                <td class="text-center">
+                    {% if perfil.rol == 'ADMIN' %}
+                        <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle px-3 py-1 rounded-pill">Admin</span>
+                    {% elif perfil.rol == 'EDITOR' %}
+                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-1 rounded-pill">Editor</span>
                     {% else %}
-                    <span class="badge bg-danger">BLOQUEADO</span>
+                        <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-3 py-1 rounded-pill">{{ perfil.rol|default:"Usuario" }}</span>
                     {% endif %}
                 </td>
-                <td>{{ perfil.mfa_habilitado|yesno:"Sí,No" }}</td>
-                <td>{{ perfil.usuario.last_login|date:"d M Y H:i" }}</td>
-                <td>{{ perfil.sesiones_activas }}</td>
-                <td class="text-end">
-                    <div class="d-inline-flex gap-1">
-                        {# Editar visible para ADMIN y EDITOR #}
-                        {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
-                          <a href="{% url 'usuarios_edit' perfil.id %}" class="btn btn-sm btn-warning">Editar</a>
-                        {% endif %}
-
-                        {# Eliminar solo para ADMIN #}
-                        {% if request.user.perfil.rol == 'ADMIN' %}
-                          <form action="{% url 'usuarios_delete' perfil.id %}" method="post" class="d-inline js-delete-user">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
-                          </form>
-                        {% endif %}
-                    </div>
+                <td class="text-center">
+                    {% if perfil.estado == 'ACTIVO' %}
+                        <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle px-3 py-1 rounded-pill">Activo</span>
+                    {% elif perfil.estado == 'INACTIVO' %}
+                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-1 rounded-pill">Inactivo</span>
+                    {% else %}
+                        <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle px-3 py-1 rounded-pill">Bloqueado</span>
+                    {% endif %}
+                </td>
+                <td class="text-center">{{ perfil.usuario.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</td>
+                <td class="text-center">
+                    {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
+                      <a href="{% url 'usuarios_edit' perfil.id %}" class="btn btn-sm btn-outline-primary me-1">Editar</a>
+                    {% endif %}
+                    {% if request.user.perfil.rol == 'ADMIN' %}
+                      <form action="{% url 'usuarios_delete' perfil.id %}" method="post" class="d-inline js-delete-user">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                      </form>
+                    {% endif %}
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="11" class="text-center text-muted py-4">No hay usuarios registrados.</td>
+                <td colspan="9" class="text-center text-muted py-4">No hay usuarios registrados.</td>
             </tr>
             {% endfor %}
         </tbody>

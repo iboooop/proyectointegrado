@@ -1,36 +1,62 @@
 {% load static %}
 <div class="table-responsive">
   <table class="table table-hover align-middle">
-    <thead class="table-light">
+    <thead>
       <tr>
         {% with qs_base='q='|add:q|add:'&page_size='|add:page_size %}
         <th>
-          <a href="?{{ qs_base }}&sort=nombre&dir={% if sort == 'nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
+          <a href="?{{ qs_base }}&sort=nombre&dir={% if sort == 'nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}">
             Nombre {% if sort == 'nombre' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
           </a>
         </th>
-        <th>RUT</th>
-        <th>Contacto</th>
-        <th>Teléfono</th>
-        <th>Correo</th>
-        <th>Estado</th>
+        <th>
+          <a href="?{{ qs_base }}&sort=razon_social&dir={% if sort == 'razon_social' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Razón Social {% if sort == 'razon_social' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th>
+          <a href="?{{ qs_base }}&sort=rut&dir={% if sort == 'rut' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            RUT {% if sort == 'rut' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th>
+          <a href="?{{ qs_base }}&sort=contacto&dir={% if sort == 'contacto' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Contacto {% if sort == 'contacto' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th>
+          <a href="?{{ qs_base }}&sort=telefono&dir={% if sort == 'telefono' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Teléfono {% if sort == 'telefono' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th>
+          <a href="?{{ qs_base }}&sort=correo&dir={% if sort == 'correo' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Correo {% if sort == 'correo' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th class="text-center">
+          <a href="?{{ qs_base }}&sort=estado&dir={% if sort == 'estado' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Estado {% if sort == 'estado' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
         <th class="text-center">Acciones</th>
         {% endwith %}
       </tr>
     </thead>
     <tbody>
       {% for proveedor in proveedores %}
-      <tr>
+      <tr class="{% if proveedor.estado != 'ACTIVO' %}table-light text-muted{% endif %}">
         <td>{{ proveedor.nombre }}</td>
+        <td>{{ proveedor.razon_social|default:"—" }}</td>
         <td>{{ proveedor.rut }}</td>
         <td>{{ proveedor.contacto }}</td>
         <td>{{ proveedor.telefono|default:"—" }}</td>
         <td>{{ proveedor.correo|default:"—" }}</td>
-        <td>
+        <td class="text-center">
           {% if proveedor.estado == 'ACTIVO' %}
-            <span class="badge bg-success">Activo</span>
+            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle px-3 py-1 rounded-pill">Activo</span>
           {% else %}
-            <span class="badge bg-danger">Inactivo</span>
+            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-1 rounded-pill">Inactivo</span>
           {% endif %}
         </td>
         <td class="text-center">
@@ -39,7 +65,7 @@
       </tr>
       {% empty %}
       <tr>
-        <td colspan="7" class="text-center text-muted py-4">No hay proveedores registrados.</td>
+        <td colspan="8" class="text-center text-muted py-4">No hay proveedores registrados.</td>
       </tr>
       {% endfor %}
     </tbody>

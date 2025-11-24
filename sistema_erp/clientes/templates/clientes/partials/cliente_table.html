@@ -1,6 +1,6 @@
 {% load static %}
 <div class="table-responsive">
-  <table class="table table-hover align-middle table-lg">
+  <table class="table table-hover align-middle">
     <thead>
       <tr>
         {% with qs_base='q='|add:q|add:'&page_size='|add:page_size %}
@@ -14,10 +14,26 @@
             RUT {% if sort == 'rut' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
           </a>
         </th>
-        <th>Teléfono</th>
-        <th>Email</th>
-        <th>Estado</th>
-        <th>Fecha</th>
+        <th>
+          <a href="?{{ qs_base }}&sort=telefono&dir={% if sort == 'telefono' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Teléfono {% if sort == 'telefono' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th>
+          <a href="?{{ qs_base }}&sort=email&dir={% if sort == 'email' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Email {% if sort == 'email' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th class="text-center">
+          <a href="?{{ qs_base }}&sort=estadoCondicion&dir={% if sort == 'estadoCondicion' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Estado {% if sort == 'estadoCondicion' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th>
+          <a href="?{{ qs_base }}&sort=fecha_registro&dir={% if sort == 'fecha_registro' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Fecha registro {% if sort == 'fecha_registro' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
         <th class="text-center">Acciones</th>
         {% endwith %}
       </tr>
@@ -25,20 +41,20 @@
 
     <tbody>
       {% for c in clientes %}
-      <tr>
+      <tr class="{% if c.estadoCondicion|lower != 'activo' %}table-light text-muted{% endif %}">
         <td>{{ c.nombre }}</td>
         <td>{{ c.rut }}</td>
         <td>{{ c.telefono|default:"—" }}</td>
         <td>{{ c.email|default:"—" }}</td>
-        <td>
+        <td class="text-center">
           {% if c.estadoCondicion|lower == 'activo' %}
-            <span class="badge bg-success">Activo</span>
+            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle px-3 py-1 rounded-pill">Activo</span>
           {% elif c.estadoCondicion|lower == 'inactivo' %}
-            <span class="badge bg-secondary">Inactivo</span>
+            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-1 rounded-pill">Inactivo</span>
           {% elif c.estadoCondicion|lower == 'suspendido' %}
-            <span class="badge bg-warning text-dark">Suspendido</span>
+            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-1 rounded-pill">Suspendido</span>
           {% else %}
-            <span class="badge bg-light text-dark">Desconocido</span>
+            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-1 rounded-pill">{{ c.estadoCondicion|default:"Desconocido" }}</span>
           {% endif %}
         </td>
         <td>{{ c.fecha_registro|date:"d/m/Y H:i" }}</td>
