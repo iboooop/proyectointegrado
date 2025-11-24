@@ -272,6 +272,31 @@
             margin-top: 0.2rem;
         }
 
+        /* Mensaje de error general flotante, centrado y con ancho fijo */
+        .login-error-alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            border: 1px solid #f5c6cb;
+            z-index: 1050;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-error-alert i {
+            margin-right: 0.5rem;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .login-wrapper {
@@ -298,25 +323,11 @@
                 
                 <!-- Logo centrado -->
                 <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="login-logo">
-                
-                <!-- Mostrar solo mensajes de error/alerta (no éxito) -->
-                {% if messages %}
-                    {% for message in messages %}
-                        {% if 'error' in message.tags or 'warning' in message.tags %}
-                        <div class="flash-error"><p>{{ message }}</p></div>
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-                
+
                 <form method="post" novalidate>
                     {% csrf_token %}
 
-                    {# Mostrar errores no asociados a un campo (ej. credenciales incorrectas) #}
-                    {% if form.non_field_errors %}
-                        {% for error in form.non_field_errors %}
-                            <div class="field-error">{{ error }}</div>
-                        {% endfor %}
-                    {% endif %}
+                    
 
                     <div class="mb-3">
                         {{ form.usuario_o_email.label_tag }}
@@ -423,5 +434,18 @@
             </div>
         </div>
     </div>
+
+    <!-- Mensaje de error general flotante, centrado y con ancho fijo -->
+    {% if form.non_field_errors %}
+        <div class="login-error-alert">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="login-error-alert" style="visibility:hidden;">.</div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

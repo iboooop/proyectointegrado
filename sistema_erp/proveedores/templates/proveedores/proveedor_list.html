@@ -26,35 +26,49 @@
       text-decoration: underline !important;
     }
 
-    /* Eliminar espacio bajo el footer: que el body no tenga margen/padding extra */
-    html, body {
-      height: 100%;
-    }
-    body {
-      margin: 0;
-      padding: 0;
+    /* Mejorar tabla responsiva (igual que transaccion_list.html) */
+    .table-responsive {
+      overflow-x: auto;
+      min-height: 400px;
     }
 
-    /* Opcional: si quieres que el contenido principal no genere gap al final,
-       deja que crezca pero sin forzar min-height con margen extra */
-    .page-wrapper {
+    /* Ajustar anchos de columnas similar al otro template (opcional) */
+    .table th:nth-child(1), .table td:nth-child(1) { min-width: 120px; } /* Fecha / primera columna */
+    /* ...puedes añadir más reglas si lo necesitas... */
+
+    /* Forzar footer abajo y eliminar espacio blanco bajo el footer (igual que transaccion_list.html) */
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    body {
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
-    .page-content {
+    /* El contenedor principal debe crecer para empujar el footer abajo (misma regla que en transacciones) */
+    .container-fluid.px-3.my-4 {
       flex: 1 0 auto;
     }
     footer.productos-footer {
       flex-shrink: 0;
-      margin-bottom: 0 !important;
-      padding-bottom: 0 !important;
+      width: 100%;
+      margin: 0;
+      box-sizing: border-box;
+      border-top: none;
+      background: linear-gradient(180deg, #341207 0%, #231006 100%);
+      color: #fff;
+    }
+
+    /* Ajustes internos del footer (coincidir con transaccion_list) */
+    footer.productos-footer .container {
+      padding-top: 1.25rem;
+      padding-bottom: 1.25rem;
     }
   </style>
 </head>
-<body class="bg-light page-wrapper">
-  <div class="page-content">
-    <div class="container-fluid px-3 my-4" style="max-width: 1400px;">
+<body class="bg-light">
+  <div class="container-fluid px-3 my-4" style="max-width: 1400px;">
     <a href="/" class="btn btn-outline-secondary mb-3">&larr; Volver al dashboard</a>
 
     <div class="card shadow-sm rounded-4">
@@ -94,7 +108,6 @@
         </div>
       </div>
     </div>
-  </div>
   </div>
 
   <script>
@@ -177,23 +190,23 @@
   </script>
 
   <footer class="productos-footer">
-    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
-      <div class="d-flex align-items-center gap-3">
-        <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="productos-footer-logo">
-        <div>
-          <div class="fw-semibold text-uppercase mb-1" style="font-size:0.8rem;letter-spacing:0.08em;">Info de Contacto</div>
-          <div style="font-size:0.85rem;">Móvil: +569 6226 1712</div>
-          <div style="font-size:0.85rem;">E-Mail: ventas@lilis.cl</div>
-          <div style="font-size:0.85rem;" class="mt-2">
-            Ubícanos en: Paseo San Ramón<br>
-            Waldo Alcalde 401, local 8, San Ramón, Coquimbo
+        <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+          <div class="d-flex align-items-center gap-3">
+            <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="productos-footer-logo">
+            <div>
+              <div class="fw-semibold text-uppercase mb-1" style="font-size:0.8rem;letter-spacing:0.08em;">Info de Contacto</div>
+              <div style="font-size:0.85rem;">Móvil: +569 6226 1712</div>
+              <div style="font-size:0.85rem;">E-Mail: ventas@lilis.cl</div>
+              <div style="font-size:0.85rem;" class="mt-2">
+                Ubícanos en: Paseo San Ramón<br>
+                Waldo Alcalde 401, local 8, San Ramón, Coquimbo
+              </div>
+            </div>
+          </div>
+          <div class="ms-auto text-end" style="font-size:0.8rem;">
+            <small>Derechos Reservados © 2022 Lilis.</small>
           </div>
         </div>
-      </div>
-      <div class="ms-auto text-end" style="font-size:0.8rem;">
-        <small>Derechos Reservados © 2022 Lilis.</small>
-      </div>
-    </div>
-  </footer>
+    </footer>
 </body>
 </html>

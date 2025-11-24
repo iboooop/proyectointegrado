@@ -8,6 +8,7 @@ from productos.models import Producto
 from usuarios.models import Perfil
 
 CATEGORIES = ['ALFAJORES', 'CONFITERIA', 'CHOCOLATES', 'GALLETAS']
+
 ROLES = ['ADMIN', 'BODEGA', 'VENTAS', 'COMPRAS', 'EDITOR', 'LECTOR']
 
 

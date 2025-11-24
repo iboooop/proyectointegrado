@@ -30,10 +30,13 @@
         /* Eliminar espacio bajo el footer */
         html, body {
           height: 100%;
+          margin: 0;
         }
         body {
-          margin: 0;
           padding: 0;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
         }
 
         .page-wrapper {
@@ -44,10 +47,20 @@
         .page-content {
           flex: 1 0 auto;
         }
+
+        /* Footer identical to product_list.html */
         footer.productos-footer {
           flex-shrink: 0;
           margin-bottom: 0 !important;
           padding-bottom: 0 !important;
+          width: 100%;
+          box-sizing: border-box;
+          background: linear-gradient(180deg, #341207 0%, #231006 100%);
+          color: #fff;
+        }
+        footer.productos-footer .container {
+          padding-top: 1.25rem;
+          padding-bottom: 1.25rem;
         }
     </style>
 
@@ -189,10 +202,6 @@
         if (params.get('deleted')==='1') { showAlert('success', 'Usuario eliminado', 'Se eliminó correctamente.'); }
     })();
     </script>
-
-<<<<<<< HEAD
-{% include 'partials/footer.html' %}
-=======
     <footer class="productos-footer">
         <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
           <div class="d-flex align-items-center gap-3">
@@ -212,6 +221,5 @@
           </div>
         </div>
     </footer>
->>>>>>> origin/feature/production-TC
 </body>
 </html>
