@@ -6,82 +6,101 @@
     <meta charset="UTF-8">
     <title>Editar Usuario</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{% static 'usuarios/css/usuarios.css' %}" rel="stylesheet">
+    <link href="{% static 'productos/css/styles.css' %}" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Eliminar espacio bajo el footer */
+        html, body {
+          height: 100%;
+        }
+        body {
+          margin: 0;
+          padding: 0;
+        }
+
+        .page-wrapper {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+        .page-content {
+          flex: 1 0 auto;
+        }
+        footer.productos-footer {
+          flex-shrink: 0;
+          margin-bottom: 0 !important;
+          padding-bottom: 0 !important;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-light page-wrapper">
+    <div class="page-content">
     <div class="container" style="padding-left: 32px; padding-right: 32px;">
         <a href="{% url 'usuarios_list' %}" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
 
-        <div class="card">
-            <div class="card-header">
-                Editar Usuario
-            </div>
+        <div class="card shadow-sm rounded-4">
+            <div class="card-body">
+                <h5 class="mb-4 fw-semibold">Editar Usuario</h5>
 
-            {% if messages %}
-                {% for m in messages %}
-                    {% if m.tags == 'success' %}
-                        <div class="d-none" data-swal-success="{{ m }}"></div>
-                    {% else %}
-                        <div class="alert alert-{{ m.tags }} mb-2">{{ m }}</div>
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-
-            <form method="post" enctype="multipart/form-data" novalidate>
-                {% csrf_token %}
-
-                <!-- Errores globales -->
-                {% if usuario_form.non_field_errors %}
-                <div class="alert alert-danger">
-                    {{ usuario_form.non_field_errors|join:", " }}
-                </div>
-                {% endif %}
-                {% if perfil_form.non_field_errors %}
-                <div class="alert alert-danger">
-                    {{ perfil_form.non_field_errors|join:", " }}
-                </div>
-                {% endif %}
-
-                <h5 class="mb-4">Avatar</h5>
-                <div class="row mb-4">
-                    <div class="col-md-6 d-flex align-items-center gap-3">
-                        <div class="avatar-circle">
-                            <img id="avatarPreview" class="avatar-img" 
-                                 src="{% if perfil_form.instance.avatar %}{{ perfil_form.instance.avatar.url }}{% else %}https://ui-avatars.com/api/?name={{ usuario_form.instance.first_name|default:'Usuario' }}+{{ usuario_form.instance.last_name|default:'' }}&background=dee2e6&color=495057&size=120{% endif %}" 
-                                 alt="Avatar">
-                            <button type="button" class="btn btn-outline-primary avatar-edit-btn" data-bs-toggle="modal" data-bs-target="#avatarModal">Editar</button>
-                        </div>
-                        {% if perfil_form.avatar.errors %}
-                        <div class="text-danger">{{ perfil_form.avatar.errors|join:", " }}</div>
+                {% if messages %}
+                    {% for m in messages %}
+                        {% if m.tags == 'success' %}
+                            <div class="d-none" data-swal-success="{{ m }}"></div>
+                        {% else %}
+                            <div class="alert alert-{{ m.tags }} mb-2">{{ m }}</div>
                         {% endif %}
-                    </div>
-                </div>
+                    {% endfor %}
+                {% endif %}
 
-                <!-- Modal para editar avatar -->
-                <div class="modal fade" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="avatarModalLabel">Editar Avatar</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                            </div>
-                            <div class="modal-body d-flex flex-column align-items-center">
-                                <img id="modalAvatarPreview" class="modal-avatar-img"
-                                     src="{% if perfil_form.instance.avatar %}{{ perfil_form.instance.avatar.url }}{% else %}https://ui-avatars.com/api/?name={{ usuario_form.instance.first_name|default:'Usuario' }}+{{ usuario_form.instance.last_name|default:'' }}&background=dee2e6&color=495057&size=120{% endif %}" 
-                                     alt="Avatar preview">
-                                <input type="file" id="id_avatar" name="avatar" accept="image/*" class="form-control mt-2" style="max-width: 250px;">
-                                <div id="avatarError" class="text-danger mt-2" style="display:none;"></div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="button" class="btn btn-primary" id="saveAvatarBtn" data-bs-dismiss="modal">Guardar</button>
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Errores globales -->
+                    {% if usuario_form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ usuario_form.non_field_errors|join:", " }}
+                    </div>
+                    {% endif %}
+                    {% if perfil_form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ perfil_form.non_field_errors|join:", " }}
+                    </div>
+                    {% endif %}
+
+                    <h6 class="fw-semibold mb-3">Avatar</h6>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Imagen de perfil</label>
+                            <input type="file" id="id_avatar" name="avatar" accept="image/*" class="form-control" style="display:none;">
+                            {% if perfil_form.avatar.errors %}
+                            <div class="text-danger small">{{ perfil_form.avatar.errors|join:", " }}</div>
+                            {% endif %}
+
+                            <!-- Miniatura + botón subir imagen -->
+                            <div class="thumbnail-wrapper mt-2">
+                                <div class="thumbnail-box" id="preview-box">
+                                    <img id="avatarPreview" 
+                                         src="{% if perfil_form.instance.avatar %}{{ perfil_form.instance.avatar.url }}{% else %}https://ui-avatars.com/api/?name={{ usuario_form.instance.first_name|default:'Usuario' }}+{{ usuario_form.instance.last_name|default:'' }}&background=dee2e6&color=495057&size=120{% endif %}" 
+                                         alt="Avatar" 
+                                         style="width:100%;height:100%;object-fit:cover;border-radius:10px;">
+                                </div>
+
+                                <div>
+                                    <button
+                                        type="button"
+                                        class="btn btn-upload"
+                                        onclick="document.getElementById('id_avatar').click();"
+                                    >
+                                        <span class="btn-upload-icon">↑</span>
+                                        <span>Subir imagen</span>
+                                    </button>
+                                    <div class="form-text">JPG o PNG, máx. 2MB.</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <h5 class="mb-3">Identificación</h5>
+                <h6 class="fw-semibold mb-3">Identificación</h6>
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="username" class="form-label">Username</label>
@@ -116,7 +135,7 @@
                     </div>
                 </div>
 
-                <h5 class="mb-3">Estado y acceso</h5>
+                <h6 class="fw-semibold mb-3">Estado y acceso</h6>
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="telefono" class="form-label">Teléfono</label>
@@ -139,7 +158,7 @@
                     </div>
                 </div>
 
-                <h5 class="mb-3">Seguridad</h5>
+                <h6 class="fw-semibold mb-3">Seguridad</h6>
                 <div class="form-check form-switch mb-2">
                     <input class="form-check-input" type="checkbox" id="togglePasswordChange">
                     <label class="form-check-label" for="togglePasswordChange">Cambiar contraseña</label>
@@ -175,13 +194,34 @@
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-end gap-2">
-                    <button type="submit" class="btn btn-save">Guardar</button>
-                    <a href="{% url 'usuarios_list' %}" class="btn btn-cancel">Cancelar</a>
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{% url 'usuarios_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Editar</button>
                 </div>
             </form>
         </div>
     </div>
+    </div>
+
+    <footer class="productos-footer mt-4">
+        <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="productos-footer-logo">
+                <div>
+                    <div class="fw-semibold text-uppercase mb-1" style="font-size:0.8rem;letter-spacing:0.08em;">Info de Contacto</div>
+                    <div style="font-size:0.85rem;">Móvil: +569 6226 1712</div>
+                    <div style="font-size:0.85rem;">E-Mail: ventas@lilis.cl</div>
+                    <div style="font-size:0.85rem;" class="mt-2">
+                        Ubícanos en: Paseo San Ramón<br>
+                        Waldo Alcalde 401, local 8, San Ramón, Coquimbo
+                    </div>
+                </div>
+            </div>
+            <div class="ms-auto text-end" style="font-size:0.8rem;">
+                <small>Derechos Reservados © 2022 Lilis.</small>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -194,7 +234,7 @@
                 icon: 'success',
                 title: 'Cambios guardados',
                 text: text || 'Los cambios se han guardado correctamente.',
-                confirmButtonColor: '#2563eb',
+                confirmButtonColor: '#d33',
                 timer: 1800,
                 timerProgressBar: true,
                 showConfirmButton: false
@@ -205,45 +245,27 @@
     // 🔹 Previsualización del avatar
     const avatarInput = document.getElementById('id_avatar');
     const avatarPreview = document.getElementById('avatarPreview');
-    const modalAvatarPreview = document.getElementById('modalAvatarPreview');
-    const saveAvatarBtn = document.getElementById('saveAvatarBtn');
-    const avatarError = document.getElementById('avatarError');
-    let tempAvatarUrl = avatarPreview.src;
 
-    avatarInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            if (!file.type.startsWith('image/')) {
-                avatarError.textContent = 'Solo se permiten imágenes.';
-                avatarError.style.display = 'block';
-                return;
+    if (avatarInput) {
+        avatarInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (!file.type.startsWith('image/')) {
+                    alert('Solo se permiten imágenes.');
+                    return;
+                }
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('El tamaño máximo permitido es 2MB.');
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    avatarPreview.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
             }
-            if (file.size > 2 * 1024 * 1024) {
-                avatarError.textContent = 'El tamaño máximo permitido es 2MB.';
-                avatarError.style.display = 'block';
-                return;
-            }
-            avatarError.style.display = 'none';
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-                modalAvatarPreview.src = ev.target.result;
-                tempAvatarUrl = ev.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    saveAvatarBtn.addEventListener('click', function() {
-        if (tempAvatarUrl) {
-            avatarPreview.src = tempAvatarUrl;
-        }
-    });
-
-    document.getElementById('avatarModal').addEventListener('show.bs.modal', function() {
-        modalAvatarPreview.src = avatarPreview.src;
-        tempAvatarUrl = avatarPreview.src;
-        avatarError.style.display = 'none';
-    });
+        });
+    }
 
     // 🔹 Toggle cambio de contraseña
     (function(){

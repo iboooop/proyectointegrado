@@ -211,6 +211,13 @@ def usuarios_edit_view(request, id):
     })
 
 
+# ---------------- DETALLE ----------------
+@login_required
+def usuarios_detail_view(request, id):
+    perfil = get_object_or_404(Perfil, id=id)
+    return render(request, 'usuarios/details.html', {'perfil': perfil})
+
+
 # ---------------- ELIMINAR ----------------
 @login_required
 def usuarios_delete_view(request, id):

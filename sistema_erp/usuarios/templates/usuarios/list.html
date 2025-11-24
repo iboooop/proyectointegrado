@@ -25,9 +25,33 @@
           color: #000000 !important;
           text-decoration: underline !important;
         }
+
+        /* Eliminar espacio bajo el footer */
+        html, body {
+          height: 100%;
+        }
+        body {
+          margin: 0;
+          padding: 0;
+        }
+
+        .page-wrapper {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+        .page-content {
+          flex: 1 0 auto;
+        }
+        footer.productos-footer {
+          flex-shrink: 0;
+          margin-bottom: 0 !important;
+          padding-bottom: 0 !important;
+        }
     </style>
 </head>
-<body class="bg-light">
+<body class="bg-light page-wrapper">
+    <div class="page-content">
     <div class="container-fluid px-3 my-4" style="max-width: 1400px;">
         <a href="/" class="btn btn-outline-secondary mb-3">&larr; Volver al dashboard</a>
 
@@ -67,6 +91,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <script>
@@ -149,7 +174,7 @@
         // Alertas de estado
         const params = new URLSearchParams(window.location.search);
         const showAlert = (icon, title, text) => {
-          Swal.fire({ icon, title, text, timer: 2000, timerProgressBar: true, showConfirmButton: false });
+          Swal.fire({ icon, title, text, timer: 2000, timerProgressBar: true, showConfirmButton: false, confirmButtonColor: '#d33' });
         };
 
         if (params.get('created')==='1') { showAlert('success', 'Usuario creado', 'Se registró correctamente.'); }
@@ -179,151 +204,3 @@
     </footer>
 </body>
 </html>
-                confirmButtonColor: '#2563eb'
-            });
-            // Limpiar el query param para evitar re-mostrar al refrescar
-            params.delete('created');
-            const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-            window.history.replaceState({}, '', newUrl);
-        }
-
-        function bindDeleteHandlers(scope=document) {
-            scope.querySelectorAll('form.js-delete-user').forEach((form) => {
-                form.addEventListener('submit', function(e){
-                    e.preventDefault();
-                    Swal.fire({
-                        title: '¿Eliminar usuario?',
-                        text: 'Esta acción no se puede deshacer.',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Sí, eliminar',
-                        cancelButtonText: 'Cancelar',
-                        confirmButtonColor: '#dc3545',
-                        cancelButtonColor: '#6c757d'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
-                        }
-                    });
-                });
-            });
-        }
-        bindDeleteHandlers(document);
-
-        // Búsqueda en vivo (debounce + fetch parcial)
-        const searchInput = document.getElementById('searchInput');
-        const tableWrap = document.getElementById('usersTableWrap');
-        let debounceTimer = null;
-
-        function buildUrl() {
-            const params2 = new URLSearchParams(window.location.search);
-            const qVal = searchInput.value.trim();
-            if (qVal) params2.set('q', qVal); else params2.delete('q');
-            params2.set('partial', '1');
-            // Reiniciar a la primera página al cambiar búsqueda
-            params2.delete('page');
-            // Respetar page_size actual
-            const pageSizeSel = document.getElementById('pageSizeSelect');
-            if (pageSizeSel && pageSizeSel.value) params2.set('page_size', pageSizeSel.value);
-            return window.location.pathname + '?' + params2.toString();
-        }
-
-        function updateUrlOnly() {
-            const params2 = new URLSearchParams(window.location.search);
-            const qVal = searchInput.value.trim();
-            if (qVal) params2.set('q', qVal); else params2.delete('q');
-            const newUrl = window.location.pathname + (params2.toString() ? '?' + params2.toString() : '');
-            window.history.replaceState({}, '', newUrl);
-        }
-
-        async function fetchAndUpdate(url) {
-            const resp = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-            const html = await resp.text();
-            tableWrap.innerHTML = html;
-            bindDeleteHandlers(tableWrap);
-        }
-
-        if (searchInput) {
-            searchInput.addEventListener('input', function(){
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(async () => {
-                    try {
-                        const url = buildUrl();
-                        await fetchAndUpdate(url);
-                        updateUrlOnly();
-                    } catch (e) {
-                        console.error('Error al buscar:', e);
-                    }
-                }, 300);
-            });
-        }
-
-        // Cambio de filas por página
-        const pageSizeSelect = document.getElementById('pageSizeSelect');
-        if (pageSizeSelect) {
-            pageSizeSelect.addEventListener('change', async function(){
-                const params = new URLSearchParams(window.location.search);
-                params.set('page_size', this.value);
-                params.delete('page');
-                params.set('partial', '1');
-                const url = window.location.pathname + '?' + params.toString();
-                await fetchAndUpdate(url);
-                // Actualizar URL visible sin partial
-                params.delete('partial');
-                const newUrl = window.location.pathname + '?' + params.toString();
-                window.history.replaceState({}, '', newUrl);
-            });
-        }
-
-        // Interceptar clicks de paginación y orden para AJAX
-        tableWrap.addEventListener('click', async function(e){
-            const a = e.target.closest('a.page-link, thead a');
-            if (a && a.getAttribute('href')) {
-                e.preventDefault();
-                const url = a.getAttribute('href') + '&partial=1';
-                await fetchAndUpdate(url);
-                // Actualizar URL sin partial
-                const cleanUrl = a.getAttribute('href');
-                window.history.replaceState({}, '', cleanUrl);
-            }
-        });
-
-        // Ir a página específica (jumpPageForm)
-        const jumpPageForm = () => tableWrap.querySelector('#jumpPageForm');
-        const attachJumpHandler = () => {
-            const form = jumpPageForm();
-            if (!form) return;
-            const input = form.querySelector('#jumpPageInput');
-            const btn = form.querySelector('#jumpGoBtn');
-            if (!input || !btn) return;
-            btn.addEventListener('click', async function(){
-                let target = parseInt(input.value, 10);
-                if (isNaN(target) || target < 1) target = 1;
-                const max = parseInt(input.getAttribute('max'), 10) || 1;
-                if (target > max) target = max;
-                const params = new URLSearchParams(window.location.search);
-                params.set('page', target);
-                params.set('partial', '1');
-                if (pageSizeSelect && pageSizeSelect.value) params.set('page_size', pageSizeSelect.value);
-                const url = window.location.pathname + '?' + params.toString();
-                await fetchAndUpdate(url);
-                // URL limpia
-                params.delete('partial');
-                window.history.replaceState({}, '', window.location.pathname + '?' + params.toString());
-                attachJumpHandler(); // re-attach after DOM replace
-            });
-        };
-        attachJumpHandler();
-
-        // Re-attach jump handler cada vez que se reemplaza el partial
-        const originalFetchAndUpdate = fetchAndUpdate;
-        fetchAndUpdate = async function(url){
-            await originalFetchAndUpdate(url);
-            attachJumpHandler();
-        };
-    })();
-    </script>
-{% include 'partials/footer.html' %}
-</body>
-</html>
-{% comment %}Footer agregado{% endcomment %}

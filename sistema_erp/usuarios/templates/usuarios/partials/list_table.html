@@ -76,15 +76,7 @@
                 </td>
                 <td class="text-center">{{ perfil.usuario.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</td>
                 <td class="text-center">
-                    {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
-                      <a href="{% url 'usuarios_edit' perfil.id %}" class="btn btn-sm btn-outline-primary me-1">Editar</a>
-                    {% endif %}
-                    {% if request.user.perfil.rol == 'ADMIN' %}
-                      <form action="{% url 'usuarios_delete' perfil.id %}" method="post" class="d-inline js-delete-user">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
-                      </form>
-                    {% endif %}
+                    <a href="{% url 'usuarios_detail' perfil.id %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
                 </td>
             </tr>
             {% empty %}
