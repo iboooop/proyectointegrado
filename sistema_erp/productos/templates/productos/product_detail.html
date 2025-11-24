@@ -19,32 +19,7 @@
 
     <div class="card shadow-sm rounded-4">
       <div class="card-body">
-<<<<<<< HEAD
-        <div class="row mb-3">
-          <div class="col-md-6">
-            <p><strong>Categorí:</strong> {{ producto.get_categoria_display }}</p>
-            <p><strong>Precio:</strong> ${{ producto.precio }}</p>
-            <p>
-            <strong>Stock actual:</strong>
-            {{ producto.stock_actual }}
-            {% if producto.stock == 'ALTO' %}
-                <span class="badge bg-success ms-1">ALTO</span>
-            {% elif producto.stock == 'BAJO' %}
-                <span class="badge bg-danger ms-1">BAJO</span>
-            {% else %}
-                <span class="badge bg-secondary ms-1">N/A</span>
-            {% endif %}
-            </p>
-          </div>
-          <div class="col-md-6">
-            <p><strong>Proveedor:</strong> {{ producto.proveedor }}</p>
-            <p><strong>Lote:</strong> {{ producto.lote|default:"N/A" }}</p>
-            <p><strong>Fecha de vencimiento:</strong> 
-              {% if producto.fecha_vencimiento %}
-                {{ producto.fecha_vencimiento|date:"d/m/Y" }}
-              {% else %}
-                No registrada
-=======
+
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5 class="mb-0 fw-semibold">{{ producto.nombre }}</h5>
           <span class="badge bg-secondary">SKU: {{ producto.sku }}</span>
@@ -57,7 +32,7 @@
               Activo
               {% if producto.fecha_activacion %}
                 desde {{ producto.fecha_activacion|date:"d/m/Y H:i" }}
->>>>>>> origin/feature/production-TC
+
               {% endif %}
             {% else %}
               Inactivo

@@ -4,6 +4,11 @@ from proveedores.models import Proveedor
 
 
 class CategoriaProducto(models.Model):
+
+    precio = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    lote = models.CharField(max_length=50, null=True, blank=True)
+    stock = models.CharField(max_length=10, choices=[('ALTO','ALTO'),('BAJO','BAJO')], default='ALTO')
+    
     codigo = models.CharField(max_length=50, unique=True)
     nombre = models.CharField(max_length=100)
 

@@ -4,6 +4,7 @@ from productos.models import Producto
 from proveedores.models import Proveedor
 from django.contrib.auth.models import User
 from usuarios.models import Perfil
+from bodegas.models import Bodega
 
 class MovimientoInventario(models.Model):
     TIPO_MOVIMIENTO = [
