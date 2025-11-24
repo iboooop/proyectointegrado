@@ -5,21 +5,43 @@
   <meta charset="UTF-8">
   <title>Editar Movimiento</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="{% static 'transacciones/css/transacciones.css' %}" rel="stylesheet">
+  <link href="{% static 'productos/css/styles.css' %}" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body>
-  <div class="container my-5">
-    <a href="{% url 'detalle_transaccion' transaccion.id %}" class="btn btn-outline-secondary mb-3">&larr; Volver al detalle</a>
 
-    <div class="card">
-      <div class="card-header card-header-dark">
-        <h4 class="mb-0">Editar Movimiento</h4>
-      </div>
+<body class="bg-light">
+  <div class="container my-4">
+    <a href="{% url 'detalle_transaccion' transaccion.id %}" class="btn btn-outline-secondary mb-3">
+      &larr; Volver al detalle
+    </a>
 
+    <div class="card shadow-sm rounded-4">
       <div class="card-body">
-        <form method="post" novalidate>
+
+        <h5 class="mb-3 fw-semibold">Editar movimiento de inventario</h5>
+
+        <!-- NAV TABS -->
+        <ul class="nav nav-pills mb-4" id="productTabs">
+          <li class="nav-item">
+            <button class="nav-link" id="paso1-tab" data-bs-toggle="pill" data-bs-target="#paso1" type="button">
+              1. Datos del movimiento
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="paso2-tab" data-bs-toggle="pill" data-bs-target="#paso2" type="button">
+              2. Control avanzado
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="paso3-tab" data-bs-toggle="pill" data-bs-target="#paso3" type="button">
+              3. Referencias / Observaciones
+            </button>
+          </li>
+        </ul>
+
+        <form method="post" id="movEditForm" novalidate>
           {% csrf_token %}
+<<<<<<< HEAD
           {% for field in form %}
             <div class="mb-3">
               <label class="form-label fw-semibold">{{ field.label }}</label>
@@ -35,11 +57,220 @@
           <div class="d-flex justify-content-end mt-4">
             <button type="submit" class="btn btn-edit me-2">Guardar cambios</button>
             <a href="{% url 'detalle_transaccion' transaccion.id %}" class="btn btn-outline-secondary">Cancelar</a>
+=======
+          <input type="hidden" name="active_tab" id="active_tab" value="{{ active_tab|default:'paso1-tab' }}">
+
+          {% if mensaje %}
+            <div class="alert alert-{{ mensaje_tipo }} mb-3">{{ mensaje }}</div>
+          {% endif %}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger mb-3">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="tab-content">
+            <!-- PASO 1 -->
+            <div class="tab-pane fade" id="paso1">
+              <h6 class="fw-semibold mb-3">Datos del movimiento</h6>
+
+              <div class="row g-3">
+                <div class="col-md-3">
+                  <label class="form-label">Fecha</label>
+                  {{ form.fecha }}
+                  {% if form.fecha.errors %}
+                    <div class="text-danger small mt-1">{{ form.fecha.errors|join:', ' }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label">Tipo de movimiento</label>
+                  {{ form.tipo }}
+                  {% if form.tipo.errors %}
+                    <div class="text-danger small mt-1">{{ form.tipo.errors|join:', ' }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label">Estado</label>
+                  {{ form.estado }}
+                  {% if form.estado.errors %}
+                    <div class="text-danger small mt-1">{{ form.estado.errors|join:', ' }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label">Cantidad</label>
+                  {{ form.cantidad }}
+                  {% if form.cantidad.errors %}
+                    <div class="text-danger small mt-1">{{ form.cantidad.errors|join:', ' }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">Producto (SKU)</label>
+                  {{ form.producto }}
+                  {% if form.producto.errors %}
+                    <div class="text-danger small mt-1">{{ form.producto.errors|join:', ' }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">Proveedor</label>
+                  {{ form.proveedor }}
+                  {% if form.proveedor.errors %}
+                    <div class="text-danger small mt-1">{{ form.proveedor.errors|join:', ' }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">Bodega (origen)</label>
+                  {{ form.bodega_origen }}
+                  {% if form.bodega_origen.errors %}
+                    <div class="text-danger small mt-1">{{ form.bodega_origen.errors|join:', ' }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="col-md-4" id="bodega-destino-wrap">
+                  <label class="form-label">Bodega a transferir</label>
+                  {{ form.bodega_destino }}
+                  {% if form.bodega_destino.errors %}
+                    <div class="text-danger small mt-1">{{ form.bodega_destino.errors|join:', ' }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end gap-2 mt-4">
+                <button type="reset" id="resetPaso1EditBtn" class="btn btn-outline-secondary">Limpiar</button>
+                <button type="button" onclick="activarTab('paso2-tab')" class="btn btn-primary">Siguiente</button>
+              </div>
+            </div>
+
+            <!-- PASO 2 -->
+            <div class="tab-pane fade" id="paso2">
+              <h6 class="fw-semibold mb-3">Control avanzado</h6>
+
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <div class="form-check ms-1">
+                    {{ form.perecible }}
+                    <label class="form-check-label" for="id_perecible">Perecible (tiene vencimiento)</label>
+                  </div>
+                  {% if form.perecible.errors %}
+                    <div class="text-danger small mt-1">{{ form.perecible.errors|join:', ' }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="row g-3 mt-2">
+                <div class="col-md-4">
+                  <label class="form-label">Lote</label>
+                  {{ form.lote }}
+                  {% if form.lote.errors %}
+                    <div class="text-danger small mt-1">{{ form.lote.errors|join:', ' }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Serie</label>
+                  {{ form.serie }}
+                  {% if form.serie.errors %}
+                    <div class="text-danger small mt-1">{{ form.serie.errors|join:', ' }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Fecha de vencimiento</label>
+                  {{ form.fecha_vencimiento }}
+                  {% if form.fecha_vencimiento.errors %}
+                    <div class="text-danger small mt-1">{{ form.fecha_vencimiento.errors|join:', ' }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between mt-4">
+                <button type="button" onclick="activarTab('paso1-tab')" class="btn btn-outline-primary">Anterior</button>
+                <div>
+                  <button type="reset" id="resetPaso2EditBtn" class="btn btn-outline-secondary me-2">Limpiar</button>
+                  <button type="button" onclick="activarTab('paso3-tab')" class="btn btn-primary">Siguiente</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- PASO 3 -->
+            <div class="tab-pane fade" id="paso3">
+              <h6 class="fw-semibold mb-3">Documento de referencia y motivo</h6>
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Documento de referencia</label>
+                  {{ form.doc_referencia }}
+                  {% if form.doc_referencia.errors %}
+                    <div class="text-danger small mt-1">{{ form.doc_referencia.errors|join:', ' }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Adjuntar documento (opcional)</label>
+                  <div>
+                    <button
+                      type="button"
+                      class="btn btn-upload"
+                      onclick="document.getElementById('id_doc_referencia_file').click();"
+                    >
+                      <span class="btn-upload-icon">↑</span>
+                      <span>Subir documento</span>
+                    </button>
+                    <div class="form-text">
+                      PDF, JPG o PNG, máx. 5MB (opcional).
+                    </div>
+                  </div>
+                  <div style="display:none;">
+                    {{ form.doc_referencia_file }}
+                  </div>
+                  <!-- Miniatura del archivo adjunto -->
+                  <div class="mt-2" id="doc-preview-edit" style="display:none;">
+                    <div class="d-flex align-items-center gap-2">
+                      <div id="doc-preview-thumb-edit" class="border rounded" style="width:64px;height:64px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;"></div>
+                      <div>
+                        <div id="doc-preview-name-edit" class="small fw-semibold"></div>
+                        <div id="doc-preview-size-edit" class="small text-muted"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row g-3 mt-2">
+                <div class="col-md-6">
+                  <label class="form-label">Motivo</label>
+                  {{ form.motivo }}
+                  {% if form.motivo.errors %}
+                    <div class="text-danger small mt-1">{{ form.motivo.errors|join:', ' }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Observaciones</label>
+                  {{ form.observaciones }}
+                  {% if form.observaciones.errors %}
+                    <div class="text-danger small mt-1">{{ form.observaciones.errors|join:', ' }}</div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between mt-4">
+                <button type="button" onclick="activarTab('paso2-tab')" class="btn btn-outline-primary">Anterior</button>
+                <div>
+                  <button type="reset" id="resetPaso3EditBtn" class="btn btn-outline-secondary me-2">Limpiar</button>
+                  <button type="submit" class="btn btn-primary me-2">Guardar cambios</button>
+                  <a href="{% url 'detalle_transaccion' transaccion.id %}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+              </div>
+            </div>
+>>>>>>> origin/feature/production-TC
           </div>
         </form>
+
       </div>
     </div>
   </div>
+<<<<<<< HEAD
   <!-- SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
@@ -58,5 +289,181 @@
       {% endif %}
     });
   </script>
+=======
+
+  <footer class="productos-footer mt-4">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="productos-footer-logo">
+        <div>
+          <div class="fw-semibold text-uppercase mb-1" style="font-size:0.8rem;letter-spacing:0.08em;">Info de Contacto</div>
+          <div style="font-size:0.85rem;">Móvil: +569 6226 1712</div>
+          <div style="font-size:0.85rem;">E-Mail: ventas@lilis.cl</div>
+          <div style="font-size:0.85rem;" class="mt-2">
+            Ubícanos en: Paseo San Ramón<br>
+            Waldo Alcalde 401, local 8, San Ramón, Coquimbo
+          </div>
+        </div>
+      </div>
+      <div class="ms-auto text-end" style="font-size:0.8rem;">
+        <small>Derechos Reservados © 2022 Lilis.</small>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function activarTab(id) {
+      const tabEl = document.getElementById(id);
+      if (!tabEl) return;
+      new bootstrap.Tab(tabEl).show();
+      const hidden = document.getElementById('active_tab');
+      if (hidden) hidden.value = id;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('movEditForm');
+      if (!form) return;
+
+      // activar tab correcto (errores o backend)
+      let errorTab = null;
+      const firstError = document.querySelector('.text-danger.small');
+      if (firstError) {
+        const pane = firstError.closest('.tab-pane');
+        if (pane && pane.id) errorTab = pane.id + '-tab';
+      }
+      const backendTab = document.getElementById('active_tab').value;
+      const lastTabId = errorTab || backendTab || 'paso1-tab';
+      activarTab(lastTabId);
+
+      // mostrar/ocultar bodega destino
+      const tipoSelect = document.getElementById('id_tipo');
+      const bodegaDestinoWrap = document.getElementById('bodega-destino-wrap');
+      function toggleBodegaDestino() {
+        if (!tipoSelect || !bodegaDestinoWrap) return;
+        const val = tipoSelect.value;
+        if (val === 'TRANSFERENCIA') {
+          bodegaDestinoWrap.style.display = '';
+        } else {
+          bodegaDestinoWrap.style.display = 'none';
+        }
+      }
+      if (tipoSelect) {
+        tipoSelect.addEventListener('change', toggleBodegaDestino);
+        toggleBodegaDestino();
+      }
+
+      // botones limpiar por paso
+      const resetPaso1 = document.getElementById('resetPaso1EditBtn');
+      if (resetPaso1) {
+        resetPaso1.addEventListener('click', function (e) {
+          e.preventDefault();
+          form.reset();
+          activarTab('paso1-tab');
+          toggleBodegaDestino();
+        });
+      }
+
+      const resetPaso2 = document.getElementById('resetPaso2EditBtn');
+      if (resetPaso2) {
+        resetPaso2.addEventListener('click', function (e) {
+          e.preventDefault();
+          form.reset();
+          activarTab('paso2-tab');
+          toggleBodegaDestino();
+        });
+      }
+
+      const resetPaso3 = document.getElementById('resetPaso3EditBtn');
+      if (resetPaso3) {
+        resetPaso3.addEventListener('click', function (e) {
+          e.preventDefault();
+          form.reset();
+          activarTab('paso3-tab');
+          toggleBodegaDestino();
+        });
+      }
+
+      // validación mínima similar a crear
+      form.addEventListener('submit', function (e) {
+        const requiredIds = [
+          'id_fecha',
+          'id_tipo',
+          'id_estado',
+          'id_cantidad',
+          'id_producto',
+          'id_proveedor',
+          'id_bodega_origen'
+        ];
+
+        let hasClientError = false;
+
+        requiredIds.forEach(function (id) {
+          const field = document.getElementById(id);
+          if (!field) return;
+          const isHidden = field.offsetParent === null;
+          if (!isHidden && !field.value) {
+            hasClientError = true;
+            field.classList.add('is-invalid');
+          } else {
+            field.classList.remove('is-invalid');
+          }
+        });
+
+        if (hasClientError) {
+          e.preventDefault();
+          Swal.fire({
+            icon: 'error',
+            title: 'Revisa los campos obligatorios',
+            text: 'Faltan datos requeridos para actualizar el movimiento.',
+            confirmButtonColor: '#D10A11'
+          });
+        }
+
+        const alertBox = document.querySelector('.alert.alert-warning');
+        if (alertBox) {
+          alertBox.classList.add('border', 'border-warning-subtle');
+        }
+      });
+
+      // Miniatura del documento adjunto (PDF o imagen) en edición
+      const docInput = document.getElementById('id_doc_referencia_file');
+      const docPreview = document.getElementById('doc-preview-edit');
+      const docThumb = document.getElementById('doc-preview-thumb-edit');
+      const docName = document.getElementById('doc-preview-name-edit');
+      const docSize = document.getElementById('doc-preview-size-edit');
+
+      if (docInput && docPreview && docThumb && docName && docSize) {
+        docInput.addEventListener('change', function () {
+          const file = this.files[0];
+          if (!file) {
+            docPreview.style.display = 'none';
+            docThumb.innerHTML = '';
+            docName.textContent = '';
+            docSize.textContent = '';
+            return;
+          }
+
+          docName.textContent = file.name;
+          docSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
+
+          const ext = file.name.split('.').pop().toLowerCase();
+          if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              docThumb.innerHTML = '<img src="' + e.target.result + '" alt="preview" style="max-width:100%;max-height:100%;object-fit:cover;">';
+            };
+            reader.readAsDataURL(file);
+          } else {
+            docThumb.innerHTML = 'PDF';
+          }
+
+          docPreview.style.display = '';
+        });
+      }
+    });
+  </script>
+
+>>>>>>> origin/feature/production-TC
 </body>
 </html>

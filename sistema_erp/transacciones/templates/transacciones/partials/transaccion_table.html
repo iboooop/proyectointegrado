@@ -1,38 +1,86 @@
 {% load static %}
+<style>
+  /* FORZAR encabezados negros - máxima prioridad */
+  table th,
+  table th a,
+  table th a:visited,
+  table thead th,
+  table thead th a,
+  table thead th a:visited {
+    color: #000000 !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+  }
+  
+  table th a:hover,
+  table thead th a:hover {
+    color: #000000 !important;
+    text-decoration: underline !important;
+  }
+</style>
 <div class="table-responsive">
+<<<<<<< HEAD
 
   <table class="table table-hover align-middle table-lg">
+=======
+  <table class="table table-hover align-middle">
+>>>>>>> origin/feature/production-TC
     <thead>
       <tr>
         {% with qs_base='q='|add:q|add:'&page_size='|add:page_size %}
         <th>
-          <a href="?{{ qs_base }}&sort=fecha&dir={% if sort == 'fecha' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
+          <a href="?{{ qs_base }}&sort=fecha&dir={% if sort == 'fecha' and dir == 'asc' %}desc{% else %}asc{% endif %}">
             Fecha {% if sort == 'fecha' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
           </a>
         </th>
         <th>
-          <a href="?{{ qs_base }}&sort=tipo&dir={% if sort == 'tipo' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
+          <a href="?{{ qs_base }}&sort=tipo&dir={% if sort == 'tipo' and dir == 'asc' %}desc{% else %}asc{% endif %}">
             Tipo {% if sort == 'tipo' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
           </a>
         </th>
         <th>
-          <a href="?{{ qs_base }}&sort=producto__nombre&dir={% if sort == 'producto__nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-            Producto {% if sort == 'producto__nombre' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          <a href="?{{ qs_base }}&sort=producto__sku&dir={% if sort == 'producto__sku' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            SKU {% if sort == 'producto__sku' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
           </a>
         </th>
         <th>
-          <a href="?{{ qs_base }}&sort=proveedor__nombre&dir={% if sort == 'proveedor__nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
+          <a href="?{{ qs_base }}&sort=proveedor__nombre&dir={% if sort == 'proveedor__nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}">
             Proveedor {% if sort == 'proveedor__nombre' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
           </a>
         </th>
         <th>
-          <a href="?{{ qs_base }}&sort=cantidad&dir={% if sort == 'cantidad' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
+          <a href="?{{ qs_base }}&sort=bodega_origen__nombre&dir={% if sort == 'bodega_origen__nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Bodega {% if sort == 'bodega_origen__nombre' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th class="text-end">
+          <a href="?{{ qs_base }}&sort=cantidad&dir={% if sort == 'cantidad' and dir == 'asc' %}desc{% else %}asc{% endif %}">
             Cantidad {% if sort == 'cantidad' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
           </a>
         </th>
         <th>
-          <a href="?{{ qs_base }}&sort=usuario__username&dir={% if sort == 'usuario__username' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
-            Usuario {% if sort == 'usuario__username' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          <a href="?{{ qs_base }}&sort=lote&dir={% if sort == 'lote' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Lote {% if sort == 'lote' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th>
+          <a href="?{{ qs_base }}&sort=serie&dir={% if sort == 'serie' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Serie {% if sort == 'serie' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th>
+          <a href="?{{ qs_base }}&sort=fecha_vencimiento&dir={% if sort == 'fecha_vencimiento' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Vence {% if sort == 'fecha_vencimiento' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th>
+          <a href="?{{ qs_base }}&sort=doc_referencia&dir={% if sort == 'doc_referencia' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Doc. referencia {% if sort == 'doc_referencia' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th class="text-center">
+          <a href="?{{ qs_base }}&sort=estado&dir={% if sort == 'estado' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Estado {% if sort == 'estado' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
           </a>
         </th>
         <th class="text-center">Acciones</th>
@@ -45,24 +93,39 @@
         <td>{{ t.fecha|date:"d/m/Y H:i" }}</td>
         <td>
           {% if t.tipo == 'ENTRADA' %}
-            <span class="badge bg-success">Entrada</span>
+            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle px-3 py-1 rounded-pill">Entrada</span>
           {% elif t.tipo == 'SALIDA' %}
-            <span class="badge bg-danger">Salida</span>
+            <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle px-3 py-1 rounded-pill">Salida</span>
+          {% elif t.tipo == 'TRANSFERENCIA' %}
+            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-1 rounded-pill">Transferencia</span>
           {% else %}
-            <span class="badge bg-secondary">Ajuste</span>
+            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-1 rounded-pill">{{ t.get_tipo_display }}</span>
           {% endif %}
         </td>
-        <td>{{ t.producto.nombre }}</td>
+        <td>{{ t.producto.sku }}</td>
         <td>{{ t.proveedor|default:"—" }}</td>
-        <td>{{ t.cantidad }}</td>
-        <td>{{ t.usuario.username|default:"—" }}</td>
+        <td>{{ t.bodega_origen|default:"—" }}</td>
+        <td class="text-end">{{ t.cantidad }}</td>
+        <td>{{ t.lote|default:"—" }}</td>
+        <td>{{ t.serie|default:"—" }}</td>
+        <td>{{ t.fecha_vencimiento|date:"d/m/Y"|default:"—" }}</td>
+        <td>{{ t.doc_referencia|default:"—" }}</td>
+        <td class="text-center">
+          {% if t.estado == 'EN_PROCESO' or t.estado == 'POR_CONFIRMAR' %}
+            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle px-3 py-1 rounded-pill">Activo</span>
+          {% elif t.estado == 'CANCELADO' or t.estado == 'DESACTIVADO' %}
+            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-1 rounded-pill">Inactivo</span>
+          {% else %}
+            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-1 rounded-pill">{{ t.get_estado_display }}</span>
+          {% endif %}
+        </td>
         <td class="text-center">
           <a href="{% url 'detalle_transaccion' t.id %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
         </td>
       </tr>
       {% empty %}
       <tr>
-        <td colspan="7" class="text-center text-muted py-4">No hay transacciones registradas.</td>
+        <td colspan="12" class="text-center text-muted py-4">No hay transacciones registradas.</td>
       </tr>
       {% endfor %}
     </tbody>

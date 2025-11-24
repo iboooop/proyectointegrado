@@ -7,23 +7,48 @@
     <title>Dashboard - Sistema ERP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{% static 'productos/css/styles.css' %}" rel="stylesheet">
     <style>
+        html, body {
+            height: 100%;
+        }
+        
         body {
-            background: #f8f9fa;
+            background: #f3f4f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .page-content {
+            flex: 1 0 auto;
         }
 
         .dashboard-header {
-            background: #212529;
+            background: #D10A11;
             color: #fff;
             padding: 1rem 2rem;
         }
 
+        .dashboard-logo {
+            max-height: 45px;
+            margin-right: 15px;
+        }
+
         .card {
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+<<<<<<< HEAD
             border-radius: 10px;
 
             transition: .2s;
 
+=======
+            border-radius: 18px;
+            transition: .2s;
+            border: 1px solid #e2e5f0;
+>>>>>>> origin/feature/production-TC
         }
 
         .card:hover {
@@ -34,6 +59,7 @@
         .card-header {
             background: #f1f3f4;
             font-weight: 600;
+            border-radius: 18px 18px 0 0;
         }
 
         .card-header-with-icon {
@@ -49,6 +75,7 @@
             font-size: 1.3rem;
         }
 
+<<<<<<< HEAD
         .footer {
             background: #212529;
             color: #fff;
@@ -58,10 +85,12 @@
             margin-top: 2rem;
         }
 
+=======
+>>>>>>> origin/feature/production-TC
         .pill {
             background: #f1f3f4;
             color: #212529;
-            border-radius: 1em;
+            border-radius: 999px;
             padding: .3em .8em;
             font-weight: 600;
 
@@ -118,15 +147,54 @@
         .card-fixed-height .card-body::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
+
+        /* Botones con color corporativo */
+        .btn-dark {
+            background-color: #D10A11 !important;
+            border-color: #D10A11 !important;
+        }
+
+        .btn-dark:hover {
+            background-color: #a3090e !important;
+            border-color: #a3090e !important;
+        }
+
+        /* Badges estilizados como en productos */
+        .badge.bg-success-subtle {
+            background-color: #d1f4e0 !important;
+            color: #0f5132 !important;
+            border: 1px solid #a7e1c4 !important;
+            padding: 0.35em 0.65em;
+            border-radius: 999px;
+        }
+
+        .badge.bg-warning-subtle {
+            background-color: #fff3cd !important;
+            color: #997404 !important;
+            border: 1px solid #ffe69c !important;
+            padding: 0.35em 0.65em;
+            border-radius: 999px;
+        }
+
+        .badge.bg-secondary-subtle {
+            background-color: #e2e3e5 !important;
+            color: #41464b !important;
+            border: 1px solid #c4c8cc !important;
+            padding: 0.35em 0.65em;
+            border-radius: 999px;
+        }
     </style>
 </head>
 
 <body>
     <!-- HEADER -->
     <div class="dashboard-header d-flex justify-content-between align-items-center">
-        <div>
-            <span class="fs-4 fw-bold">Sistema ERP</span>
-            <span class="text-muted ms-2">| {{ request.user.username }}</span>
+        <div class="d-flex align-items-center">
+            <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="dashboard-logo">
+            <div>
+                <span class="fs-4 fw-bold">Sistema Gestión Lilis</span>
+                <span class="text-white-50 ms-2">| {{ request.user.username }}</span>
+            </div>
         </div>
         <div>
             <form method="post" action="{% url 'logout' %}">
@@ -138,6 +206,7 @@
         </div>
     </div>
 
+    <div class="page-content">
     <div class="container-fluid mt-4 px-4">
 
         <!-- FILA PRINCIPAL - 6 TARJETAS CON BOTONES -->
@@ -341,7 +410,7 @@
                             <li class="list-item-centered">
                                 <span>{{ cliente.nombre }}</span>
                                 <span
-                                    class="pill {% if cliente.estadoCondicion == 'activo' %}bg-success text-white{% elif cliente.estadoCondicion == 'suspendido' %}bg-warning{% else %}bg-secondary text-white{% endif %}">
+                                    class="badge {% if cliente.estadoCondicion == 'activo' %}bg-success-subtle text-success-emphasis border border-success-subtle{% elif cliente.estadoCondicion == 'suspendido' %}bg-warning-subtle text-warning-emphasis border border-warning-subtle{% else %}bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle{% endif %} px-3 py-1 rounded-pill">
                                     {{ cliente.get_estadoCondicion_display }}
                                 </span>
                             </li>
@@ -377,7 +446,7 @@
                                         </p>
                                         <div class="d-flex justify-content-between align-items-center">
                                             <span
-                                                class="pill {% if bodega.estado == 'ACTIVO' %}bg-success text-white{% elif bodega.estado == 'MANTENIMIENTO' %}bg-warning{% else %}bg-secondary text-white{% endif %}">
+                                                class="badge {% if bodega.estado == 'ACTIVO' %}bg-success-subtle text-success-emphasis border border-success-subtle{% elif bodega.estado == 'MANTENIMIENTO' %}bg-warning-subtle text-warning-emphasis border border-warning-subtle{% else %}bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle{% endif %} px-3 py-1 rounded-pill">
                                                 {{ bodega.get_estado_display }}
                                             </span>
                                             <small class="text-muted">
@@ -468,11 +537,28 @@
             </div>
         </div>
     </div>
+    </div>
 
     <!-- FOOTER -->
-    <div class="footer text-center">
-        <small>Sistema ERP © 2025 | Usuario: {{ request.user.username }} ({{ request.session.rol }})</small>
-    </div>
+    <footer class="productos-footer">
+        <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="productos-footer-logo">
+                <div>
+                    <div class="fw-semibold text-uppercase mb-1" style="font-size:0.8rem;letter-spacing:0.08em;">Info de Contacto</div>
+                    <div style="font-size:0.85rem;">Móvil: +569 6226 1712</div>
+                    <div style="font-size:0.85rem;">E-Mail: ventas@lilis.cl</div>
+                    <div style="font-size:0.85rem;" class="mt-2">
+                        Ubícanos en: Paseo San Ramón<br>
+                        Waldo Alcalde 401, local 8, San Ramón, Coquimbo
+                    </div>
+                </div>
+            </div>
+            <div class="ms-auto text-end" style="font-size:0.8rem;">
+                <small>Derechos Reservados © 2022 Lilis.</small>
+            </div>
+        </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

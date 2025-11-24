@@ -1,0 +1,175 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle del Usuario - {{ perfil.usuario.username }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'productos/css/styles.css' %}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .detail-label { font-size: 0.8rem; font-weight: 600; color: #4b5563; margin-bottom: 2px; }
+        .detail-value { font-size: 0.9rem; color: #111827; }
+        .detail-section-title { font-size: 0.9rem; font-weight: 600; color: #121826; margin-bottom: 6px; }
+        .avatar-preview { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #e5e7eb; }
+
+        /* Eliminar espacio bajo el footer */
+        html, body {
+          height: 100%;
+        }
+        body {
+          margin: 0;
+          padding: 0;
+        }
+
+        .page-wrapper {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+        .page-content {
+          flex: 1 0 auto;
+        }
+        footer.productos-footer {
+          flex-shrink: 0;
+          margin-bottom: 0 !important;
+          padding-bottom: 0 !important;
+        }
+    </style>
+</head>
+<body class="bg-light page-wrapper">
+    <div class="page-content">
+    <div class="container my-4">
+        <a href="{% url 'usuarios_list' %}" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
+
+        <div class="card shadow-sm rounded-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 fw-semibold">{{ perfil.usuario.username }}</h5>
+                    <span class="badge {% if perfil.estado == 'ACTIVO' %}bg-success-subtle text-success-emphasis border border-success-subtle{% elif perfil.estado == 'INACTIVO' %}bg-warning-subtle text-warning-emphasis border border-warning-subtle{% else %}bg-danger-subtle text-danger-emphasis border border-danger-subtle{% endif %} px-3 py-1 rounded-pill">
+                        {{ perfil.get_estado_display }}
+                    </span>
+                </div>
+
+                {% if perfil.avatar %}
+                <div class="mb-3 text-center">
+                    <img src="{{ perfil.avatar.url }}" alt="Avatar" class="avatar-preview">
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value">{{ perfil.usuario.email|default:"—" }}</div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <div class="detail-label">Nombres</div>
+                            <div class="detail-value">{{ perfil.usuario.first_name|default:"—" }}</div>
+                        </div>
+                        <div class="mb-2">
+                            <div class="detail-label">Apellidos</div>
+                            <div class="detail-value">{{ perfil.usuario.last_name|default:"—" }}</div>
+                        </div>
+                        <div class="mb-2">
+                            <div class="detail-label">Teléfono</div>
+                            <div class="detail-value">{{ perfil.telefono|default:"—" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-2">
+                            <div class="detail-label">Rol</div>
+                            <div class="detail-value">
+                                {% if perfil.rol == 'ADMIN' %}
+                                    <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle px-3 py-1 rounded-pill">Administrador</span>
+                                {% elif perfil.rol == 'EDITOR' %}
+                                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-1 rounded-pill">Editor</span>
+                                {% elif perfil.rol == 'LECTOR' %}
+                                    <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-3 py-1 rounded-pill">Lector</span>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-1 rounded-pill">{{ perfil.get_rol_display }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <div class="detail-label">Último acceso</div>
+                            <div class="detail-value">{{ perfil.usuario.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</div>
+                        </div>
+                        <div class="mb-2">
+                            <div class="detail-label">MFA Habilitado</div>
+                            <div class="detail-value">{% if perfil.mfa_habilitado %}Sí{% else %}No{% endif %}</div>
+                        </div>
+                        <div class="mb-2">
+                            <div class="detail-label">Sesiones activas</div>
+                            <div class="detail-value">{{ perfil.sesiones_activas|default:0 }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Botones de acción -->
+                <div class="mt-4 d-flex justify-content-end gap-2">
+                    {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
+                        <a href="{% url 'usuarios_edit' perfil.id %}" class="btn btn-outline-secondary">Editar</a>
+                    {% endif %}
+                    {% if request.user.perfil.rol == 'ADMIN' %}
+                        <form action="{% url 'usuarios_delete' perfil.id %}" method="post" id="form-eliminar-usuario">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <footer class="productos-footer mt-4">
+        <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="productos-footer-logo">
+                <div>
+                    <div class="fw-semibold text-uppercase mb-1" style="font-size:0.8rem;letter-spacing:0.08em;">Info de Contacto</div>
+                    <div style="font-size:0.85rem;">Móvil: +569 6226 1712</div>
+                    <div style="font-size:0.85rem;">E-Mail: ventas@lilis.cl</div>
+                    <div style="font-size:0.85rem;" class="mt-2">
+                        Ubícanos en: Paseo San Ramón<br>
+                        Waldo Alcalde 401, local 8, San Ramón, Coquimbo
+                    </div>
+                </div>
+            </div>
+            <div class="ms-auto text-end" style="font-size:0.8rem;">
+                <small>Derechos Reservados © 2022 Lilis.</small>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const formEliminar = document.getElementById('form-eliminar-usuario');
+            if (!formEliminar) return;
+
+            formEliminar.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: '¿Eliminar usuario?',
+                    text: 'Esta acción no se puede deshacer.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        formEliminar.submit();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

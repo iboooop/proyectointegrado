@@ -5,15 +5,59 @@
   <meta charset="UTF-8">
   <title>Listado de Movimientos</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="{% static 'transacciones/css/transacciones.css' %}" rel="stylesheet">
+  <link href="{% static 'productos/css/styles.css' %}" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<<<<<<< HEAD
 
 
+=======
+  <style>
+    /* FORZAR encabezados negros - máxima prioridad */
+    table th,
+    table th a,
+    table th a:visited,
+    table thead th,
+    table thead th a,
+    table thead th a:visited {
+      color: #000000 !important;
+      text-decoration: none !important;
+      font-weight: 600 !important;
+    }
+    
+    table th a:hover,
+    table thead th a:hover {
+      color: #000000 !important;
+      text-decoration: underline !important;
+    }
+    
+    /* Mejorar tabla responsiva */
+    .table-responsive {
+      overflow-x: auto;
+      min-height: 400px;
+    }
+    
+    /* Ajustar anchos de columnas para mejor distribución */
+    .table th:nth-child(1), .table td:nth-child(1) { min-width: 120px; } /* Fecha */
+    .table th:nth-child(2), .table td:nth-child(2) { min-width: 100px; } /* Tipo */
+    .table th:nth-child(3), .table td:nth-child(3) { min-width: 120px; } /* SKU */
+    .table th:nth-child(4), .table td:nth-child(4) { min-width: 140px; } /* Proveedor */
+    .table th:nth-child(5), .table td:nth-child(5) { min-width: 120px; } /* Bodega */
+    .table th:nth-child(6), .table td:nth-child(6) { min-width: 80px; }  /* Cantidad */
+    .table th:nth-child(7), .table td:nth-child(7) { min-width: 100px; } /* Lote */
+    .table th:nth-child(8), .table td:nth-child(8) { min-width: 100px; } /* Serie */
+    .table th:nth-child(9), .table td:nth-child(9) { min-width: 100px; } /* Vence */
+    .table th:nth-child(10), .table td:nth-child(10) { min-width: 120px; } /* Doc ref */
+    .table th:nth-child(11), .table td:nth-child(11) { min-width: 100px; } /* Estado */
+    .table th:nth-child(12), .table td:nth-child(12) { min-width: 120px; } /* Acciones */
+  </style>
+>>>>>>> origin/feature/production-TC
 </head>
-<body class="trx-list">
-  <div class="container my-5">
+<body class="bg-light">
+
+  <div class="container-fluid px-3 my-4" style="max-width: 1400px;">
     <a href="/" class="btn btn-outline-secondary mb-3">&larr; Volver al dashboard</a>
 
+<<<<<<< HEAD
     <div class="card">
 
       <div class="card-header card-header-dark d-flex justify-content-between align-items-center">
@@ -29,12 +73,57 @@
         </div>
       </div>
 
+=======
+    <div class="card shadow-sm rounded-4">
+>>>>>>> origin/feature/production-TC
       <div class="card-body">
 
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <div>
+            <h5 class="mb-0 list-header-title">Movimientos de Inventario</h5>
+            <div class="list-subtitle">Resumen de movimientos y stock actual</div>
+          </div>
+          <div class="d-flex gap-2">
+            <a href="{% url 'transacciones_export' %}?q={{ q }}&sort={{ sort }}&dir={{ dir }}" class="btn btn-outline-secondary btn-outline-danger-soft">Exportar Excel</a>
+            {% if request.user.perfil.rol != 'LECTOR' %}
+              <a href="{% url 'crear_transaccion' %}" class="btn btn-danger">+ Crear movimiento</a>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Resumen superior -->
+        <div class="row mb-3 g-3">
+          <div class="col-md-4">
+            <div class="card shadow-sm rounded-4 border-0">
+              <div class="card-body py-3 px-3">
+                <div class="text-muted small">Movimientos de hoy</div>
+                <div class="h5 mb-0">{{ movimientos_hoy }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card shadow-sm rounded-4 border-0">
+              <div class="card-body py-3 px-3">
+                <div class="text-muted small">Stock total del listado</div>
+                <div class="h5 mb-0">{{ stock_total }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card shadow-sm rounded-4 border-0">
+              <div class="card-body py-3 px-3">
+                <div class="text-muted small">Productos únicos (SKU)</div>
+                <div class="h5 mb-0">{{ productos_unicos }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
           <form id="searchForm" class="flex-grow-1 me-3" onsubmit="return false;">
-            <input type="text" id="searchInput" class="form-control" placeholder="Buscar (producto, proveedor, tipo, usuario, lote, doc ref)" value="{{ q }}">
+            <input type="text" id="searchInput" class="form-control" placeholder="Buscar por SKU, producto, proveedor, tipo, bodega, lote, serie, vencimiento o doc ref..." value="{{ q }}">
           </form>
+
           <form id="pageSizeForm" class="d-flex align-items-center gap-2" onsubmit="return false;">
             <label for="pageSizeSelect" class="form-label m-0">Filas por página:</label>
             <select id="pageSizeSelect" class="form-select" style="width: 140px;">
@@ -43,10 +132,15 @@
               {% endfor %}
             </select>
           </form>
-          <div class="text-muted small">Total: {{ paginator.count }} registros</div>
+
+          <div class="text-muted small">Total: {{ paginator.count }} movimientos</div>
         </div>
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/feature/production-TC
         <div id="trxTableWrap">
           {% include 'transacciones/partials/transaccion_table.html' %}
         </div>
@@ -54,106 +148,143 @@
     </div>
   </div>
   <script>
-    (function(){
-      const params = new URLSearchParams(window.location.search);
-      const showAlert = (icon, title, text) => {
-        Swal.fire({ icon, title, text, timer: 2000, timerProgressBar: true, showConfirmButton: false, confirmButtonColor: '#2563eb' });
-      };
-      if (params.get('created')==='1') { showAlert('success', 'Movimiento creado', 'Se registró correctamente.'); params.delete('created'); }
-      if (params.get('updated')==='1') { showAlert('success', 'Movimiento actualizado', 'Se guardaron los cambios.'); params.delete('updated'); }
-      if (params.get('deleted')==='1') { showAlert('success', 'Movimiento eliminado', 'Se eliminó correctamente.'); params.delete('deleted'); }
-      if (window.history && params.toString() !== window.location.search.substring(1)) {
-        const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-        window.history.replaceState({}, '', newUrl);
-      }
+  (function(){
+    const wrap = document.getElementById('trxTableWrap');
+    const searchInput = document.getElementById('searchInput');
+    const pageSizeSelect = document.getElementById('pageSizeSelect');
+    const sortPills = document.querySelectorAll('.sort-pill');
+    let debounceTimer = null;
 
-      function bindDelete(scope=document){
-        scope.querySelectorAll('form.js-del-trx').forEach((form)=>{
-          form.addEventListener('submit', function(e){
-            e.preventDefault();
-            Swal.fire({
-              title: '¿Eliminar movimiento?',
-              text: 'Esta acción no se puede deshacer.',
-              icon: 'warning',
-              showCancelButton: true,
-              confirmButtonText: 'Sí, eliminar',
-              cancelButtonText: 'Cancelar',
-              confirmButtonColor: '#dc3545',
-              cancelButtonColor: '#6c757d'
-            }).then((r)=>{ if (r.isConfirmed) form.submit(); });
-          });
-        });
-      }
-      bindDelete(document);
-
-      const wrap = document.getElementById('trxTableWrap');
-      const searchInput = document.getElementById('searchInput');
-      const pageSizeSelect = document.getElementById('pageSizeSelect');
-      let debounceTimer=null;
-
-      async function fetchAndUpdate(url){
-        const resp = await fetch(url, { headers: { 'X-Requested-With':'XMLHttpRequest' }});
+    async function fetchAndUpdate(url){
+      try {
+        const resp = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }});
         const html = await resp.text();
         wrap.innerHTML = html;
-        bindDelete(wrap);
-        // re-attach jump handler
         attachJumpHandler();
+      } catch (err) {
+        console.error('Error al actualizar:', err);
+        wrap.innerHTML = `<div class="alert alert-danger">Error al cargar los datos.</div>`;
       }
+    }
 
-      function buildUrl(){
-        const p = new URLSearchParams(window.location.search);
-        const qVal = (searchInput?.value||'').trim();
-        if (qVal) p.set('q', qVal); else p.delete('q');
-        if (pageSizeSelect?.value) p.set('page_size', pageSizeSelect.value);
-        p.delete('page');
-        p.set('partial','1');
-        return window.location.pathname + '?' + p.toString();
+    function buildUrl(extra){
+      const p = new URLSearchParams(window.location.search);
+      const qVal = (searchInput?.value || '').trim();
+      if (qVal) p.set('q', qVal); else p.delete('q');
+      if (pageSizeSelect?.value) p.set('page_size', pageSizeSelect.value);
+      p.delete('page');
+      if (extra && extra.sort){
+        p.set('sort', extra.sort);
       }
+      if (extra && extra.dir){
+        p.set('dir', extra.dir);
+      }
+      p.set('partial', '1');
+      return window.location.pathname + '?' + p.toString();
+    }
 
-      function updateUrlOnly(){
-        const p = new URLSearchParams(window.location.search);
-        const qVal = (searchInput?.value||'').trim();
-        if (qVal) p.set('q', qVal); else p.delete('q');
-        if (pageSizeSelect?.value) p.set('page_size', pageSizeSelect.value);
-        const newUrl = window.location.pathname + (p.toString()? '?' + p.toString() : '');
-        window.history.replaceState({}, '', newUrl);
-      }
-
-      if (searchInput) {
-        searchInput.addEventListener('input', function(){
-          clearTimeout(debounceTimer);
-          debounceTimer = setTimeout(async ()=>{ await fetchAndUpdate(buildUrl()); updateUrlOnly(); }, 300);
-        });
-      }
-      if (pageSizeSelect) {
-        pageSizeSelect.addEventListener('change', async function(){
-          const p = new URLSearchParams(window.location.search);
-          p.set('page_size', this.value); p.delete('page'); p.set('partial','1');
-          await fetchAndUpdate(window.location.pathname + '?' + p.toString());
-          p.delete('partial'); window.history.replaceState({}, '', window.location.pathname + '?' + p.toString());
-        });
-      }
-
-      // interceptar clicks de paginación y orden
-      wrap.addEventListener('click', async function(e){
-        const a = e.target.closest('a.page-link, thead a');
-        if (a && a.getAttribute('href')) { e.preventDefault(); const clean = a.getAttribute('href'); await fetchAndUpdate(clean + '&partial=1'); window.history.replaceState({}, '', clean); }
+    if (searchInput){
+      searchInput.addEventListener('input', function(){
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(()=>fetchAndUpdate(buildUrl()), 300);
       });
+    }
 
-      // Ir a página específica
-      function attachJumpHandler(){
-        const form = wrap.querySelector('#jumpPageForm');
-        if (!form) return; const input = form.querySelector('#jumpPageInput'); const btn = form.querySelector('#jumpGoBtn');
-        if (!btn) return; btn.addEventListener('click', async function(){
-          let target = parseInt(input.value,10); if (isNaN(target)||target<1) target=1; const max = parseInt(input.getAttribute('max'),10)||1; if (target>max) target=max;
-          const p = new URLSearchParams(window.location.search); p.set('page', target); p.set('partial','1'); if (pageSizeSelect?.value) p.set('page_size', pageSizeSelect.value);
-          await fetchAndUpdate(window.location.pathname + '?' + p.toString()); p.delete('partial'); window.history.replaceState({}, '', window.location.pathname + '?' + p.toString());
+    if (pageSizeSelect){
+      pageSizeSelect.addEventListener('change', ()=>fetchAndUpdate(buildUrl()));
+    }
+
+    // Click en pills de orden (desactivado - ya no hay pills)
+    /*
+    if (sortPills.length){
+      sortPills.forEach(pill => {
+        pill.addEventListener('click', function(){
+          const currentSort = this.getAttribute('data-sort');
+          const params = new URLSearchParams(window.location.search);
+          const activeSort = params.get('sort') || '{{ sort }}';
+          const activeDir = params.get('dir') || '{{ dir }}';
+          let newDir = 'asc';
+          if (activeSort === currentSort && activeDir === 'asc'){
+            newDir = 'desc';
+          }
+          const url = buildUrl({ sort: currentSort, dir: newDir });
+          fetchAndUpdate(url);
+          params.set('sort', currentSort);
+          params.set('dir', newDir);
+          window.history.replaceState({}, '', window.location.pathname + '?' + params.toString());
+
+          // Actualizar visualmente flechas
+          document.querySelectorAll('.sort-pill').forEach(p => p.classList.remove('active'));
+          this.classList.add('active');
+          document.querySelectorAll('.sort-icon').forEach(icon => {
+            const field = icon.getAttribute('data-field');
+            if (field === currentSort){
+              icon.textContent = newDir === 'desc' ? '▼' : '▲';
+            } else {
+              icon.textContent = '▲';
+            }
+          });
         });
+      });
+    }
+    */
+
+    wrap.addEventListener('click', async e=>{
+      const a = e.target.closest('a.page-link, thead a');
+      if (a && a.getAttribute('href')){
+        e.preventDefault();
+        const clean = a.getAttribute('href');
+        await fetchAndUpdate(clean + '&partial=1');
+        window.history.replaceState({}, '', clean);
       }
-      attachJumpHandler();
-    })();
+    });
+
+    function attachJumpHandler(){
+      const form = wrap.querySelector('#jumpPageForm');
+      if (!form) return;
+      const input = form.querySelector('#jumpPageInput');
+      const btn = form.querySelector('#jumpGoBtn');
+      if (!btn) return;
+
+      btn.addEventListener('click', async function(){
+        let target = parseInt(input.value, 10);
+        if (isNaN(target) || target < 1) target = 1;
+        const max = parseInt(input.getAttribute('max'), 10) || 1;
+        if (target > max) target = max;
+        const p = new URLSearchParams(window.location.search);
+        p.set('page', target);
+        p.set('partial', '1');
+        await fetchAndUpdate(window.location.pathname + '?' + p.toString());
+      });
+    }
+
+    attachJumpHandler();
+  })();
   </script>
+<<<<<<< HEAD
 >>>>>>> 269c5e010624db413a2d803e1ed0db91c3008822
 {% include 'partials/footer.html' %}
+=======
+
+  <footer class="productos-footer">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="productos-footer-logo">
+        <div>
+          <div class="fw-semibold text-uppercase mb-1" style="font-size:0.8rem;letter-spacing:0.08em;">Info de Contacto</div>
+          <div style="font-size:0.85rem;">Móvil: +569 6226 1712</div>
+          <div style="font-size:0.85rem;">E-Mail: ventas@lilis.cl</div>
+          <div style="font-size:0.85rem;" class="mt-2">
+            Ubícanos en: Paseo San Ramón<br>
+            Waldo Alcalde 401, local 8, San Ramón, Coquimbo
+          </div>
+        </div>
+      </div>
+      <div class="ms-auto text-end" style="font-size:0.8rem;">
+        <small>Derechos Reservados © 2022 Lilis.</small>
+      </div>
+    </div>
+  </footer>
+>>>>>>> origin/feature/production-TC
 </body>
 </html>

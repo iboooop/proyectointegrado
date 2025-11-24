@@ -1,71 +1,71 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <title>Detalle del Proveedor - {{ proveedor.nombre }}</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{% static 'productos/css/styles.css' %}" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    body { background: #f8f9fa; }
-    .card { border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .card-header { background: #212529; color: #fff; }
-    .btn-fixed {
-      font-size: 0.85rem;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-weight: 500;
-    }
-    .btn-warning-fixed {
-      background-color: #ffc107;
-      color: #212529;
-      border: none;
-    }
-    .btn-danger-fixed {
-      background-color: #dc3545;
-      color: #fff;
-      border: none;
-    }
+    .detail-label { font-size: 0.8rem; font-weight: 600; color: #4b5563; margin-bottom: 2px; }
+    .detail-value { font-size: 0.9rem; color: #111827; }
+    .detail-section-title { font-size: 0.9rem; font-weight: 600; color: #121826; margin-bottom: 6px; }
   </style>
 </head>
-<body>
-  <div class="container my-5">
-    <a href="/proveedores/" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
+<body class="bg-light">
+  <div class="container my-4">
+    <a href="{% url 'lista_proveedores' %}" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
 
     <!-- Tarjeta principal del proveedor -->
-    <div class="card">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">{{ proveedor.nombre }}</h4>
-        
-        {% if proveedor.estado == 'ACTIVO' %}
-          <span class="badge bg-success">Estado: ACTIVO</span>
-        {% else %}
-          <span class="badge bg-danger">Estado: INACTIVO</span>
-        {% endif %}
-        
-      </div>
-
+    <div class="card shadow-sm rounded-4">
       <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0 fw-semibold">{{ proveedor.nombre }}</h5>
+          <span class="badge {% if proveedor.estado == 'ACTIVO' %}bg-success{% else %}bg-danger{% endif %}">
+            {{ proveedor.estado }}
+          </span>
+        </div>
+
+        <div class="mb-3">
+          <div class="detail-label">RUT</div>
+          <div class="detail-value">{{ proveedor.rut }}</div>
+        </div>
+
         <div class="row mb-3">
           <div class="col-md-6">
-            <p><strong>RUT:</strong> {{ proveedor.rut }}</p>
-            <p><strong>Contacto:</strong> {{ proveedor.contacto }}</p>
-            <p><strong>Teléfono:</strong> {{ proveedor.telefono|default:"—" }}</p>
+            <div class="mb-2">
+              <div class="detail-label">Contacto</div>
+              <div class="detail-value">{{ proveedor.contacto }}</div>
+            </div>
+            <div class="mb-2">
+              <div class="detail-label">Teléfono</div>
+              <div class="detail-value">{{ proveedor.telefono|default:'—' }}</div>
+            </div>
           </div>
           <div class="col-md-6">
-            <p><strong>Correo:</strong> {{ proveedor.correo|default:"—" }}</p>
-            <p><strong>Dirección:</strong> {{ proveedor.direccion|default:"—" }}</p>
-            <p><strong>Estado:</strong> {{ proveedor.estado }}</p>
+            <div class="mb-2">
+              <div class="detail-label">Correo electrónico</div>
+              <div class="detail-value">{{ proveedor.correo|default:'—' }}</div>
+            </div>
+            <div class="mb-2">
+              <div class="detail-label">Dirección</div>
+              <div class="detail-value">{{ proveedor.direccion|default:'—' }}</div>
+            </div>
           </div>
         </div>
 
-        <!-- Botones -->
+        <hr>
+
+        <!-- Botones de acción -->
         <div class="mt-4 d-flex justify-content-end gap-2">
           {% if request.user.perfil.rol != 'LECTOR' %}
-            <a href="{% url 'editar_proveedor' proveedor.id %}" class="btn btn-warning-fixed btn-fixed">Editar</a>
+            <a href="{% url 'editar_proveedor' proveedor.id %}" class="btn btn-outline-secondary">Editar</a>
           {% endif %}
           {% if request.user.perfil.rol == 'ADMIN' %}
-            <form action="{% url 'eliminar_proveedor' proveedor.id %}" method="post" onsubmit="return confirm('¿Seguro que deseas eliminar este proveedor?');">
+            <form action="{% url 'eliminar_proveedor' proveedor.id %}" method="post" id="form-eliminar-proveedor">
               {% csrf_token %}
-              <button type="submit" class="btn btn-danger-fixed btn-fixed">Eliminar</button>
+              <button type="submit" class="btn btn-danger">Eliminar</button>
             </form>
           {% endif %}
         </div>
@@ -73,19 +73,18 @@
     </div>
 
     <!-- Tabla de productos asociados -->
-    <hr class="my-5">
-    <h5 class="mb-3">Productos Asociados</h5>
-    <div class="card">
-      
+    <hr class="my-4">
+    <h5 class="mb-3 fw-semibold">Productos Asociados</h5>
+    <div class="card shadow-sm rounded-4">
       <div class="card-body p-0">
         <table class="table table-hover mb-0 align-middle">
-          <thead class="table-light">
+          <thead>
             <tr>
               <th>Nombre</th>
               <th>Categoría</th>
-              <th>Precio</th>
-              <th>Stock actual</th>
-              <th>Estado</th>
+              <th class="text-end">Precio</th>
+              <th class="text-end">Stock actual</th>
+              <th class="text-center">Estado</th>
             </tr>
           </thead>
           <tbody>
@@ -93,13 +92,19 @@
             <tr>
               <td>{{ p.nombre }}</td>
               <td>{{ p.get_categoria_display }}</td>
-              <td>${{ p.precio }}</td>
-              <td>{{ p.stock_actual }}</td>
-              <td>{{ p.get_stock_display }}</td>
+              <td class="text-end">${{ p.precio }}</td>
+              <td class="text-end">{{ p.stock_actual }}</td>
+              <td class="text-center">
+                {% if p.activo %}
+                  <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle px-3 py-1 rounded-pill">Activo</span>
+                {% else %}
+                  <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-1 rounded-pill">Inactivo</span>
+                {% endif %}
+              </td>
             </tr>
             {% empty %}
             <tr>
-              <td colspan="5" class="text-center text-muted py-3">Este proveedor no tiene productos asociados.</td>
+              <td colspan="5" class="text-center text-muted py-4">Este proveedor no tiene productos asociados.</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -108,18 +113,17 @@
     </div>
 
     <!-- Tabla de movimientos asociados -->
-    <hr class="my-5">
-    <h5 class="mb-3">Movimientos de Inventario Relacionados a sus Productos</h5>
-    <div class="card">
-      
+    <hr class="my-4">
+    <h5 class="mb-3 fw-semibold">Movimientos de Inventario Relacionados</h5>
+    <div class="card shadow-sm rounded-4">
       <div class="card-body p-0">
         <table class="table table-hover mb-0 align-middle">
-          <thead class="table-light">
+          <thead>
             <tr>
               <th>Fecha</th>
-              <th>Tipo</th>
+              <th class="text-center">Tipo</th>
               <th>Producto</th>
-              <th>Cantidad</th>
+              <th class="text-end">Cantidad</th>
               <th>Usuario</th>
               <th>Observaciones</th>
             </tr>
@@ -128,23 +132,23 @@
             {% for m in movimientos %}
             <tr>
               <td>{{ m.fecha|date:"d/m/Y H:i" }}</td>
-              <td>
+              <td class="text-center">
                 {% if m.tipo == 'ENTRADA' %}
-                  <span class="badge bg-success">Entrada</span>
+                  <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle px-3 py-1 rounded-pill">Entrada</span>
                 {% elif m.tipo == 'SALIDA' %}
-                  <span class="badge bg-danger">Salida</span>
+                  <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle px-3 py-1 rounded-pill">Salida</span>
                 {% else %}
-                  <span class="badge bg-secondary">Ajuste</span>
+                  <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-1 rounded-pill">Ajuste</span>
                 {% endif %}
               </td>
               <td>{{ m.producto.nombre }}</td>
-              <td>{{ m.cantidad }}</td>
+              <td class="text-end">{{ m.cantidad }}</td>
               <td>{{ m.usuario.username|default:"—" }}</td>
               <td>{{ m.observaciones|default:"—" }}</td>
             </tr>
             {% empty %}
             <tr>
-              <td colspan="6" class="text-center text-muted py-3">No hay movimientos registrados para este proveedor.</td>
+              <td colspan="6" class="text-center text-muted py-4">No hay movimientos registrados para este proveedor.</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -152,5 +156,51 @@
       </div>
     </div>
   </div>
+
+  <footer class="productos-footer">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="productos-footer-logo">
+        <div>
+          <div class="fw-semibold text-uppercase mb-1" style="font-size:0.8rem;letter-spacing:0.08em;">Info de Contacto</div>
+          <div style="font-size:0.85rem;">Móvil: +569 6226 1712</div>
+          <div style="font-size:0.85rem;">E-Mail: ventas@lilis.cl</div>
+          <div style="font-size:0.85rem;" class="mt-2">
+            Ubícanos en: Paseo San Ramón<br>
+            Waldo Alcalde 401, local 8, San Ramón, Coquimbo
+          </div>
+        </div>
+      </div>
+      <div class="ms-auto text-end" style="font-size:0.8rem;">
+        <small>Derechos Reservados © 2022 Lilis.</small>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const formEliminar = document.getElementById('form-eliminar-proveedor');
+      if (!formEliminar) return;
+
+      formEliminar.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        Swal.fire({
+          title: '¿Eliminar proveedor?',
+          text: 'Esta acción no se puede deshacer.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#6b7280',
+          confirmButtonText: 'Sí, eliminar',
+          cancelButtonText: 'Cancelar'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            formEliminar.submit();
+          }
+        });
+      });
+    });
+  </script>
 </body>
 </html>

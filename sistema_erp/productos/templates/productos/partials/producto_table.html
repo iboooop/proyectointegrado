@@ -1,12 +1,34 @@
 <table class="table table-hover align-middle">
   <thead>
     <tr>
-      <th>SKU</th>
-      <th>Nombre</th>
-      <th>Proveedor</th>
-      <th class="text-end">Stock</th>
-      <th class="text-center">Estado</th>
+      {% with qs_base='q='|add:q|add:'&page_size='|add:page_size %}
+      <th>
+        <a href="?{{ qs_base }}&sort=sku&dir={% if sort == 'sku' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+          SKU {% if sort == 'sku' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+        </a>
+      </th>
+      <th>
+        <a href="?{{ qs_base }}&sort=nombre&dir={% if sort == 'nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+          Nombre {% if sort == 'nombre' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+        </a>
+      </th>
+      <th>
+        <a href="?{{ qs_base }}&sort=proveedor__nombre&dir={% if sort == 'proveedor__nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+          Proveedor {% if sort == 'proveedor__nombre' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+        </a>
+      </th>
+      <th class="text-end">
+        <a href="?{{ qs_base }}&sort=stock&dir={% if sort == 'stock' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+          Stock {% if sort == 'stock' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+        </a>
+      </th>
+      <th class="text-center">
+        <a href="?{{ qs_base }}&sort=estado&dir={% if sort == 'estado' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+          Estado {% if sort == 'estado' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+        </a>
+      </th>
       <th class="text-center">Acciones</th>
+      {% endwith %}
     </tr>
   </thead>
   <tbody>

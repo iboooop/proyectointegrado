@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.db import models
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.utils import timezone
@@ -15,21 +16,34 @@ from .forms import MovimientoInventarioForm
 
 # ---------------- LISTA ----------------
 def lista_transacciones(request):
-    qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario', 'bodega')
+    qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario', 'bodega_origen', 'bodega_destino')
 
-    # Búsqueda
+    # Filtros de texto (SKU/nombre producto, proveedor, usuario, tipo, bodega, lote, serie, doc ref, motivo)
     q = (request.GET.get('q') or '').strip()
     if q:
         qs = qs.filter(
-            Q(producto__nombre__icontains=q)
+            Q(producto__sku__icontains=q)
+            | Q(producto__nombre__icontains=q)
             | Q(proveedor__nombre__icontains=q)
             | Q(usuario__username__icontains=q)
             | Q(tipo__icontains=q)
+            | Q(bodega_origen__nombre__icontains=q)
+            | Q(bodega_destino__nombre__icontains=q)
             | Q(lote__icontains=q)
             | Q(serie__icontains=q)
+            | Q(fecha_vencimiento__icontains=q)
             | Q(doc_referencia__icontains=q)
             | Q(motivo__icontains=q)
         )
+
+    # Filtros específicos por fecha y tipo (para los pill-filters)
+    fecha_filtro = (request.GET.get('fecha') or '').strip()
+    if fecha_filtro:
+        qs = qs.filter(fecha__date=fecha_filtro)
+
+    tipo_filtro = (request.GET.get('tipo') or '').strip()
+    if tipo_filtro:
+        qs = qs.filter(tipo=tipo_filtro)
 
     # Orden
     sort = (request.GET.get('sort') or 'fecha').strip()
@@ -50,6 +64,15 @@ def lista_transacciones(request):
     if direction == 'desc':
         order_field = f'-{order_field}'
     qs = qs.order_by(order_field)
+
+    # Resumen superior (día actual)
+    from django.utils import timezone
+
+    hoy = timezone.localdate()
+    # Contar TODOS los movimientos de hoy, no solo los del queryset filtrado
+    movimientos_hoy = MovimientoInventario.objects.filter(fecha__date=hoy).count()
+    stock_total = qs.aggregate(total=models.Sum('cantidad'))['total'] or 0
+    productos_unicos = qs.values('producto__sku').distinct().count()
 
     # Tamaño de página persistente
     allowed_sizes = [5, 10, 20, 50]
@@ -76,6 +99,11 @@ def lista_transacciones(request):
         'page_size': page_size,
 
         'page_sizes': allowed_sizes,
+        'fecha_filtro': fecha_filtro,
+        'tipo_filtro': tipo_filtro,
+        'movimientos_hoy': movimientos_hoy,
+        'stock_total': stock_total,
+        'productos_unicos': productos_unicos,
     }
 
     if request.GET.get('partial') == '1' or request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -86,15 +114,36 @@ def lista_transacciones(request):
 
 # ---------------- CREAR ----------------
 def crear_transaccion(request):
+    mensaje = None
+    mensaje_tipo = None
+
     if request.method == 'POST':
         form = MovimientoInventarioForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('/transacciones/?created=1')
+            mov = form.save(commit=False)
+            # Por defecto, todo nuevo movimiento parte "por confirmar"
+            if not mov.estado:
+                mov.estado = 'POR_CONFIRMAR'
+            mov.save()
+            form = MovimientoInventarioForm()
+            mensaje = "Movimiento creado correctamente."
+            mensaje_tipo = "success"
+        else:
+            mensaje = "Corrige los errores indicados."
+            mensaje_tipo = "danger"
     else:
         initial = {'fecha': timezone.now().strftime('%Y-%m-%dT%H:%M')}
         form = MovimientoInventarioForm(initial=initial)
-    return render(request, 'transacciones/transaccion_add.html', {'form': form})
+
+    return render(
+        request,
+        'transacciones/transaccion_add.html',
+        {
+            'form': form,
+            'mensaje': mensaje,
+            'mensaje_tipo': mensaje_tipo,
+        },
+    )
 
 
 # ---------------- DETALLE ----------------
@@ -108,26 +157,64 @@ def detalle_transaccion(request, id):
 # ---------------- EDITAR ----------------
 def editar_transaccion(request, id):
     transaccion = get_object_or_404(MovimientoInventario, id=id)
+
+    mensaje = None
+    mensaje_tipo = None
+
     if request.method == 'POST':
         form = MovimientoInventarioForm(request.POST, instance=transaccion)
         if form.is_valid():
-            form.save()
-            return redirect('/transacciones/?updated=1')
+            if not form.has_changed():
+                mensaje = "No realizaste ningún cambio."
+                mensaje_tipo = "warning"
+            else:
+                from django.utils import timezone
+
+                was_inactive = (transaccion.estado in ['CANCELADO', 'DESACTIVADO'])
+                mov = form.save(commit=False)
+                now = timezone.now()
+
+                if mov.estado == 'EN_PROCESO' and was_inactive:
+                    mov.fecha_activacion = now
+                    mov.fecha_desactivacion = None
+                elif mov.estado in ['CANCELADO', 'DESACTIVADO'] and not was_inactive:
+                    mov.fecha_desactivacion = now
+
+                mov.save()
+                mensaje = "Cambios guardados correctamente."
+                mensaje_tipo = "success"
+        else:
+            mensaje = "Corrige los errores indicados."
+            mensaje_tipo = "danger"
     else:
         initial = {
             'fecha': transaccion.fecha.strftime('%Y-%m-%dT%H:%M')
             if transaccion.fecha else timezone.now().strftime('%Y-%m-%dT%H:%M')
         }
         form = MovimientoInventarioForm(instance=transaccion, initial=initial)
-    return render(request, 'transacciones/transaccion_edit.html', {'form': form, 'transaccion': transaccion})
+
+    return render(
+        request,
+        'transacciones/transaccion_edit.html',
+        {
+            'form': form,
+            'transaccion': transaccion,
+            'mensaje': mensaje,
+            'mensaje_tipo': mensaje_tipo,
+        },
+    )
 
 
 # ---------------- ELIMINAR ----------------
 def eliminar_transaccion(request, id):
     transaccion = get_object_or_404(MovimientoInventario, id=id)
     if request.method == 'POST':
-        transaccion.delete()
-        return redirect('/transacciones/?deleted=1')
+        from django.utils import timezone
+
+        transaccion.estado = 'DESACTIVADO'
+        transaccion.fecha_desactivacion = timezone.now()
+        transaccion.save(update_fields=['estado', 'fecha_desactivacion'])
+        return redirect('lista_transacciones')
     return redirect('detalle_transaccion', id=id)
 
 
@@ -148,7 +235,7 @@ def exportar_transacciones_excel(request):
             status=500
         )
 
-    qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario', 'bodega')
+    qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario', 'bodega_origen', 'bodega_destino')
 
     q = (request.GET.get('q') or '').strip()
     if q:
@@ -188,7 +275,7 @@ def exportar_transacciones_excel(request):
 
     headers = [
         'Fecha', 'Tipo', 'Producto', 'Proveedor', 'Usuario', 'Cantidad',
-        'Bodega', 'Lote', 'Serie', 'Vence', 'Doc Ref', 'Motivo', 'Observaciones'
+        'Bodega origen', 'Bodega destino', 'Lote', 'Serie', 'Vence', 'Doc Ref', 'Motivo', 'Observaciones'
     ]
     header_fill = PatternFill(start_color='EAF2FF', end_color='EAF2FF', fill_type='solid')
     bold = Font(bold=True, color='1f2937')
@@ -214,7 +301,8 @@ def exportar_transacciones_excel(request):
             getattr(m.proveedor, 'nombre', '') if m.proveedor else '',
             getattr(m.usuario, 'username', '') if m.usuario else '',
             m.cantidad,
-            getattr(m.bodega, 'codigo', '') if m.bodega else '',
+            getattr(m.bodega_origen, 'codigo', '') if m.bodega_origen else '',
+            getattr(m.bodega_destino, 'codigo', '') if m.bodega_destino else '',
             m.lote or '',
             m.serie or '',
             m.fecha_vencimiento.strftime('%Y-%m-%d') if m.fecha_vencimiento else '',
@@ -239,7 +327,7 @@ def exportar_transacciones_excel(request):
     ws.freeze_panes = 'A2'
     ws.row_dimensions[1].height = 24
 
-    widths = [18, 12, 28, 22, 18, 10, 16, 14, 18, 14, 16, 24, 40]
+    widths = [18, 12, 28, 22, 18, 10, 16, 16, 14, 18, 14, 16, 24, 40]
     for i, w in enumerate(widths, start=1):
         ws.column_dimensions[get_column_letter(i)].width = w
 

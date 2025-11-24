@@ -1,45 +1,64 @@
 {% load static %}
 <div class="table-responsive">
   <table class="table table-hover align-middle">
-    <thead class="table-light">
+    <thead>
       <tr>
         {% with qs_base='q='|add:q|add:'&page_size='|add:page_size %}
         <th>
-          <a href="?{{ qs_base }}&sort=nombre&dir={% if sort == 'nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none">
+          <a href="?{{ qs_base }}&sort=nombre&dir={% if sort == 'nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}">
             Nombre {% if sort == 'nombre' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
           </a>
         </th>
-        <th>Código</th>
-        <th>Dirección</th>
-        <th>Responsable</th>
-        <th>Tipo</th>
-        <th>Estado</th>
+        <th>
+          <a href="?{{ qs_base }}&sort=codigo&dir={% if sort == 'codigo' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Código {% if sort == 'codigo' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th>
+          <a href="?{{ qs_base }}&sort=direccion&dir={% if sort == 'direccion' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Dirección {% if sort == 'direccion' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th>
+          <a href="?{{ qs_base }}&sort=responsable&dir={% if sort == 'responsable' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Responsable {% if sort == 'responsable' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th>
+          <a href="?{{ qs_base }}&sort=tipo&dir={% if sort == 'tipo' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Tipo {% if sort == 'tipo' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th class="text-center">
+          <a href="?{{ qs_base }}&sort=estado&dir={% if sort == 'estado' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Estado {% if sort == 'estado' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
         <th class="text-center">Acciones</th>
         {% endwith %}
       </tr>
     </thead>
     <tbody>
       {% for b in bodegas %}
-      <tr>
+      <tr class="{% if b.estado != 'ACTIVO' %}table-light text-muted{% endif %}">
         <td>{{ b.nombre }}</td>
         <td>{{ b.codigo }}</td>
         <td>{{ b.direccion|default:"—" }}</td>
         <td>{{ b.responsable|default:"—" }}</td>
         <td>{{ b.tipo|default:"—" }}</td>
-        <td>
+        <td class="text-center">
           {% if b.estado == 'ACTIVO' %}
-            <span class="badge bg-success">Activo</span>
+            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle px-3 py-1 rounded-pill">Activo</span>
           {% elif b.estado == 'INACTIVO' %}
-            <span class="badge bg-secondary">Inactivo</span>
+            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-1 rounded-pill">Inactivo</span>
           {% elif b.estado == 'MANTENIMIENTO' %}
-            <span class="badge bg-warning text-dark">En Mantenimiento</span>
+            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-3 py-1 rounded-pill">Mantenimiento</span>
           {% else %}
-            <span class="badge bg-light text-dark">Desconocido</span>
+            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-1 rounded-pill">{{ b.get_estado_display|default:"Desconocido" }}</span>
           {% endif %}
-
         </td>
         <td class="text-center">
-          <a href="{% url 'bodegas_detail' b.id %}" class="btn btn-outline-primary btn-sm">Ver detalle</a>
+          <a href="{% url 'bodegas_detail' b.id %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
         </td>
       </tr>
       {% empty %}
