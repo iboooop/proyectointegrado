@@ -25,9 +25,12 @@ class Producto(models.Model):
     precio = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     lote = models.CharField(max_length=50, null=True, blank=True)
     stock = models.CharField(max_length=10, choices=[('ALTO','ALTO'),('BAJO','BAJO')], default='ALTO')
+    sku = models.CharField(max_length=16, unique=True, verbose_name="SKU")
+
+
 
     # Identificación
-    sku = models.CharField(max_length=16, unique=True, verbose_name="SKU")
+    
     ean_upc = models.CharField(
         max_length=13, unique=True, blank=True, null=True, verbose_name="EAN/UPC"
     )
