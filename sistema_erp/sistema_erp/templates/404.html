@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,7 +7,13 @@
     <title>Página no encontrada - 404</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f8fafc; color: #0f172a; }
+        body {
+            background: linear-gradient(135deg, rgba(209, 10, 17, 0.85) 0%, rgba(163, 9, 14, 0.9) 100%),
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23230E00" width="100" height="100"/></svg>');
+            background-size: cover;
+            background-attachment: fixed;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
         .error-container {
             min-height: 100vh;
             display: flex;
@@ -16,31 +23,67 @@
         }
         .error-card {
             background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(2, 6, 23, 0.08);
-            padding: 2rem;
+            border-radius: 18px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 3rem 2.5rem;
             max-width: 640px;
             width: 100%;
             text-align: center;
         }
+        .error-logo {
+            max-width: 180px;
+            margin: 0 auto 2rem auto;
+        }
         .error-code {
-            font-size: 4rem;
+            font-size: 5rem;
             font-weight: 800;
-            color: #1d4ed8;
+            color: #D10A11;
             letter-spacing: 2px;
+            margin-bottom: 0.5rem;
         }
         .error-title {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: 700;
-            margin-top: .25rem;
-            margin-bottom: .5rem;
+            color: #121826;
+            margin-bottom: 1rem;
         }
-        .error-desc { color: #475569; }
+        .error-desc {
+            color: #4b5563;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+        .btn {
+            border-radius: 999px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 0.65rem 1.8rem;
+        }
+        .btn-primary {
+            background-color: #D10A11 !important;
+            border-color: #D10A11 !important;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #a3090e !important;
+            border-color: #a3090e !important;
+        }
+        .btn-outline-secondary {
+            color: #4b5563 !important;
+            border-color: #d1d5db !important;
+            background-color: #ffffff !important;
+        }
+        .btn-outline-secondary:hover {
+            background-color: #f3f4f6 !important;
+            color: #111827 !important;
+        }
     </style>
 </head>
 <body>
 <div class="error-container">
     <div class="error-card">
+        <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="error-logo">
         <div class="error-code">404</div>
         <div class="error-title">Página no encontrada</div>
         <p class="error-desc">La URL a la que intentaste acceder no existe o ha sido movida. Verifica la dirección o vuelve al inicio.</p>
