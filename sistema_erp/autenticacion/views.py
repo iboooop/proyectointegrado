@@ -10,6 +10,7 @@ from django.core.mail import send_mail
 from django.contrib import messages
 from usuarios.models import Perfil
 from .forms import LoginForm, RegistroForm
+import os
 
 # ------------------------------
 # Función para registrar un nuevo usuario
@@ -89,9 +90,39 @@ def login_view(request):
 # Función para recuperar contraseña (envía un enlace por correo)
 # ------------------------------
 def recuperar_password_view(request):
-    # Funcionalidad de envío deshabilitada: si llega POST, mostramos info y permanecemos en la vista
     if request.method == 'POST':
-        messages.info(request, "La recuperación por correo está deshabilitada en este entorno.")
+        email = request.POST.get('email')
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            messages.error(request, "No existe un usuario con ese correo registrado.")
+            return redirect('recuperar_password')
+
+        # Generar token seguro
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+        # Construir enlace absoluto
+        url_reset = request.build_absolute_uri(
+            f"/autenticacion/reset/{uid}/{token}/"
+        )
+
+        # Enviar correo
+        send_mail(
+            subject="Recuperación de contraseña - Lilis ERP",
+            message=f"Hola {user.username},\n\n"
+                    f"Para restablecer tu contraseña, haz clic en el siguiente enlace:\n\n"
+                    f"{url_reset}\n\n"
+                    f"Si no solicitaste este cambio, puedes ignorar este mensaje.",
+            from_email=os.getenv("EMAIL_HOST_USER"),
+            recipient_list=[email],
+            fail_silently=False,
+        )
+
+        messages.success(request, "Hemos enviado un correo con instrucciones para recuperar tu contraseña.")
+        return redirect('login')
+
     return render(request, 'autenticacion/recuperar_password.html')
 
 # ------------------------------
@@ -101,29 +132,30 @@ def restablecer_password_view(request, uidb64, token):
     try:
         uid = urlsafe_base64_decode(uidb64).decode()
         user = User.objects.get(pk=uid)
-    except (User.DoesNotExist, ValueError, TypeError):
+    except:
         messages.error(request, "El enlace de recuperación no es válido.")
         return redirect('login')
 
-    if request.method == 'POST':
-        nueva_password = request.POST.get('nueva_password')
-        confirmar_password = request.POST.get('confirmar_password')
+    # Validar token
+    if not default_token_generator.check_token(user, token):
+        messages.error(request, "El enlace de recuperación ha expirado o no es válido.")
+        return redirect('login')
 
-        if nueva_password != confirmar_password:
+    if request.method == 'POST':
+        nueva = request.POST.get('nueva_password')
+        confirmar = request.POST.get('confirmar_password')
+
+        if nueva != confirmar:
             messages.error(request, "Las contraseñas no coinciden.")
             return redirect(request.path)
 
-        if default_token_generator.check_token(user, token):
-            user.set_password(nueva_password)
-            user.save()
-            messages.success(request, "Tu contraseña ha sido restablecida exitosamente.")
-            return redirect('login')
-        else:
-            messages.error(request, "El enlace de recuperación ha expirado.")
-            return redirect('login')
+        user.set_password(nueva)
+        user.save()
 
-    return render(request, 'autenticacion/restablecer_password.html', {'uidb64': uidb64, 'token': token})
+        messages.success(request, "Tu contraseña ha sido restablecida correctamente.")
+        return redirect('login')
 
+    return render(request, 'autenticacion/restablecer_password.html')
 # ------------------------------
 # Función para cambiar contraseña (usuario autenticado)
 # ------------------------------

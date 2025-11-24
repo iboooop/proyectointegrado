@@ -30,6 +30,7 @@ urlpatterns = [
     path('transacciones/', include('transacciones.urls')),
     # Catch-all: al final, cualquier otra URL muestra el 404 personalizado incluso en DEBUG
     re_path(r'^(?P<extra>.*)$', views.not_found_view, name='not_found'),
+    
 ]
 
 # Handler para errores HTTP personalizados
