@@ -11,6 +11,9 @@ django-extensions>=3.2
 # Variables de entorno (.env)
 python-dotenv>=1.0.0
 
+# Biblioteca para manejo de imágenes (ImageField)
+Pillow>=9.0
+
 # Base de datos MySQL (opción recomendada)
 mysqlclient>=2.1
 

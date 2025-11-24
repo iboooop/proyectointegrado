@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError
 from .models import Producto, CategoriaProducto
 from proveedores.models import Proveedor
 
-
 class ProductoForm(forms.ModelForm):
     class Meta:
         model = Producto
@@ -28,7 +27,6 @@ class ProductoForm(forms.ModelForm):
             "control_por_lote",
             "control_por_serie",
             "proveedor",
-            "bodega",
             "imagen",          
             "imagen_url",
             "ficha_tecnica_url",
@@ -110,7 +108,6 @@ class ProductoForm(forms.ModelForm):
                 attrs={"class": "form-check-input"}
             ),
             "proveedor": forms.Select(attrs={"class": "form-select"}),
-            "bodega": forms.Select(attrs={"class": "form-select"}),
             "imagen": forms.ClearableFileInput(
                 attrs={"class": "form-control", "accept": "image/*"}
             ),
