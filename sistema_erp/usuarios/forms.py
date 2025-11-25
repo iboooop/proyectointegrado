@@ -43,9 +43,12 @@ class UsuarioForm(forms.ModelForm):
 
     def clean_email(self):
         email = (self.cleaned_data.get('email') or '').strip()
+        if not email:
+            raise ValidationError("El correo electrónico es obligatorio.")
         # Si está editando y no cambió el email, no forzar validación extra
         if self.instance.pk and email.lower() == (getattr(self.instance, 'email', '') or '').lower():
             return email
+        # Verificar que el email no esté en uso por usuarios activos
         qs = User.objects.filter(email__iexact=email)
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)

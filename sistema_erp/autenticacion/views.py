@@ -70,7 +70,13 @@ def login_view(request):
                 perfil = Perfil.objects.filter(usuario=user).first()
                 request.session['usuario'] = user.username
                 request.session['rol'] = perfil.rol if perfil else "Sin rol"
-                messages.success(request, f'Bienvenido, {user.username}')
+                
+                # RQ-USR-04: Verificar si debe cambiar clave provisoria
+                if perfil and perfil.debe_cambiar_clave:
+                    messages.warning(request, 'Por seguridad, debes cambiar tu contraseña provisoria antes de continuar.')
+                    return redirect('cambiar_password')
+                
+                # No agregamos mensaje de bienvenida aquí, se mostrará en el dashboard
                 return redirect('dashboard')
             else:
                 # Añadir error al formulario (non-field error) para mostrarlo inline en la plantilla
@@ -129,6 +135,9 @@ def restablecer_password_view(request, uidb64, token):
 # ------------------------------
 @login_required
 def cambiar_password_view(request):
+    perfil = Perfil.objects.filter(usuario=request.user).first()
+    es_cambio_obligatorio = perfil.debe_cambiar_clave if perfil else False
+    
     if request.method == 'POST':
         password_actual = request.POST.get('password_actual')
         nueva_password = request.POST.get('nueva_password')
@@ -141,13 +150,45 @@ def cambiar_password_view(request):
         if nueva_password != confirmar_password:
             messages.error(request, "Las contraseñas no coinciden.")
             return redirect('cambiar_password')
+        
+        # RQ-USR-04: Validar política de robustez
+        if len(nueva_password) < 8:
+            messages.error(request, "La contraseña debe tener al menos 8 caracteres.")
+            return redirect('cambiar_password')
+        
+        import re
+        if not re.search(r'[A-Z]', nueva_password):
+            messages.error(request, "La contraseña debe contener al menos una letra mayúscula.")
+            return redirect('cambiar_password')
+        
+        if not re.search(r'[a-z]', nueva_password):
+            messages.error(request, "La contraseña debe contener al menos una letra minúscula.")
+            return redirect('cambiar_password')
+        
+        if not re.search(r'[0-9]', nueva_password):
+            messages.error(request, "La contraseña debe contener al menos un número.")
+            return redirect('cambiar_password')
+        
+        if not re.search(r'[!@#$%&*(),.?":{}|<>]', nueva_password):
+            messages.error(request, "La contraseña debe contener al menos un carácter especial.")
+            return redirect('cambiar_password')
 
+        # Cambiar contraseña
         request.user.set_password(nueva_password)
         request.user.save()
-        messages.success(request, "Tu contraseña ha sido cambiada exitosamente.")
+        
+        # RQ-USR-04: Desmarcar flag de cambio obligatorio
+        if perfil and perfil.debe_cambiar_clave:
+            perfil.debe_cambiar_clave = False
+            perfil.save()
+        
+        messages.success(request, "Tu contraseña ha sido cambiada exitosamente. Por favor, inicia sesión nuevamente.")
+        logout(request)
         return redirect('login')
 
-    return render(request, 'autenticacion/cambiar_password.html')
+    return render(request, 'autenticacion/cambiar_password.html', {
+        'es_cambio_obligatorio': es_cambio_obligatorio
+    })
 
 # ------------------------------
 # Cerrar sesión

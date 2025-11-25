@@ -4,6 +4,58 @@ from django.conf import settings
 from django.shortcuts import redirect
 
 
+class PasswordChangeRequiredMiddleware:
+	"""Middleware que fuerza el cambio de contraseña si el usuario tiene una clave provisoria.
+	
+	Si el usuario está autenticado y tiene el flag debe_cambiar_clave=True,
+	redirige a la vista de cambio de contraseña obligatorio.
+	
+	Exclusiones:
+	  - Rutas de autenticación (login, logout, cambiar contraseña)
+	  - Rutas estáticas y admin
+	"""
+	
+	def __init__(self, get_response):
+		self.get_response = get_response
+		self.change_password_url = '/autenticacion/cambiar_password/'
+		
+		self._exempt_patterns = [
+			re.compile(r'^static/.*'),
+			re.compile(r'^media/.*'),
+			re.compile(r'^admin/.*'),
+			re.compile(r'^autenticacion/login/?$'),
+			re.compile(r'^autenticacion/logout/?$'),
+			re.compile(r'^autenticacion/cambiar_password/?$'),
+		]
+	
+	def __call__(self, request):
+		# Solo aplicar si el usuario está autenticado
+		if not request.user.is_authenticated:
+			return self.get_response(request)
+		
+		path = request.path.lstrip('/')
+		
+		# Verificar si la ruta está exenta
+		for pattern in self._exempt_patterns:
+			if pattern.match(path):
+				return self.get_response(request)
+		
+		# Verificar si el usuario tiene un perfil y debe cambiar la clave
+		try:
+			perfil = request.user.perfil
+			if perfil.debe_cambiar_clave:
+				# Si ya está en la página de cambio de contraseña, permitir acceso
+				if path.startswith(self.change_password_url.lstrip('/')):
+					return self.get_response(request)
+				# Redirigir a cambio de contraseña
+				return redirect(self.change_password_url)
+		except Exception:
+			# Si no tiene perfil o hay algún error, continuar normalmente
+			pass
+		
+		return self.get_response(request)
+
+
 class LoginRequiredMiddleware:
 	"""Middleware que exige autenticación para acceder al sitio.
 

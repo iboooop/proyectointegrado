@@ -28,9 +28,7 @@
 
         {% if messages %}
           {% for m in messages %}
-            {% if m.tags == 'success' %}
-              <div class="d-none" data-swal-success="{{ m }}"></div>
-            {% elif m.tags == 'error' or m.tags == 'warning' %}
+            {% if m.tags == 'error' or m.tags == 'warning' or m.tags == 'danger' %}
               <div class="alert alert-{{ m.tags }} mb-2">{{ m }}</div>
             {% endif %}
           {% endfor %}
@@ -190,23 +188,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // 🔹 SweetAlert para mensajes de éxito
-    document.addEventListener('DOMContentLoaded', function(){
-        const successContainer = document.querySelector('[data-swal-success]');
-        if(successContainer){
-            const text = successContainer.getAttribute('data-swal-success');
-            Swal.fire({
-                icon: 'success',
-                title: 'Usuario creado',
-                text: text || 'El usuario se ha creado correctamente.',
-                confirmButtonColor: '#d33',
-                timer: 1800,
-                timerProgressBar: true,
-                showConfirmButton: false
-            });
-        }
-    });
-
     // preview avatar
     const avatarInput = document.getElementById('id_avatar');
     const avatarPreview = document.getElementById('avatarPreview');

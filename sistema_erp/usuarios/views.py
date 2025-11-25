@@ -20,6 +20,7 @@ from django.conf import settings
 from datetime import datetime
 import random
 import string
+import threading
 
 try:
     from openpyxl import Workbook
@@ -62,6 +63,7 @@ def generar_password_robusta():
 def enviar_correo_clave_provisoria(usuario, password_provisoria):
     """
     Envía un correo al usuario con su contraseña provisoria.
+    Usa timeout corto para no bloquear la respuesta.
     """
     try:
         asunto = 'Bienvenido - Credenciales de acceso'
@@ -80,13 +82,15 @@ Accede al sistema en: http://127.0.0.1:8000/login/
 Saludos,
 Equipo Lilis
 """
-        send_mail(
+        # Enviar con timeout de 5 segundos y fail_silently para no bloquear
+        from django.core.mail import EmailMessage
+        email = EmailMessage(
             asunto,
             mensaje,
             settings.DEFAULT_FROM_EMAIL,
-            [usuario.email],
-            fail_silently=False,
+            [usuario.email]
         )
+        email.send(fail_silently=True)
         return True
     except Exception as e:
         print(f"Error al enviar correo: {e}")
@@ -124,15 +128,23 @@ def usuarios_list_view(request):
     perfil = Perfil.objects.filter(usuario=request.user).first()
     rol = getattr(perfil, 'rol', None)
 
-
     # permitir ADMIN, LECTOR y EDITOR; denegar el resto
     if rol not in ('ADMIN', 'LECTOR', 'EDITOR'):
         return HttpResponseForbidden("No tiene permisos para ver usuarios.")
+    
+    # Limpiar parámetros de query antiguos si no es una búsqueda activa
+    if not request.GET.get('q') and request.GET.get('created'):
+        # Limpiar el parámetro 'created' redirigiendo sin él
+        return redirect('usuarios_list')
 
     # sincronizar sesión por si se accede directamente
     if rol:
         request.session['rol'] = rol
 
+    # Limpiar parámetros de query antiguos si se accede directamente sin búsqueda
+    if not request.GET.get('q') and (request.GET.get('created') or request.GET.get('deleted')):
+        # Redirigir sin parámetros antiguos
+        return redirect('usuarios_list')
 
     # Filtros de búsqueda
     q = (request.GET.get('q') or '').strip()
@@ -233,16 +245,22 @@ def usuarios_create_view(request):
                     perfil.debe_cambiar_clave = True  # Marcar para cambio obligatorio
                     perfil.save()
                     
-                    # Enviar correo con credenciales
-                    correo_enviado = enviar_correo_clave_provisoria(usuario, password_provisoria)
-                    
-                    if correo_enviado:
-                        messages.success(request, f"Usuario creado exitosamente. Se envió un correo a {usuario.email} con las credenciales de acceso.")
-                    else:
-                        messages.warning(request, f"Usuario creado, pero hubo un error al enviar el correo. Contraseña provisoria: {password_provisoria}")
-                    
-                    url = f"{reverse('usuarios_list')}?created=1"
-                    return redirect(url)
+                # Enviar correo en segundo plano para no bloquear la respuesta
+                def enviar_correo_background():
+                    try:
+                        enviar_correo_clave_provisoria(usuario, password_provisoria)
+                    except:
+                        pass  # Silenciar errores en el thread
+                
+                thread = threading.Thread(target=enviar_correo_background)
+                thread.daemon = True  # El thread se cerrará cuando termine el proceso principal
+                thread.start()
+                
+                # Mostrar mensaje de éxito inmediatamente (sin esperar el correo)
+                messages.success(request, f"Usuario '{usuario.username}' creado exitosamente. Se enviará un correo a {usuario.email} con las credenciales de acceso.")
+                
+                # Redirigir al listado (el mensaje se mostrará allí)
+                return redirect('usuarios_list')
             except Exception as e:
                 messages.error(request, f"Hubo un error al crear el usuario: {str(e)}")
         else:
@@ -250,16 +268,15 @@ def usuarios_create_view(request):
             print("Errores PerfilForm:", perfil_form.errors)
             messages.error(request, "Hubo un error al crear el usuario. Verifique los datos ingresados.")
     else:
-        # 🔹 Limpiar mensajes antiguos al cargar en GET
-        storage = messages.get_messages(request)
-        storage.used = True
+        # 🔹 Limpiar TODOS los mensajes antiguos al cargar en GET
+        # Esto evita que mensajes de otras vistas aparezcan aquí
+        list(messages.get_messages(request))  # Consumir y descartar todos los mensajes
         usuario_form = UsuarioForm()
         perfil_form = PerfilForm()
 
     return render(request, 'usuarios/create.html', {
         'usuario_form': usuario_form,
         'perfil_form': perfil_form,
-        'show_messages': request.method == 'POST'
     })
 
 
@@ -315,9 +332,8 @@ def usuarios_edit_view(request, id):
             print("Errores PerfilForm:", perfil_form.errors)
             messages.error(request, "No se pudieron guardar los cambios. Verifique los datos.")
     else:
-        # 🔹 Limpiar mensajes antiguos al cargar en GET
-        storage = messages.get_messages(request)
-        storage.used = True
+        # 🔹 Limpiar TODOS los mensajes antiguos al cargar en GET
+        list(messages.get_messages(request))  # Consumir y descartar todos los mensajes
         usuario_form = UsuarioForm(instance=usuario)
         perfil_form = PerfilForm(instance=perfil)
 
@@ -339,10 +355,18 @@ def usuarios_detail_view(request, id):
 @login_required
 def usuarios_delete_view(request, id):
     perfil = get_object_or_404(Perfil, id=id)
+    usuario = perfil.usuario
 
     if request.method == 'POST':
-        perfil.delete()
-        return redirect(reverse('usuarios_list') + '?deleted=1')
+        try:
+            with transaction.atomic():
+                # Eliminar primero el perfil y luego el usuario
+                perfil.delete()
+                usuario.delete()
+            messages.success(request, "Usuario eliminado correctamente.")
+        except Exception as e:
+            messages.error(request, f"Error al eliminar el usuario: {str(e)}")
+        return redirect('usuarios_list')
     # ... lógica para mostrar confirmación si es GET ...
 
     return render(request, 'usuarios/delete.html', {'perfil': perfil})
@@ -440,3 +464,50 @@ def export_usuarios_excel(request):
 def usuarios_detail_view(request, id):
     perfil = get_object_or_404(Perfil, id=id)
     return render(request, 'usuarios/details.html', {'perfil': perfil})
+
+
+# ---------------- RESETEAR CONTRASEÑA (RQ-USR-06) ----------------
+@login_required
+def usuarios_reset_password_view(request, id):
+    """RQ-USR-06: El administrador puede resetear la contraseña de un usuario.
+    Se genera una nueva clave temporal robusta y se envía por correo.
+    """
+    perfil_admin = Perfil.objects.filter(usuario=request.user).first()
+    rol_admin = getattr(perfil_admin, 'rol', None)
+    
+    # Solo ADMIN puede resetear contraseñas
+    if rol_admin != 'ADMIN':
+        return HttpResponseForbidden("Solo los administradores pueden resetear contraseñas.")
+    
+    perfil = get_object_or_404(Perfil, id=id)
+    usuario = perfil.usuario
+    
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                # Generar nueva contraseña provisoria robusta
+                password_provisoria = generar_password_robusta()
+                
+                # Actualizar contraseña del usuario
+                usuario.set_password(password_provisoria)
+                usuario.save()
+                
+                # Marcar que debe cambiar la clave
+                perfil.debe_cambiar_clave = True
+                perfil.save()
+                
+                # Enviar correo con la nueva clave
+                correo_enviado = enviar_correo_clave_provisoria(usuario, password_provisoria)
+                
+                if correo_enviado:
+                    messages.success(request, f"Contraseña reseteada exitosamente. Se envió un correo a {usuario.email} con la nueva clave provisoria.")
+                else:
+                    messages.warning(request, f"Contraseña reseteada, pero hubo un error al enviar el correo. Nueva clave: {password_provisoria}")
+                
+                return redirect(reverse('usuarios_detail', args=[perfil.id]))
+        except Exception as e:
+            messages.error(request, f"Error al resetear la contraseña: {str(e)}")
+            return redirect(reverse('usuarios_detail', args=[perfil.id]))
+    
+    # Si es GET, mostrar confirmación
+    return render(request, 'usuarios/reset_password_confirm.html', {'perfil': perfil})
