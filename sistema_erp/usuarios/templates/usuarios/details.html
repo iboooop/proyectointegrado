@@ -100,6 +100,18 @@
                             </div>
                         </div>
                         <div class="mb-2">
+                            <div class="detail-label">Cargo</div>
+                            <div class="detail-value">
+                                {% if perfil.cargo == 'BODEGA' %}
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-1 rounded-pill">Operador de Bodega</span>
+                                {% elif perfil.cargo == 'VENTAS' %}
+                                    <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle px-3 py-1 rounded-pill">Operador de Ventas</span>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="mb-2">
                             <div class="detail-label">Último acceso</div>
                             <div class="detail-value">{{ perfil.usuario.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</div>
                         </div>
@@ -118,7 +130,7 @@
 
                 <!-- Botones de acción -->
                 <div class="mt-4 d-flex justify-content-end gap-2">
-                    {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
+                    {% if request.user.perfil.rol == 'ADMIN' %}
                         <a href="{% url 'usuarios_edit' perfil.id %}" class="btn btn-outline-secondary">Editar</a>
                     {% endif %}
                     {% if request.user.perfil.rol == 'ADMIN' %}

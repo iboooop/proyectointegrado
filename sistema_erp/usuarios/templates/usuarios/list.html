@@ -86,7 +86,7 @@
                     </div>
                     <div class="d-flex gap-2">
                         <a href="{% url 'usuarios_export' %}" class="btn btn-outline-secondary btn-outline-danger-soft">Exportar Excel</a>
-                        {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
+                        {% if request.user.perfil.rol == 'ADMIN' %}
                             <a href="{% url 'usuarios_create' %}" class="btn btn-danger">+ Crear usuario</a>
                         {% endif %}
                     </div>

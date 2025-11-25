@@ -131,12 +131,22 @@
 
           <div class="row mb-3">
             <div class="col-md-6">
+              <label for="cargo" class="form-label">Cargo (opcional)</label>
+              {{ perfil_form.cargo }}
+              {% if perfil_form.cargo.errors %}
+              <div class="text-danger">{{ perfil_form.cargo.errors|join:", " }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
               <label for="estado" class="form-label">Estado</label>
               {{ perfil_form.estado }}
               {% if perfil_form.estado.errors %}
               <div class="text-danger">{{ perfil_form.estado.errors|join:", " }}</div>
               {% endif %}
             </div>
+          </div>
+
+          <div class="row mb-3">
             <div class="col-md-6">
               <label for="mfa_habilitado" class="form-label">MFA habilitado</label>
               {{ perfil_form.mfa_habilitado }}
@@ -144,9 +154,6 @@
               <div class="text-danger">{{ perfil_form.mfa_habilitado.errors|join:", " }}</div>
               {% endif %}
             </div>
-          </div>
-
-          <div class="row mb-3">
             <div class="col-md-6">
               <label for="sesiones_activas" class="form-label">Sesiones activas</label>
               {{ perfil_form.sesiones_activas }}

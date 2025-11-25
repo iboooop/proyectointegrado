@@ -187,6 +187,7 @@ def usuarios_list_view(request):
         'usuario__last_name': 'usuario__last_name',
         'telefono': 'telefono',
         'rol': 'rol',
+        'cargo': 'cargo',
         'estado': 'estado',
         'mfa_habilitado': 'mfa_habilitado',
         'usuario__last_login': 'usuario__last_login',
@@ -249,7 +250,8 @@ def usuarios_create_view(request):
     
     # Solo ADMIN puede crear usuarios
     if rol_admin != 'ADMIN':
-        return HttpResponseForbidden("Solo los administradores pueden crear usuarios.")
+        from django.shortcuts import render
+        return render(request, '404.html', status=404)
     
     if request.method == 'POST':
         usuario_form = UsuarioForm(request.POST)

@@ -99,10 +99,11 @@ class PerfilForm(forms.ModelForm):
 
     class Meta:
         model = Perfil
-        fields = ['telefono', 'rol', 'estado', 'mfa_habilitado', 'avatar', 'sesiones_activas']
+        fields = ['telefono', 'rol', 'cargo', 'estado', 'mfa_habilitado', 'avatar', 'sesiones_activas']
         widgets = {
             'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el teléfono'}),
             'rol': forms.Select(attrs={'class': 'form-select'}),
+            'cargo': forms.Select(attrs={'class': 'form-select'}),
             'estado': forms.Select(attrs={'class': 'form-select'}),
             'mfa_habilitado': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }

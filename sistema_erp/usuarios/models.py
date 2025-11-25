@@ -21,8 +21,15 @@ class Perfil(models.Model):
         ('BLOQUEADO', 'Bloqueado'),
     ]
 
+    CARGOS = [
+        ('', 'Sin cargo'),
+        ('BODEGA', 'Operador de Bodega'),
+        ('VENTAS', 'Operador de Ventas'),
+    ]
+
     usuario = models.OneToOneField(User, on_delete=models.CASCADE)
     rol = models.CharField(max_length=20, choices=ROLES)
+    cargo = models.CharField(max_length=20, choices=CARGOS, blank=True, default='', verbose_name='Cargo')
     telefono = models.CharField(max_length=15, blank=True)
     estado = models.CharField(max_length=10, choices=ESTADOS, default='ACTIVO')
     mfa_habilitado = models.BooleanField(default=False)
