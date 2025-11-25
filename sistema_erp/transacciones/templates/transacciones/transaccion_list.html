@@ -36,16 +36,17 @@
     /* Ajustar anchos de columnas para mejor distribución */
     .table th:nth-child(1), .table td:nth-child(1) { min-width: 120px; } /* Fecha */
     .table th:nth-child(2), .table td:nth-child(2) { min-width: 100px; } /* Tipo */
-    .table th:nth-child(3), .table td:nth-child(3) { min-width: 120px; } /* SKU */
+    .table th:nth-child(3), .table td:nth-child(3) { min-width: 140px; } /* Producto */
     .table th:nth-child(4), .table td:nth-child(4) { min-width: 140px; } /* Proveedor */
-    .table th:nth-child(5), .table td:nth-child(5) { min-width: 120px; } /* Bodega */
-    .table th:nth-child(6), .table td:nth-child(6) { min-width: 80px; }  /* Cantidad */
-    .table th:nth-child(7), .table td:nth-child(7) { min-width: 100px; } /* Lote */
-    .table th:nth-child(8), .table td:nth-child(8) { min-width: 100px; } /* Serie */
-    .table th:nth-child(9), .table td:nth-child(9) { min-width: 100px; } /* Vence */
-    .table th:nth-child(10), .table td:nth-child(10) { min-width: 120px; } /* Doc ref */
-    .table th:nth-child(11), .table td:nth-child(11) { min-width: 100px; } /* Estado */
-    .table th:nth-child(12), .table td:nth-child(12) { min-width: 120px; } /* Acciones */
+    .table th:nth-child(5), .table td:nth-child(5) { min-width: 140px; } /* Bodega Origen */
+    .table th:nth-child(6), .table td:nth-child(6) { min-width: 140px; } /* Bodega Destino */
+    .table th:nth-child(7), .table td:nth-child(7) { min-width: 80px; }  /* Cantidad */
+    .table th:nth-child(8), .table td:nth-child(8) { min-width: 100px; } /* Lote */
+    .table th:nth-child(9), .table td:nth-child(9) { min-width: 100px; } /* Serie */
+    .table th:nth-child(10), .table td:nth-child(10) { min-width: 100px; } /* Vence */
+    .table th:nth-child(11), .table td:nth-child(11) { min-width: 120px; } /* Doc ref */
+    .table th:nth-child(12), .table td:nth-child(12) { min-width: 100px; } /* Estado */
+    .table th:nth-child(13), .table td:nth-child(13) { min-width: 120px; } /* Acciones */
 
     /* Forzar footer abajo y eliminar espacio blanco bajo el footer */
     html, body {
@@ -126,7 +127,7 @@
 
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
           <form id="searchForm" class="flex-grow-1 me-3" onsubmit="return false;">
-            <input type="text" id="searchInput" class="form-control" placeholder="Buscar por SKU, producto, proveedor, tipo, bodega, lote, serie, vencimiento o doc ref..." value="{{ q }}">
+            <input type="text" id="searchInput" class="form-control" placeholder="Buscar por producto, proveedor, tipo, bodegas, lote, serie, vencimiento o doc ref..." value="{{ q }}">
           </form>
 
           <form id="pageSizeForm" class="d-flex align-items-center gap-2" onsubmit="return false;">

@@ -79,16 +79,8 @@
               <div class="row g-3">
                 <!-- Fecha (auto) -->
                 <div class="col-md-3">
-                  <label class="form-label">Fecha</label>
-                  <!-- si tu form ya tiene campo fecha, usa {{ form.fecha }} y pon initial en el form; aquí lo fuerzo como datetime-local -->
-                  <input
-                    type="datetime-local"
-                    id="id_fecha"
-                    name="fecha"
-                    class="form-control"
-                    value="{{ form.initial.fecha|default_if_none:'' }}"
-                    required
-                  >
+                  <label class="form-label">{{ form.fecha.label }}</label>
+                  {{ form.fecha }}
                   {% include 'transacciones/partials/field_errors.html' with field=form.fecha %}
                 </div>
 
@@ -111,7 +103,6 @@
                 <div class="col-md-4">
                   <label class="form-label">Producto (SKU)</label>
                   {{ form.producto }}
-                  <div class="form-text">Debe existir en la base de datos.</div>
                   {% include 'transacciones/partials/field_errors.html' with field=form.producto %}
                 </div>
 
@@ -336,6 +327,24 @@
         toggleBodegaDestino();
       }
 
+      // 3.5) Hacer obligatoria la fecha de vencimiento si perecible está marcado
+      const perecibleCheckbox = document.getElementById('id_perecible');
+      const fechaVencimientoInput = document.getElementById('id_fecha_vencimiento');
+      
+      function toggleFechaVencimientoRequired() {
+        if (!perecibleCheckbox || !fechaVencimientoInput) return;
+        if (perecibleCheckbox.checked) {
+          fechaVencimientoInput.setAttribute('required', 'required');
+        } else {
+          fechaVencimientoInput.removeAttribute('required');
+        }
+      }
+      
+      if (perecibleCheckbox) {
+        perecibleCheckbox.addEventListener('change', toggleFechaVencimientoRequired);
+        toggleFechaVencimientoRequired();
+      }
+
       // 4) Botón limpiar paso 1: resetea todo y vuelve al step1
       const resetPaso1 = document.getElementById('resetPaso1Btn');
       if (resetPaso1) {
@@ -414,6 +423,27 @@
               }
             }
           });
+
+          // Validación adicional: si perecible está marcado, fecha_vencimiento es obligatoria
+          const perecibleCheck = document.getElementById('id_perecible');
+          const fechaVenc = document.getElementById('id_fecha_vencimiento');
+          if (perecibleCheck && perecibleCheck.checked && fechaVenc && !fechaVenc.value) {
+            hasClientError = true;
+            fechaVenc.classList.add('is-invalid');
+            const wrapper = fechaVenc.closest('.col-md-3, .col-md-4, .col-md-6, .col-12, .col-md-2');
+            if (wrapper && !wrapper.querySelector('.client-error')) {
+              const err = document.createElement('div');
+              err.className = 'text-danger small client-error mt-1';
+              err.textContent = 'La fecha de vencimiento es obligatoria para productos perecibles.';
+              wrapper.appendChild(err);
+            }
+            if (!firstInvalidPane) {
+              const pane = fechaVenc.closest('.tab-pane');
+              if (pane && pane.id) {
+                firstInvalidPane = pane.id + '-tab';
+              }
+            }
+          }
 
           if (hasClientError) {
             e.preventDefault();

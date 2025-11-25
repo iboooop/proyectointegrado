@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 from .models import Producto
 from .forms import ProductoForm
 from transacciones.models import MovimientoInventario
@@ -15,6 +16,7 @@ except ImportError:
 
 
 # ---------------- LISTAR ----------------
+@login_required
 def lista_productos(request):
 
     qs = Producto.objects.select_related("proveedor").all()
@@ -82,6 +84,7 @@ def lista_productos(request):
 
 
 # ---------------- CREAR ----------------
+@login_required
 def crear_producto(request):
     active_tab = request.POST.get("active_tab", "paso1-tab")
     mensaje = None
@@ -121,6 +124,7 @@ def crear_producto(request):
 
 
 # ---------------- DETALLE ----------------
+@login_required
 def detalle_producto(request, id):
     producto = get_object_or_404(
         Producto.objects.select_related("proveedor"), idProducto=id
@@ -142,6 +146,7 @@ def detalle_producto(request, id):
 
 
 # ---------------- EDITAR ----------------
+@login_required
 def editar_producto(request, id):
     producto = get_object_or_404(Producto, idProducto=id)
 
@@ -197,6 +202,7 @@ def editar_producto(request, id):
 
 
 # ---------------- ELIMINAR ----------------
+@login_required
 def eliminar_producto(request, id):
     producto = get_object_or_404(Producto, idProducto=id)
     if request.method == "POST":
@@ -211,6 +217,7 @@ def eliminar_producto(request, id):
 
 
 # ---------------- EXPORTAR EXCEL ----------------
+@login_required
 def exportar_productos_excel(request):
     if Workbook is None:
         return HttpResponse("openpyxl no está instalado.", status=500)

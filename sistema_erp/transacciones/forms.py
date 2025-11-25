@@ -1,22 +1,26 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import MovimientoInventario
+from .models import MovimientoInventario, Bodega
 
 class MovimientoInventarioForm(forms.ModelForm):
     class Meta:
         model = MovimientoInventario
         fields = [
-            'producto', 'proveedor', 'fecha', 'estado', 'tipo',
-            'cantidad', 'lote', 'serie', 'fecha_vencimiento', 'doc_referencia',
+            'producto', 'proveedor', 'bodega_origen', 'bodega_destino',
+            'fecha', 'estado', 'tipo',
+            'cantidad', 'perecible', 'lote', 'serie', 'fecha_vencimiento', 'doc_referencia',
             'doc_referencia_file', 'motivo', 'observaciones'
         ]
         widgets = {
             'producto': forms.Select(attrs={'class': 'form-select'}),
             'proveedor': forms.Select(attrs={'class': 'form-select'}),
+            'bodega_origen': forms.Select(attrs={'class': 'form-select'}),
+            'bodega_destino': forms.Select(attrs={'class': 'form-select'}),
             'fecha': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
             'estado': forms.Select(attrs={'class': 'form-select'}),
             'tipo': forms.Select(attrs={'class': 'form-select'}),
             'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
+            'perecible': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'lote': forms.TextInput(attrs={'class': 'form-control'}),
             'serie': forms.TextInput(attrs={'class': 'form-control'}),
             'fecha_vencimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
@@ -28,8 +32,18 @@ class MovimientoInventarioForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # etiquetas y campos de bodegas eliminados (app 'bodegas' removida)
 
+        # Filtrar solo bodegas activas para los selects
+        self.fields['bodega_origen'].queryset = Bodega.objects.filter(estado='ACTIVO')
+        self.fields['bodega_destino'].queryset = Bodega.objects.filter(estado='ACTIVO')
+        
+        # Agregar clase is-invalid a campos con errores
+        for field_name, field in self.fields.items():
+            if self.errors.get(field_name):
+                widget_attrs = field.widget.attrs
+                current_class = widget_attrs.get('class', '')
+                widget_attrs['class'] = f"{current_class} is-invalid".strip()
+        
         # Asegurarse de que los campos referenciados existan en el form antes de ajustar labels
         if 'fecha' in self.fields:
             self.fields['fecha'].label = 'Fecha y hora'
@@ -43,6 +57,11 @@ class MovimientoInventarioForm(forms.ModelForm):
             self.fields['producto'].label = 'Producto (SKU)'
         if 'proveedor' in self.fields:
             self.fields['proveedor'].label = 'Proveedor'
+        if 'bodega_origen' in self.fields:
+            self.fields['bodega_origen'].label = 'Bodega origen'
+        if 'bodega_destino' in self.fields:
+            self.fields['bodega_destino'].label = 'Bodega destino'
+            self.fields['bodega_destino'].required = False
         if 'doc_referencia' in self.fields:
             self.fields['doc_referencia'].label = 'Documento de referencia'
         if 'motivo' in self.fields:
@@ -61,10 +80,11 @@ class MovimientoInventarioForm(forms.ModelForm):
         if not fecha:
             raise ValidationError("Debes ingresar la fecha del movimiento.")
 
-        from datetime import date
+        from django.utils import timezone
+        ahora = timezone.now()
 
-        if fecha.date() < date.today():
-            raise ValidationError("La fecha del movimiento no puede ser anterior al día de hoy.")
+        if fecha < ahora:
+            raise ValidationError("La fecha del movimiento no puede ser anterior a la fecha y hora actual.")
         return fecha
 
     def clean_producto(self):
@@ -78,6 +98,14 @@ class MovimientoInventarioForm(forms.ModelForm):
         if not proveedor:
             raise ValidationError("Debes seleccionar un proveedor asociado al producto.")
         return proveedor
+    
+    def clean_bodega_origen(self):
+        bodega_origen = self.cleaned_data.get("bodega_origen")
+        if not bodega_origen:
+            raise ValidationError("Debes seleccionar una bodega de origen.")
+        if bodega_origen.estado != 'ACTIVO':
+            raise ValidationError("La bodega de origen debe estar activa.")
+        return bodega_origen
 
     def clean_tipo(self):
         tipo = self.cleaned_data.get("tipo")
@@ -108,6 +136,19 @@ class MovimientoInventarioForm(forms.ModelForm):
     def clean(self):
         cleaned = super().clean()
 
+        tipo = cleaned.get("tipo")
+        bodega_origen = cleaned.get("bodega_origen")
+        bodega_destino = cleaned.get("bodega_destino")
+        
+        # Validación para transferencias
+        if tipo == 'TRANSFERENCIA':
+            if not bodega_destino:
+                self.add_error("bodega_destino", "Para transferencias debes especificar la bodega de destino.")
+            elif bodega_origen and bodega_destino and bodega_origen.id == bodega_destino.id:
+                self.add_error("bodega_destino", "La bodega de destino no puede ser la misma que la bodega de origen.")
+            if bodega_destino and bodega_destino.estado != 'ACTIVO':
+                self.add_error("bodega_destino", "La bodega de destino debe estar activa.")
+        
         # Validaciones de lote/serie/fecha
         lote = cleaned.get("lote", "").strip()
         serie = cleaned.get("serie", "").strip()

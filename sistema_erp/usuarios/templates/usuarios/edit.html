@@ -48,9 +48,10 @@
                     {% for m in messages %}
                         {% if m.tags == 'success' %}
                             <div class="d-none" data-swal-success="{{ m }}"></div>
-                        {% else %}
+                        {% elif m.tags == 'info' %}
+                            <div class="d-none" data-swal-info="{{ m }}"></div>
+                        {% elif m.tags == 'error' or m.tags == 'warning' %}
                             <div class="alert alert-{{ m.tags }} mb-2">{{ m }}</div>
-
                         {% endif %}
                     {% endfor %}
                 {% endif %}
@@ -161,29 +162,8 @@
                     </div>
                 </div>
 
-                <h6 class="fw-semibold mb-3">Seguridad</h6>
-                <div class="form-check form-switch mb-2">
-                    <input class="form-check-input" type="checkbox" id="togglePasswordChange">
-                    <label class="form-check-label" for="togglePasswordChange">Cambiar contraseña</label>
-                </div>
-                <div id="passwordFields" class="row mb-3" style="display:none;">
-                    <div class="col-md-6">
-                        <label for="password" class="form-label">Nueva contraseña</label>
-                        {{ usuario_form.password }}
-                        {% if usuario_form.password.errors %}
-                        <div class="text-danger">{{ usuario_form.password.errors|join:", " }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="confirm_password" class="form-label">Confirmar contraseña</label>
-                        {{ usuario_form.confirm_password }}
-                        {% if usuario_form.confirm_password.errors %}
-                        <div class="text-danger">{{ usuario_form.confirm_password.errors|join:", " }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="col-12">
-                        <small class="text-muted">Mínimo 8 caracteres, al menos 1 mayúscula y 1 número.</small>
-                    </div>
+                <div class="alert alert-info" role="alert">
+                    <strong>🔒 Gestión de Contraseña:</strong> Si necesita restablecer la contraseña del usuario, el sistema generará una nueva clave provisoria que será enviada por correo electrónico.
                 </div>
 
                 <div class="row mb-3">
@@ -243,6 +223,20 @@
                 showConfirmButton: false
             });
         }
+        
+        const infoContainer = document.querySelector('[data-swal-info]');
+        if(infoContainer){
+            const text = infoContainer.getAttribute('data-swal-info');
+            Swal.fire({
+                icon: 'info',
+                title: 'Sin cambios',
+                text: text || 'No se detectaron cambios para guardar.',
+                confirmButtonColor: '#3085d6',
+                timer: 1800,
+                timerProgressBar: true,
+                showConfirmButton: false
+            });
+        }
     });
 
     // 🔹 Previsualización del avatar
@@ -269,24 +263,6 @@
             }
         });
     }
-
-    // 🔹 Toggle cambio de contraseña
-    (function(){
-        const toggle = document.getElementById('togglePasswordChange');
-        const box = document.getElementById('passwordFields');
-        const pwd = document.getElementById('{{ usuario_form.password.id_for_label }}');
-        const pwd2 = document.getElementById('{{ usuario_form.confirm_password.id_for_label }}');
-        if (toggle && box) {
-            toggle.addEventListener('change', function(){
-                const show = this.checked;
-                box.style.display = show ? 'flex' : 'none';
-                if (!show) {
-                    if (pwd) pwd.value = '';
-                    if (pwd2) pwd2.value = '';
-                }
-            });
-        }
-    })();
     </script>
 
 </body>

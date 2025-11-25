@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 from .models import Proveedor
 from productos.models import Producto
 from transacciones.models import MovimientoInventario
@@ -16,6 +17,7 @@ try:
 except ImportError:
     Workbook = None
 
+@login_required
 def lista_proveedores(request):
     qs = Proveedor.objects.all().order_by('nombre')
 
@@ -81,6 +83,7 @@ def crear_proveedor(request):
         form = ProveedorForm()
     return render(request, 'proveedores/proveedor_add.html', {'form': form})
 
+@login_required
 def detalle_proveedor(request, id):
     proveedor = get_object_or_404(Proveedor, id=id)
     productos = Producto.objects.filter(proveedor=proveedor)
@@ -93,6 +96,7 @@ def detalle_proveedor(request, id):
     }
     return render(request, 'proveedores/proveedor_detail.html', context)
 
+@login_required
 def editar_proveedor(request, id):
     proveedor = get_object_or_404(Proveedor, id=id)
     if request.method == 'POST':
@@ -105,6 +109,7 @@ def editar_proveedor(request, id):
         form = ProveedorForm(instance=proveedor)
     return render(request, 'proveedores/proveedor_edit.html', {'form': form, 'proveedor': proveedor})
 
+@login_required
 def eliminar_proveedor(request, id):
     proveedor = get_object_or_404(Proveedor, id=id)
     if request.method == 'POST':
@@ -113,6 +118,7 @@ def eliminar_proveedor(request, id):
     return redirect('detalle_proveedor', id=id)
 
 
+@login_required
 def exportar_proveedores_excel(request):
     if Workbook is None:
         return HttpResponse("openpyxl no está instalado.", status=500)
