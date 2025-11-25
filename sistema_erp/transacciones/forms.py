@@ -3,58 +3,60 @@ from django import forms
 from django.core.exceptions import ValidationError
 from .models import MovimientoInventario, Bodega
 
+# --- AÑADE ESTE DICCIONARIO QUE FALTA ---
+WIDGETS_MOVIMIENTO = {
+    'producto': autocomplete.ModelSelect2(
+        url='producto-autocomplete',
+        attrs={
+            'data-placeholder': 'Busca un producto por nombre o SKU...',
+            'data-html': True,
+        }
+    ),
+    'proveedor': autocomplete.ModelSelect2(
+        url='proveedor-autocomplete',
+        attrs={'data-placeholder': 'Busca un proveedor por nombre...'}
+    ),
+    'bodega_origen': autocomplete.ModelSelect2(
+        url='bodega-autocomplete',
+        attrs={'data-placeholder': 'Busca una bodega...'}
+    ),
+    'bodega_destino': autocomplete.ModelSelect2(
+        url='bodega-autocomplete',
+        attrs={'data-placeholder': 'Busca una bodega...'}
+    ),
+    # --- AÑADE ESTE WIDGET PARA EL CAMPO DE FECHA ---
+    'fecha_vencimiento': forms.DateInput(
+        attrs={
+            'type': 'date',
+        }
+    ),
+    # --- FIN DE LA ADICIÓN ---
+}
+# --- FIN DE LA ADICIÓN ---
+
 class MovimientoInventarioForm(forms.ModelForm):
     class Meta:
         model = MovimientoInventario
-        fields = [
-            'producto', 'proveedor', 'bodega_origen', 'bodega_destino',
-            'fecha', 'estado', 'tipo',
-            'cantidad', 'perecible', 'lote', 'serie', 'fecha_vencimiento', 'doc_referencia',
-            'doc_referencia_file', 'motivo', 'observaciones'
-        ]
-        widgets = {
-            'producto': autocomplete.ModelSelect2(
-                url='/productos/producto-autocomplete/',
-                attrs={
-                    'data-placeholder': 'Busca un producto por nombre...',
-                    'data-minimum-input-length': 2,
-                }
-            ),
-            'proveedor': autocomplete.ModelSelect2(
-                url='/proveedores/proveedor-autocomplete/',
-                attrs={
-                    'data-placeholder': 'Busca un proveedor por nombre...',
-                    'data-minimum-input-length': 2,
-                }
-            ),
-            'bodega_origen': autocomplete.ModelSelect2(
-                url='/transacciones/bodega-autocomplete/',
-                attrs={
-                    'data-placeholder': 'Busca una bodega...',
-                    'data-minimum-input-length': 1,
-                }
-            ),
-            'bodega_destino': autocomplete.ModelSelect2(
-                url='/transacciones/bodega-autocomplete/',
-                attrs={
-                    'data-placeholder': 'Busca una bodega...',
-                    'data-minimum-input-length': 1,
-                }
-            ),
-            'fecha': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
-            'tipo': forms.Select(attrs={'class': 'form-select'}),
-            'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
-            'perecible': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'lote': forms.TextInput(attrs={'class': 'form-control'}),
-            'serie': forms.TextInput(attrs={'class': 'form-control'}),
-            'fecha_vencimiento': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'doc_referencia': forms.TextInput(attrs={'class': 'form-control'}),
-            'motivo': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
-            'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-        }
+        exclude = ['usuario', 'perfil', 'fecha_activacion', 'fecha_desactivacion']
+        widgets = WIDGETS_MOVIMIENTO
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # --- REEMPLAZA EL BLOQUE DE ESTILOS ANTERIOR POR ESTE ---
+        for field_name, field in self.fields.items():
+            widget = field.widget
+            # No aplicar clases a los widgets de autocompletado (Select2)
+            if 'autocomplete' in str(type(widget)).lower():
+                continue
+
+            # Aplicar 'form-select' a los campos de selección (dropdowns)
+            if isinstance(widget, forms.Select):
+                widget.attrs.update({'class': 'form-select'})
+            # Aplicar 'form-control' al resto de campos (texto, número, fecha, etc.)
+            else:
+                widget.attrs.update({'class': 'form-control'})
+        # --- FIN DEL REEMPLAZO ---
 
         # Filtrar solo bodegas activas para los selects
         self.fields['bodega_origen'].queryset = Bodega.objects.filter(estado='ACTIVO')
@@ -191,3 +193,22 @@ class MovimientoInventarioForm(forms.ModelForm):
             self.add_error("observaciones", "Las observaciones no pueden superar los 500 caracteres.")
 
         return cleaned
+
+
+# --- AÑADE ESTA CLASE AL FINAL DEL ARCHIVO ---
+class MovimientoInventarioEditForm(MovimientoInventarioForm):
+    """
+    Formulario para editar un movimiento. Hereda la configuración del formulario
+    de creación, pero ajusta la validación de la fecha.
+    """
+    class Meta(MovimientoInventarioForm.Meta):
+        # Hereda los widgets y exclusiones del padre.
+        # No es necesario redefinir nada aquí si es igual.
+        pass
+
+    def clean_fecha(self):
+        fecha = self.cleaned_data.get("fecha")
+        if not fecha:
+            raise ValidationError("Debes ingresar la fecha del movimiento.")
+        # En la edición, no validamos que la fecha sea futura. Simplemente la retornamos.
+        return fecha

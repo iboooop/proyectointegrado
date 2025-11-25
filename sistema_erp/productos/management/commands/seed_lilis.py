@@ -280,17 +280,21 @@ class Command(BaseCommand):
             bodega_origen = None
             bodega_destino = None
 
-            if tipo == 'INGRESO':
+            # Lógica corregida para asignar bodegas
+            if tipo == 'INGRESO' or tipo == 'DEVOLUCION':
+                # Estos movimientos entran a una bodega. El origen es externo.
+                # Como el modelo exige un origen, asignamos uno aleatorio.
+                bodega_origen = random.choice(bodegas) 
                 bodega_destino = random.choice(bodegas)
             elif tipo in ['SALIDA', 'VENTA', 'AJUSTE']:
+                # Estos movimientos salen de una bodega.
                 bodega_origen = random.choice(bodegas)
             elif tipo == 'TRANSFERENCIA':
+                # Se mueve entre dos bodegas distintas.
                 if len(bodegas) > 1:
                     bodega_origen, bodega_destino = random.sample(bodegas, 2)
                 else:
-                    continue
-            elif tipo == 'DEVOLUCION':
-                bodega_destino = random.choice(bodegas)
+                    continue # No se puede hacer transferencia con una sola bodega
 
             # --- LÓGICA AÑADIDA ---
             fecha_movimiento = timezone.now() - timedelta(days=random.randint(0, 365))
@@ -324,11 +328,22 @@ class Command(BaseCommand):
 
     def _update_product_stock(self):
         self.stdout.write("Calculando y actualizando stock de productos...")
+        
+        # Desactivamos temporalmente las señales para evitar el doble cálculo durante el seed masivo.
+        from transacciones.signals import actualizar_stock_movimiento, anular_stock_movimiento
+        from django.db.models.signals import post_save, post_delete
+        from transacciones.models import MovimientoInventario
+
+        post_save.disconnect(actualizar_stock_movimiento, sender=MovimientoInventario)
+        post_delete.disconnect(anular_stock_movimiento, sender=MovimientoInventario)
+
+        self.stdout.write(" -> Señales desconectadas temporalmente.")
+
         productos_a_actualizar = []
         for producto in Producto.objects.all():
-            # Suma todas las cantidades que entran al inventario
+            # Suma todas las cantidades que entran al inventario (incluyendo AJUSTE)
             entradas = MovimientoInventario.objects.filter(
-                producto=producto, tipo__in=['INGRESO', 'DEVOLUCION']
+                producto=producto, tipo__in=['INGRESO', 'DEVOLUCION', 'AJUSTE']
             ).aggregate(total=models.Sum('cantidad'))['total'] or 0
             
             # Suma todas las cantidades que salen del inventario
@@ -336,11 +351,16 @@ class Command(BaseCommand):
                 producto=producto, tipo__in=['SALIDA', 'VENTA']
             ).aggregate(total=models.Sum('cantidad'))['total'] or 0
             
-            # Las transferencias y ajustes pueden sumar o restar, pero para un cálculo simple de stock total, no se consideran
-            # ya que el producto no sale del sistema, solo cambia de bodega.
+            # Las transferencias no afectan el stock total del producto.
             
-            producto.stock = entradas - salidas
+            producto.stock_actual = entradas - salidas
             productos_a_actualizar.append(producto)
 
-        Producto.objects.bulk_update(productos_a_actualizar, ['stock'])
+        Producto.objects.bulk_update(productos_a_actualizar, ['stock_actual'])
+        
+        # Reactivamos las señales
+        post_save.connect(actualizar_stock_movimiento, sender=MovimientoInventario)
+        post_delete.connect(anular_stock_movimiento, sender=MovimientoInventario)
+        self.stdout.write(" -> Señales reconectadas.")
+
         self.stdout.write(f"✔ Stock actualizado para {len(productos_a_actualizar)} productos.")
