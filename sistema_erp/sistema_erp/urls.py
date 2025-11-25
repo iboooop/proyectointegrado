@@ -19,6 +19,13 @@ from django.urls import path, include, re_path
 from . import views
 from django.conf import settings  # <-- AÑADIR
 from django.conf.urls.static import static  # <-- AÑADIR
+from rest_framework import routers
+from productos.api_views import ProductoViewSet
+
+router = routers.DefaultRouter()
+router.register(r'productos', ProductoViewSet)
+
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,6 +37,8 @@ urlpatterns = [
     path('productos/', include('productos.urls')),
     path('proveedores/', include('proveedores.urls')),
     path('transacciones/', include('transacciones.urls')),
+
+    path("api/", include(router.urls)),
     # Catch-all: al final, cualquier otra URL muestra el 404 personalizado incluso en DEBUG
     re_path(r'^(?P<extra>.*)$', views.not_found_view, name='not_found'),
     

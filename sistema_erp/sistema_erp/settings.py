@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'autenticacion',
     'sistema_erp',
     'django_extensions',
+    'rest_framework',
 ]
 
 # ===========================
