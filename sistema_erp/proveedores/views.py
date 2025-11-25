@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 from .models import Proveedor
 from productos.models import Producto
 from transacciones.models import MovimientoInventario
@@ -16,6 +17,7 @@ try:
 except ImportError:
     Workbook = None
 
+@login_required
 def lista_proveedores(request):
     qs = Proveedor.objects.all().order_by('nombre')
 
@@ -75,12 +77,20 @@ def crear_proveedor(request):
     if request.method == 'POST':
         form = ProveedorForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('lista_proveedores')
+            proveedor = form.save()
+            messages.success(request, f"Proveedor '{proveedor.razon_social}' creado exitosamente.")
+            return redirect('lista_proveedores') # O a donde quieras redirigir
+        else:
+            messages.error(request, 'El formulario contiene errores. Por favor, revísalo.')
     else:
         form = ProveedorForm()
-    return render(request, 'proveedores/proveedor_add.html', {'form': form})
 
+    context = {
+        'form': form
+    }
+    return render(request, 'proveedores/proveedor_add.html', context)
+
+@login_required
 def detalle_proveedor(request, id):
     proveedor = get_object_or_404(Proveedor, id=id)
     productos = Producto.objects.filter(proveedor=proveedor)
@@ -93,18 +103,34 @@ def detalle_proveedor(request, id):
     }
     return render(request, 'proveedores/proveedor_detail.html', context)
 
+@login_required
 def editar_proveedor(request, id):
     proveedor = get_object_or_404(Proveedor, id=id)
+
     if request.method == 'POST':
         form = ProveedorForm(request.POST, instance=proveedor)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Cambios guardados")
+            if form.has_changed():
+                form.save()
+                messages.success(request, 'Los cambios se guardaron correctamente.')
+            else:
+                messages.info(request, 'No se detectaron cambios en el formulario.')
+            
             return redirect('editar_proveedor', id=proveedor.id)
+        else:
+            # Si el formulario no es válido, se añade el mensaje de error
+            # y se vuelve a renderizar la plantilla, sin redirigir.
+            messages.error(request, 'Por favor, corrige los errores marcados en rojo.')
     else:
         form = ProveedorForm(instance=proveedor)
-    return render(request, 'proveedores/proveedor_edit.html', {'form': form, 'proveedor': proveedor})
 
+    context = {
+        'form': form,
+        'proveedor': proveedor
+    }
+    return render(request, 'proveedores/proveedor_edit.html', context)
+
+@login_required
 def eliminar_proveedor(request, id):
     proveedor = get_object_or_404(Proveedor, id=id)
     if request.method == 'POST':
@@ -113,6 +139,7 @@ def eliminar_proveedor(request, id):
     return redirect('detalle_proveedor', id=id)
 
 
+@login_required
 def exportar_proveedores_excel(request):
     if Workbook is None:
         return HttpResponse("openpyxl no está instalado.", status=500)

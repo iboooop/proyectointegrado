@@ -27,10 +27,11 @@ class ProductoAdmin(admin.ModelAdmin):
         'uom_compra', 'uom_venta', 'factor_conversion',
         'costo_estandar', 'precio_venta', 'impuesto_iva',
         'stock_minimo', 'stock_maximo', 'punto_reorden',
-        'perishable', 'control_por_lote', 'control_por_serie', 'bodega', 'stock_actual',
+        'perishable', 'control_por_lote', 'control_por_serie', 'stock_actual',
     )
     search_fields = ('sku', 'nombre', 'categoria', 'marca', 'modelo', 'proveedor__nombre')
-    list_filter = ('categoria', 'marca', 'proveedor', 'bodega', 'perishable', 'control_por_lote', 'control_por_serie')
+    # 'bodega' eliminado de filtros porque el campo ya no existe
+    list_filter = ('categoria', 'marca', 'proveedor', 'perishable', 'control_por_lote', 'control_por_serie')
     list_per_page = 20
     ordering = ('nombre',)
     inlines = [MovimientoInline]

@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .autocomplete import ProveedorAutocomplete # <- Importa la nueva vista
 
 urlpatterns = [
     path('', views.lista_proveedores, name='lista_proveedores'),
@@ -8,4 +9,5 @@ urlpatterns = [
     path('<int:id>/editar/', views.editar_proveedor, name='editar_proveedor'),
     path('<int:id>/eliminar/', views.eliminar_proveedor, name='eliminar_proveedor'),
     path('agregar/', views.crear_proveedor, name='proveedor_agregar'),
+    path('proveedor-autocomplete/', ProveedorAutocomplete.as_view(), name='proveedor-autocomplete'), # <- Añade esta línea
 ]

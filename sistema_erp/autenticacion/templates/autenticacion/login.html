@@ -48,6 +48,7 @@
             padding: 2.5rem 2rem;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
         }
 
         .login-container h1 {
@@ -94,7 +95,6 @@
             box-shadow: 0 0 0 3px rgba(209, 10, 17, 0.15);
         }
 
-        /* Estilo para mensajes de error por campo (texto rojo pequeño) */
         .field-error {
             color: #dc3545; /* rojo similar a bootstrap */
             font-size: 0.85rem;
@@ -147,7 +147,6 @@
             margin-bottom: 1.2rem;
         }
 
-        /* Tarjeta de credenciales */
         .credentials-card {
             background: white;
             border-radius: 18px;
@@ -207,7 +206,6 @@
 
         .credential-role {
             display: inline-block;
-
             padding: 0.35rem 0.75rem;
             background: #fee;
             color: #D10A11;
@@ -272,7 +270,6 @@
             margin-top: 0.2rem;
         }
 
-        /* Mensaje de error general flotante, centrado y con ancho fijo */
         .login-error-alert {
             position: fixed;
             top: 20px;
@@ -297,7 +294,27 @@
             margin-right: 0.5rem;
         }
 
-        /* Responsive */
+        /* bloqueo overlay dentro del login container */
+        .block-layer {
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.92);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 50;
+            border-radius: 18px;
+            padding: 1rem;
+        }
+
+        .block-timer {
+            font-size: 1.15rem;
+            color: #9b1d1d;
+            font-weight: 700;
+        }
+
         @media (max-width: 768px) {
             .login-wrapper {
                 flex-direction: column;
@@ -312,6 +329,27 @@
                 margin-top: 0;
             }
         }
+
+        /* Top generic error alert (muestra messages y form.non_field_errors) */
+        .top-fixed-alert {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 500px;
+            z-index: 1050;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .top-fixed-alert .alert {
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
@@ -324,7 +362,17 @@
                 <!-- Logo centrado -->
                 <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" class="login-logo">
 
-                <form method="post" novalidate>
+                {# block layer shown when remaining_seconds > 0 (JS controls display) #}
+                <div id="blockLayer" class="block-layer" style="display:none;">
+                    <div style="text-align:center;">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2a7 7 0 00-7 7v3a7 7 0 007 7 7 7 0 007-7V9a7 7 0 00-7-7z" stroke="#9b1d1d" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <div style="font-weight:700;color:#9b1d1d;">Has excedido los intentos permitidos</div>
+                    <div class="block-timer">Reintentar en <span id="timerDisplay">03:00</span></div>
+                    <div style="font-size:0.9rem;color:#6b7280;">Intenta nuevamente cuando el temporizador termine.</div>
+                </div>
+
+                <form id="loginForm" method="post" novalidate>
                     {% csrf_token %}
 
                     
@@ -355,12 +403,12 @@
                     </div>
 
                     <div style="display:flex; gap:12px; justify-content:center; align-items:center; margin-top:16px; flex-wrap:wrap;">
-                        <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+                        <button id="loginSubmit" type="submit" class="btn btn-primary">Iniciar sesión</button>
                     </div>
                 </form>
                 
                 <div style="text-align:center; margin-top:12px;">
-                    <a href="{% url 'recuperar_password' %}">¿Olvidaste tu contraseña?</a>
+                    <a href="{% url 'password_reset' %}">¿Olvidaste tu contraseña?</a>
                 </div>
             </div>
         </div>
@@ -446,6 +494,89 @@
         <div class="login-error-alert" style="visibility:hidden;">.</div>
     {% endif %}
 
+    <!-- Top generic error alert (muestra messages y form.non_field_errors) -->
+    <div class="top-fixed-alert">
+      {% if messages %}
+        {% for m in messages %}
+          <div class="alert alert-danger" role="alert">
+            {{ m }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+          {% for e in form.non_field_errors %}
+            {{ e }}{% if not forloop.last %}<br>{% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- DEBUG: mostrar remaining_seconds y mensajes -->
+    <div style="display:none;">
+      remaining_seconds={{ remaining_seconds|default:"None" }}
+      {% for m in messages %}MSG:{{ m }};{% endfor %}
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+    (function(){
+        // segundos restantes enviados por la vista
+        var remaining = {{ remaining_seconds|default:0 }};
+        // elementos
+        var blockLayer = document.getElementById('blockLayer');
+        var timerDisplay = document.getElementById('timerDisplay');
+        var submitBtn = document.getElementById('loginSubmit');
+        var form = document.getElementById('loginForm');
+
+        // inputs dentro del formulario (se seleccionan por name para respetar renderizado de Django)
+        var inputUsuario = form.querySelector('[name="usuario_o_email"]');
+        var inputPassword = form.querySelector('[name="password"]');
+        var otherButtons = form.querySelectorAll('button');
+
+        function pad(n){ return n < 10 ? '0' + n : n; }
+        function formatTime(s){ var m = Math.floor(s/60); var sec = s % 60; return pad(m) + ':' + pad(sec); }
+
+        function setBlocked(s){
+            if(s > 0){
+                blockLayer.style.display = 'flex';
+                timerDisplay.textContent = formatTime(s);
+                if(inputUsuario) inputUsuario.disabled = true;
+                if(inputPassword) inputPassword.disabled = true;
+                otherButtons.forEach(function(b){ b.disabled = true; });
+            } else {
+                blockLayer.style.display = 'none';
+                if(inputUsuario) inputUsuario.disabled = false;
+                if(inputPassword) inputPassword.disabled = false;
+                otherButtons.forEach(function(b){ b.disabled = false; });
+            }
+        }
+
+        if(remaining > 0){
+            setBlocked(remaining);
+            var countdown = setInterval(function(){
+                remaining--;
+                if(remaining <= 0){
+                    clearInterval(countdown);
+                    setBlocked(0);
+                } else {
+                    timerDisplay.textContent = formatTime(remaining);
+                }
+            }, 1000);
+        } else {
+            setBlocked(0);
+        }
+
+        // extra: prevenir envíos si bloqueado por seguridad
+        form.addEventListener('submit', function(e){
+            var anyDisabled = (inputUsuario && inputUsuario.disabled) || (inputPassword && inputPassword.disabled);
+            if(anyDisabled){
+                e.preventDefault();
+            }
+        }, true);
+    })();
+    </script>
 </body>
 </html>

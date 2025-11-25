@@ -4,19 +4,30 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from django.utils import timezone
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages  # <--- 1. IMPORTAR messages
 
-
-
-# ✅ Corrección: importamos Bodega desde la app bodegas, no desde transacciones
-from bodegas.models import Bodega
 from .models import MovimientoInventario
-from .forms import MovimientoInventarioForm
-
+# Asegúrate de importar ambos formularios si los tienes separados
+from .forms import MovimientoInventarioForm, MovimientoInventarioEditForm
 
 
 # ---------------- LISTA ----------------
+@login_required
 def lista_transacciones(request):
-    qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario', 'bodega_origen', 'bodega_destino')
+    # qs = MovimientoInventario.objects.select_related(
+    #     'producto', 'proveedor', 'usuario', 'bodega_origen', 'bodega_destino'
+    # )
+
+    # --- SOLUCIÓN ---
+    # Usamos prefetch_related para los campos que pueden ser NULOS (bodegas)
+    # y select_related para los que no.
+    qs = MovimientoInventario.objects.select_related(
+        'producto', 'proveedor', 'usuario'
+    ).prefetch_related(
+        'bodega_origen', 'bodega_destino'
+    )
+    # ----------------
 
     # Filtros de texto (SKU/nombre producto, proveedor, usuario, tipo, bodega, lote, serie, doc ref, motivo)
     q = (request.GET.get('q') or '').strip()
@@ -28,7 +39,9 @@ def lista_transacciones(request):
             | Q(usuario__username__icontains=q)
             | Q(tipo__icontains=q)
             | Q(bodega_origen__nombre__icontains=q)
+            | Q(bodega_origen__codigo__icontains=q)
             | Q(bodega_destino__nombre__icontains=q)
+            | Q(bodega_destino__codigo__icontains=q)
             | Q(lote__icontains=q)
             | Q(serie__icontains=q)
             | Q(fecha_vencimiento__icontains=q)
@@ -53,6 +66,8 @@ def lista_transacciones(request):
         'tipo': 'tipo',
         'producto__nombre': 'producto__nombre',
         'proveedor__nombre': 'proveedor__nombre',
+        'bodega_origen__nombre': 'bodega_origen__nombre',
+        'bodega_destino__nombre': 'bodega_destino__nombre',
         'cantidad': 'cantidad',
         'usuario__username': 'usuario__username',
         'lote': 'lote',
@@ -71,7 +86,7 @@ def lista_transacciones(request):
     hoy = timezone.localdate()
     # Contar TODOS los movimientos de hoy, no solo los del queryset filtrado
     movimientos_hoy = MovimientoInventario.objects.filter(fecha__date=hoy).count()
-    stock_total = qs.aggregate(total=models.Sum('cantidad'))['total'] or 0
+    stock_total = qs.aggregate(total=models.Sum('cantidad'))['total' or 0]
     productos_unicos = qs.values('producto__sku').distinct().count()
 
     # Tamaño de página persistente
@@ -113,24 +128,28 @@ def lista_transacciones(request):
 
 
 # ---------------- CREAR ----------------
+@login_required
 def crear_transaccion(request):
-    mensaje = None
-    mensaje_tipo = None
-
     if request.method == 'POST':
-        form = MovimientoInventarioForm(request.POST)
+        form = MovimientoInventarioForm(request.POST, request.FILES)
         if form.is_valid():
             mov = form.save(commit=False)
-            # Por defecto, todo nuevo movimiento parte "por confirmar"
-            if not mov.estado:
-                mov.estado = 'POR_CONFIRMAR'
+            mov.usuario = request.user
+            
+            # --- ELIMINA ESTA LÍNEA ---
+            # if not mov.estado:
+            #     mov.estado = 'POR_CONFIRMAR'
+            # --- FIN DE LA ELIMINACIÓN ---
+
             mov.save()
-            form = MovimientoInventarioForm()
-            mensaje = "Movimiento creado correctamente."
-            mensaje_tipo = "success"
+            
+            messages.success(request, '¡Movimiento creado con éxito!')
+            return redirect('lista_transacciones')
         else:
-            mensaje = "Corrige los errores indicados."
-            mensaje_tipo = "danger"
+            # --- APLICA EL CAMBIO AQUÍ ---
+            print("ERRORES DEL FORMULARIO:", form.errors.as_json())
+            # --- FIN DEL CAMBIO ---
+            messages.error(request, 'Por favor, corrige los errores indicados a continuación.')
     else:
         initial = {'fecha': timezone.now().strftime('%Y-%m-%dT%H:%M')}
         form = MovimientoInventarioForm(initial=initial)
@@ -138,60 +157,47 @@ def crear_transaccion(request):
     return render(
         request,
         'transacciones/transaccion_add.html',
-        {
-            'form': form,
-            'mensaje': mensaje,
-            'mensaje_tipo': mensaje_tipo,
-        },
+        {'form': form} # Solo pasamos el formulario
     )
 
 
 # ---------------- DETALLE ----------------
+@login_required
 def detalle_transaccion(request, id):
     transaccion = get_object_or_404(
-        MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario'), id=id
+        MovimientoInventario.objects.select_related(
+            'producto', 'proveedor', 'usuario', 'bodega_origen', 'bodega_destino'
+        ), 
+        id=id
     )
     return render(request, 'transacciones/transaccion_detail.html', {'transaccion': transaccion})
 
 
 # ---------------- EDITAR ----------------
+@login_required
 def editar_transaccion(request, id):
     transaccion = get_object_or_404(MovimientoInventario, id=id)
-
-    mensaje = None
-    mensaje_tipo = None
+    form_has_errors = False
 
     if request.method == 'POST':
-        form = MovimientoInventarioForm(request.POST, instance=transaccion)
+        form = MovimientoInventarioEditForm(request.POST, request.FILES, instance=transaccion)
         if form.is_valid():
-            if not form.has_changed():
-                mensaje = "No realizaste ningún cambio."
-                mensaje_tipo = "warning"
+            # --- INICIO DE LA MODIFICACIÓN ---
+            # Primero, revisamos si el formulario ha cambiado
+            if form.has_changed():
+                form.save()
+                messages.success(request, '¡Cambios guardados con éxito!')
             else:
-                from django.utils import timezone
-
-                was_inactive = (transaccion.estado in ['CANCELADO', 'DESACTIVADO'])
-                mov = form.save(commit=False)
-                now = timezone.now()
-
-                if mov.estado == 'EN_PROCESO' and was_inactive:
-                    mov.fecha_activacion = now
-                    mov.fecha_desactivacion = None
-                elif mov.estado in ['CANCELADO', 'DESACTIVADO'] and not was_inactive:
-                    mov.fecha_desactivacion = now
-
-                mov.save()
-                mensaje = "Cambios guardados correctamente."
-                mensaje_tipo = "success"
+                # Si no hay cambios, enviamos un mensaje informativo
+                messages.info(request, 'No se detectaron cambios para guardar.')
+            
+            # En ambos casos, redirigimos a la lista
+            return redirect('lista_transacciones')
+            # --- FIN DE LA MODIFICACIÓN ---
         else:
-            mensaje = "Corrige los errores indicados."
-            mensaje_tipo = "danger"
+            form_has_errors = True
     else:
-        initial = {
-            'fecha': transaccion.fecha.strftime('%Y-%m-%dT%H:%M')
-            if transaccion.fecha else timezone.now().strftime('%Y-%m-%dT%H:%M')
-        }
-        form = MovimientoInventarioForm(instance=transaccion, initial=initial)
+        form = MovimientoInventarioEditForm(instance=transaccion)
 
     return render(
         request,
@@ -199,13 +205,13 @@ def editar_transaccion(request, id):
         {
             'form': form,
             'transaccion': transaccion,
-            'mensaje': mensaje,
-            'mensaje_tipo': mensaje_tipo,
+            'form_has_errors': form_has_errors,
         },
     )
 
 
 # ---------------- ELIMINAR ----------------
+@login_required
 def eliminar_transaccion(request, id):
     transaccion = get_object_or_404(MovimientoInventario, id=id)
     if request.method == 'POST':
@@ -227,6 +233,7 @@ except ImportError:
     Workbook = None
 
 
+@login_required
 def exportar_transacciones_excel(request):
     """Exporta los movimientos filtrados/ordenados a un archivo XLSX con detalles."""
     if Workbook is None:
@@ -235,7 +242,9 @@ def exportar_transacciones_excel(request):
             status=500
         )
 
-    qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario', 'bodega_origen', 'bodega_destino')
+    qs = MovimientoInventario.objects.select_related(
+        'producto', 'proveedor', 'usuario', 'bodega_origen', 'bodega_destino'
+    )
 
     q = (request.GET.get('q') or '').strip()
     if q:
@@ -244,6 +253,10 @@ def exportar_transacciones_excel(request):
             | Q(proveedor__nombre__icontains=q)
             | Q(usuario__username__icontains=q)
             | Q(tipo__icontains=q)
+            | Q(bodega_origen__nombre__icontains=q)
+            | Q(bodega_origen__codigo__icontains=q)
+            | Q(bodega_destino__nombre__icontains=q)
+            | Q(bodega_destino__codigo__icontains=q)
             | Q(lote__icontains=q)
             | Q(serie__icontains=q)
             | Q(doc_referencia__icontains=q)
@@ -257,6 +270,8 @@ def exportar_transacciones_excel(request):
         'tipo': 'tipo',
         'producto__nombre': 'producto__nombre',
         'proveedor__nombre': 'proveedor__nombre',
+        'bodega_origen__nombre': 'bodega_origen__nombre',
+        'bodega_destino__nombre': 'bodega_destino__nombre',
         'cantidad': 'cantidad',
         'usuario__username': 'usuario__username',
         'lote': 'lote',
@@ -274,8 +289,8 @@ def exportar_transacciones_excel(request):
     ws.title = 'Movimientos'
 
     headers = [
-        'Fecha', 'Tipo', 'Producto', 'Proveedor', 'Usuario', 'Cantidad',
-        'Bodega origen', 'Bodega destino', 'Lote', 'Serie', 'Vence', 'Doc Ref', 'Motivo', 'Observaciones'
+        'Fecha', 'Tipo', 'Producto', 'Proveedor', 'Bodega Origen', 'Bodega Destino', 
+        'Usuario', 'Cantidad', 'Lote', 'Serie', 'Vence', 'Doc Ref', 'Motivo', 'Observaciones'
     ]
     header_fill = PatternFill(start_color='EAF2FF', end_color='EAF2FF', fill_type='solid')
     bold = Font(bold=True, color='1f2937')
@@ -299,10 +314,10 @@ def exportar_transacciones_excel(request):
             dict(MovimientoInventario.TIPO_MOVIMIENTO).get(m.tipo, m.tipo),
             getattr(m.producto, 'nombre', ''),
             getattr(m.proveedor, 'nombre', '') if m.proveedor else '',
+            getattr(m.bodega_origen, 'nombre', '') if m.bodega_origen else '',
+            getattr(m.bodega_destino, 'nombre', '') if m.bodega_destino else '',
             getattr(m.usuario, 'username', '') if m.usuario else '',
             m.cantidad,
-            getattr(m.bodega_origen, 'codigo', '') if m.bodega_origen else '',
-            getattr(m.bodega_destino, 'codigo', '') if m.bodega_destino else '',
             m.lote or '',
             m.serie or '',
             m.fecha_vencimiento.strftime('%Y-%m-%d') if m.fecha_vencimiento else '',

@@ -42,6 +42,13 @@
     <div class="container my-4">
         <a href="{% url 'usuarios_list' %}" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
 
+        <!-- Mensajes de Django (ocultos, para SweetAlert) -->
+        {% if messages %}
+          {% for m in messages %}
+            <div class="d-none" data-swal-message="{{ m }}" data-swal-tag="{{ m.tags }}"></div>
+          {% endfor %}
+        {% endif %}
+
         <div class="card shadow-sm rounded-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -93,6 +100,18 @@
                             </div>
                         </div>
                         <div class="mb-2">
+                            <div class="detail-label">Cargo</div>
+                            <div class="detail-value">
+                                {% if perfil.cargo == 'BODEGA' %}
+                                    <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-3 py-1 rounded-pill">Operador de Bodega</span>
+                                {% elif perfil.cargo == 'VENTAS' %}
+                                    <span class="badge bg-primary-subtle text-primary-emphasis border border-primary-subtle px-3 py-1 rounded-pill">Operador de Ventas</span>
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="mb-2">
                             <div class="detail-label">Último acceso</div>
                             <div class="detail-value">{{ perfil.usuario.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</div>
                         </div>
@@ -111,10 +130,13 @@
 
                 <!-- Botones de acción -->
                 <div class="mt-4 d-flex justify-content-end gap-2">
-                    {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
+                    {% if request.user.perfil.rol == 'ADMIN' %}
                         <a href="{% url 'usuarios_edit' perfil.id %}" class="btn btn-outline-secondary">Editar</a>
                     {% endif %}
                     {% if request.user.perfil.rol == 'ADMIN' %}
+                        <a href="{% url 'usuarios_reset_password' perfil.id %}" class="btn btn-warning">
+                            <i class="bi bi-arrow-clockwise"></i> Resetear Contraseña
+                        </a>
                         <form action="{% url 'usuarios_delete' perfil.id %}" method="post" id="form-eliminar-usuario">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger">Eliminar</button>
@@ -148,6 +170,37 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Mostrar mensajes con SweetAlert
+            const messageContainers = document.querySelectorAll('[data-swal-message]');
+            if (messageContainers.length > 0) {
+                const firstMessage = messageContainers[0];
+                const text = firstMessage.getAttribute('data-swal-message');
+                const tag = firstMessage.getAttribute('data-swal-tag');
+                
+                let icon = 'info';
+                let title = 'Información';
+                
+                if (tag === 'success') {
+                    icon = 'success';
+                    title = '¡Contraseña restablecida!';
+                } else if (tag === 'error' || tag === 'danger') {
+                    icon = 'error';
+                    title = 'Error';
+                } else if (tag === 'warning') {
+                    icon = 'warning';
+                    title = 'Advertencia';
+                }
+                
+                Swal.fire({
+                    icon: icon,
+                    title: title,
+                    html: text,
+                    confirmButtonColor: '#D10A11',
+                    confirmButtonText: 'Entendido'
+                });
+            }
+
+            // Confirmación de eliminación
             const formEliminar = document.getElementById('form-eliminar-usuario');
             if (!formEliminar) return;
 

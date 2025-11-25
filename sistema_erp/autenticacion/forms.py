@@ -1,4 +1,6 @@
 from django import forms
+from django.contrib.auth.forms import SetPasswordForm
+from django.utils.translation import gettext_lazy as _
 import re
 
 class LoginForm(forms.Form):
@@ -117,3 +119,24 @@ class RegistroForm(forms.Form):
             if len(telefono) != 9:  
                 raise forms.ValidationError("El teléfono debe tener exactamente 9 dígitos.")
         return telefono
+
+
+class CustomSetPasswordForm(SetPasswordForm):
+    old_password = forms.CharField(
+        label=_("Contraseña actual"),
+        strip=False,
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Contraseña actual'}),
+    )
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(user, *args, **kwargs)
+        # añadir clases/placeholder a los campos de nueva contraseña
+        for name, field in self.fields.items():
+            if name != 'old_password':
+                field.widget.attrs.update({'class': 'form-control', 'placeholder': field.label})
+
+    def clean_old_password(self):
+        old = self.cleaned_data.get('old_password')
+        if not self.user.check_password(old):
+            raise forms.ValidationError(_("La contraseña actual no es correcta."))
+        return old

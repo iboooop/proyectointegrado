@@ -1,10 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.contrib.auth.decorators import login_required
 from .models import Producto
 from .forms import ProductoForm
 from transacciones.models import MovimientoInventario
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Avg
 
 try:
     from openpyxl import Workbook
@@ -15,25 +16,25 @@ except ImportError:
 
 
 # ---------------- LISTAR ----------------
+@login_required
 def lista_productos(request):
 
     qs = Producto.objects.select_related("proveedor").all()
 
-
     q = (request.GET.get("q") or "").strip()
     if q:
-        qs = qs.filter(
-            Q(nombre__icontains=q)
-            | Q(sku__icontains=q)
-            | Q(proveedor__nombre__icontains=q)
-            | Q(stock_actual__icontains=q)
-            | Q(categoria__icontains=q)
-        )
+        # Buscar solo en campos de texto; tratar "activo"/"inactivo" por separado
+        q_lower = q.lower()
+        filters = Q(nombre__icontains=q) | Q(sku__icontains=q) | Q(proveedor__nombre__icontains=q) | Q(categoria__icontains=q)
+        if q_lower in ("activo", "activos"):
+            filters |= Q(activo=True)
+        elif q_lower in ("inactivo", "inactivos"):
+            filters |= Q(activo=False)
+        qs = qs.filter(filters)
 
     sort = (request.GET.get("sort") or "nombre").strip()
     direction = (request.GET.get("dir") or "asc").strip().lower()
 
-    # Normalizar campos permitidos para evitar errores de ordenación
     allowed_sorts = {
         "sku": "sku",
         "nombre": "nombre",
@@ -45,10 +46,11 @@ def lista_productos(request):
         sort_field = f"-{sort_field}"
     qs = qs.order_by(sort_field)
 
-    allowed_sizes = [5, 10, 20, 50]
+    # tamaños permitidos coherentes con los selects del template
+    allowed_sizes = [10, 25, 50, 100]
     try:
         page_size = int(
-            request.GET.get("page") or request.session.get("producto_page_size") or 10
+            request.GET.get("page_size") or request.session.get("producto_page_size") or 10
         )
     except ValueError:
         page_size = 10
@@ -82,6 +84,7 @@ def lista_productos(request):
 
 
 # ---------------- CREAR ----------------
+@login_required
 def crear_producto(request):
     active_tab = request.POST.get("active_tab", "paso1-tab")
     mensaje = None
@@ -121,6 +124,7 @@ def crear_producto(request):
 
 
 # ---------------- DETALLE ----------------
+@login_required
 def detalle_producto(request, id):
     producto = get_object_or_404(
         Producto.objects.select_related("proveedor"), idProducto=id
@@ -130,6 +134,12 @@ def detalle_producto(request, id):
         .select_related("proveedor", "usuario")
         .order_by("-fecha")
     )
+    # promedio del costo_estandar entre productos de la misma categoría
+    costo_promedio = (
+        Producto.objects.filter(categoria=producto.categoria)
+        .aggregate(avg_costo=Avg('costo_estandar'))
+        .get('avg_costo')
+    )
 
     return render(
         request,
@@ -137,11 +147,13 @@ def detalle_producto(request, id):
         {
             "producto": producto,
             "movimientos": movimientos,
+            "costo_promedio_categoria": costo_promedio,
         },
     )
 
 
 # ---------------- EDITAR ----------------
+@login_required
 def editar_producto(request, id):
     producto = get_object_or_404(Producto, idProducto=id)
 
@@ -197,6 +209,7 @@ def editar_producto(request, id):
 
 
 # ---------------- ELIMINAR ----------------
+@login_required
 def eliminar_producto(request, id):
     producto = get_object_or_404(Producto, idProducto=id)
     if request.method == "POST":
@@ -211,6 +224,7 @@ def eliminar_producto(request, id):
 
 
 # ---------------- EXPORTAR EXCEL ----------------
+@login_required
 def exportar_productos_excel(request):
     if Workbook is None:
         return HttpResponse("openpyxl no está instalado.", status=500)
@@ -310,3 +324,16 @@ def exportar_productos_excel(request):
     response['Content-Disposition'] = f'attachment; filename="productos_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx"'
     wb.save(response)
     return response
+
+
+def get_producto_json(request, pk):
+    try:
+        producto = Producto.objects.get(pk=pk)
+        data = {
+            'id': producto.id,
+            'text': str(producto),
+            'es_perecible': producto.perishable 
+        }
+        return JsonResponse(data)
+    except Producto.DoesNotExist:
+        return JsonResponse({'error': 'Producto no encontrado'}, status=404)

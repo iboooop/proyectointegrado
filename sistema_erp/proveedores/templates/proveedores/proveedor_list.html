@@ -208,5 +208,22 @@
           </div>
         </div>
     </footer>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Manejar mensajes de éxito que llegan después de una redirección
+    {% for message in messages %}
+      {% if 'success' in message.tags %}
+        Swal.fire({
+          icon: 'success',
+          title: '¡Operación Exitosa!',
+          text: '{{ message|escapejs }}',
+          timer: 2500,
+          showConfirmButton: false
+        });
+      {% endif %}
+    {% endfor %}
+  });
+  </script>
 </body>
 </html>

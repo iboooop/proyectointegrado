@@ -4,13 +4,40 @@ from productos.models import Producto
 from proveedores.models import Proveedor
 from django.contrib.auth.models import User
 from usuarios.models import Perfil
-from bodegas.models import Bodega
+
+
+class Bodega(models.Model):
+    """Modelo para almacenar las bodegas del sistema."""
+    ESTADO_CHOICES = [
+        ('ACTIVO', 'Activo'),
+        ('INACTIVO', 'Inactivo'),
+        ('MANTENIMIENTO', 'Mantenimiento'),
+    ]
+    
+    codigo = models.CharField(max_length=20, unique=True)
+    nombre = models.CharField(max_length=100)
+    direccion = models.CharField(max_length=255, blank=True)
+    capacidad_maxima = models.IntegerField(default=0, help_text="Capacidad máxima en unidades")
+    estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='ACTIVO')
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Bodega'
+        verbose_name_plural = 'Bodegas'
+        ordering = ['nombre']
+    
+    def __str__(self):
+        return f"{self.codigo} - {self.nombre}"
+
 
 class MovimientoInventario(models.Model):
     TIPO_MOVIMIENTO = [
-        ('ENTRADA', 'Entrada'),
+        ('INGRESO', 'Ingreso'),
         ('SALIDA', 'Salida'),
         ('VENTA', 'Venta'),
+        ('DEVOLUCION', 'Devolución'),
+        ('AJUSTE', 'Ajuste'),
         ('TRANSFERENCIA', 'Transferencia entre bodegas'),
     ]
     ESTADO_CHOICES = [
@@ -21,9 +48,23 @@ class MovimientoInventario(models.Model):
     ]
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     proveedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, null=True, blank=True)
-    cliente = models.ForeignKey('clientes.Cliente', on_delete=models.SET_NULL, null=True, blank=True)
-    bodega_origen = models.ForeignKey('bodegas.Bodega', on_delete=models.SET_NULL, null=True, blank=True, related_name='movimientos_origen')
-    bodega_destino = models.ForeignKey('bodegas.Bodega', on_delete=models.SET_NULL, null=True, blank=True, related_name='movimientos_destino')
+    
+    # Bodegas
+    bodega_origen = models.ForeignKey(
+        Bodega, 
+        on_delete=models.PROTECT, 
+        related_name='movimientos_origen',
+        help_text="Bodega de origen del movimiento (obligatorio)"
+    )
+    bodega_destino = models.ForeignKey(
+        Bodega, 
+        on_delete=models.PROTECT, 
+        related_name='movimientos_destino',
+        null=True, 
+        blank=True,
+        help_text="Bodega de destino (solo para transferencias)"
+    )
+
     usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     perfil = models.ForeignKey(Perfil, on_delete=models.SET_NULL, null=True, blank=True)
     tipo = models.CharField(max_length=20, choices=TIPO_MOVIMIENTO)

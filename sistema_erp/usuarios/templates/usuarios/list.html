@@ -70,6 +70,13 @@
     <div class="container-fluid px-3 my-4" style="max-width: 1400px;">
         <a href="/" class="btn btn-outline-secondary mb-3">&larr; Volver al dashboard</a>
 
+        <!-- Mostrar mensajes de Django con SweetAlert -->
+        {% if messages %}
+          {% for m in messages %}
+            <div class="d-none" data-swal-message="{{ m }}" data-swal-tag="{{ m.tags }}"></div>
+          {% endfor %}
+        {% endif %}
+
         <div class="card shadow-sm rounded-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
@@ -79,14 +86,14 @@
                     </div>
                     <div class="d-flex gap-2">
                         <a href="{% url 'usuarios_export' %}" class="btn btn-outline-secondary btn-outline-danger-soft">Exportar Excel</a>
-                        {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
+                        {% if request.user.perfil.rol == 'ADMIN' %}
                             <a href="{% url 'usuarios_create' %}" class="btn btn-danger">+ Crear usuario</a>
                         {% endif %}
                     </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                     <form id="searchForm" class="flex-grow-1 me-3" onsubmit="return false;">
-                        <input type="text" id="searchInput" class="form-control" placeholder="Buscar por nombre, apellido, username o email..." value="{{ q }}">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Buscar por nombre, apellido, username, email, teléfono, rol, cargo o estado..." value="{{ q }}">
                     </form>
 
                     <form id="pageSizeForm" class="d-flex align-items-center gap-2" onsubmit="return false;">
@@ -191,15 +198,37 @@
 
         attachJumpHandler();
 
-        // Alertas de estado
-        const params = new URLSearchParams(window.location.search);
-        const showAlert = (icon, title, text) => {
-          Swal.fire({ icon, title, text, timer: 2000, timerProgressBar: true, showConfirmButton: false, confirmButtonColor: '#d33' });
-        };
-
-        if (params.get('created')==='1') { showAlert('success', 'Usuario creado', 'Se registró correctamente.'); }
-        if (params.get('updated')==='1') { showAlert('success', 'Usuario actualizado', 'Se guardaron los cambios.'); }
-        if (params.get('deleted')==='1') { showAlert('success', 'Usuario eliminado', 'Se eliminó correctamente.'); }
+        // Mostrar mensajes con SweetAlert
+        const messageContainers = document.querySelectorAll('[data-swal-message]');
+        if (messageContainers.length > 0) {
+            const firstMessage = messageContainers[0];
+            const text = firstMessage.getAttribute('data-swal-message');
+            const tag = firstMessage.getAttribute('data-swal-tag');
+            
+            let icon = 'info';
+            let title = 'Información';
+            
+            if (tag === 'success') {
+                icon = 'success';
+                title = 'Éxito';
+            } else if (tag === 'error' || tag === 'danger') {
+                icon = 'error';
+                title = 'Error';
+            } else if (tag === 'warning') {
+                icon = 'warning';
+                title = 'Advertencia';
+            }
+            
+            Swal.fire({
+                icon: icon,
+                title: title,
+                text: text,
+                timer: 2500,
+                timerProgressBar: true,
+                showConfirmButton: false,
+                confirmButtonColor: '#d33'
+            });
+        }
     })();
     </script>
     <footer class="productos-footer">

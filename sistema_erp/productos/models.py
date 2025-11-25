@@ -1,5 +1,4 @@
 from django.db import models
-from bodegas.models import Bodega
 from proveedores.models import Proveedor
 
 
@@ -92,7 +91,6 @@ class Producto(models.Model):
         blank=True,
         related_name="productos",
     )
-    bodega = models.ForeignKey(Bodega, on_delete=models.SET_NULL, null=True, blank=True)
 
     # Imagen subida + URLs opcionales
     imagen = models.ImageField(upload_to="productos/", blank=True, null=True)
@@ -126,7 +124,6 @@ class Producto(models.Model):
     def alerta_por_vencer(self):
         if self.perishable and hasattr(self, "fecha_vencimiento") and self.fecha_vencimiento:
             from datetime import date, timedelta
-
             dias_alerta = 30
             return self.fecha_vencimiento <= (date.today() + timedelta(days=dias_alerta))
         return False

@@ -11,10 +11,14 @@
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
     rel="stylesheet"
   >
+  
+  <!-- AÑADE ESTA LÍNEA PARA EL TEMA DE SELECT2 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
 
   <!-- Usamos directamente el mismo CSS que productos -->
   <link href="{% static 'productos/css/styles.css' %}" rel="stylesheet">
 
+  {{ form.media.css }} {# <- AÑADE ESTA LÍNEA PARA LOS ESTILOS DEL WIDGET #}
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -62,10 +66,15 @@
           {% csrf_token %}
           <input type="hidden" name="active_tab" id="active_tab" value="{{ active_tab|default:'paso1-tab' }}">
 
-
-          {% if mensaje %}
-            <div class="alert alert-{{ mensaje_tipo }}">{{ mensaje }}</div>
+          <!-- ESTE BLOQUE YA NO ES NECESARIO, PERO LO DEJAREMOS PARA LOS MENSAJES DE ERROR GENERALES -->
+          {% if messages %}
+            {% for message in messages %}
+              {% if message.level == 40 %}<!-- 40 es el nivel de ERROR -->
+                <div class="alert alert-danger">{{ message }}</div>
+              {% endif %}
+            {% endfor %}
           {% endif %}
+          
           {% if form.non_field_errors %}
             <div class="alert alert-danger">{{ form.non_field_errors }}</div>
           {% endif %}
@@ -79,16 +88,8 @@
               <div class="row g-3">
                 <!-- Fecha (auto) -->
                 <div class="col-md-3">
-                  <label class="form-label">Fecha</label>
-                  <!-- si tu form ya tiene campo fecha, usa {{ form.fecha }} y pon initial en el form; aquí lo fuerzo como datetime-local -->
-                  <input
-                    type="datetime-local"
-                    id="id_fecha"
-                    name="fecha"
-                    class="form-control"
-                    value="{{ form.initial.fecha|default_if_none:'' }}"
-                    required
-                  >
+                  <label class="form-label">{{ form.fecha.label }}</label>
+                  {{ form.fecha }}
                   {% include 'transacciones/partials/field_errors.html' with field=form.fecha %}
                 </div>
 
@@ -111,7 +112,6 @@
                 <div class="col-md-4">
                   <label class="form-label">Producto (SKU)</label>
                   {{ form.producto }}
-                  <div class="form-text">Debe existir en la base de datos.</div>
                   {% include 'transacciones/partials/field_errors.html' with field=form.producto %}
                 </div>
 
@@ -129,6 +129,14 @@
                   {{ form.bodega_origen }}
                   {% include 'transacciones/partials/field_errors.html' with field=form.bodega_origen %}
                 </div>
+
+                <!-- AÑADE ESTE BLOQUE PARA EL CAMPO ESTADO -->
+                <div class="col-md-4">
+                  <label for="{{ form.estado.id_for_label }}" class="form-label">{{ form.estado.label }}</label>
+                  {{ form.estado }}
+                  {% include 'transacciones/partials/field_errors.html' with field=form.estado %}
+                </div>
+                <!-- FIN DE LA ADICIÓN -->
 
                 <!-- Bodega destino: solo visible si tipo = Transferencia -->
                 <div class="col-md-4" id="bodega-destino-wrap" style="display:none;">
@@ -149,12 +157,14 @@
               <h6 class="fw-semibold mb-3">Control avanzado</h6>
 
               <div class="row g-3">
+                <!-- CAMBIAMOS EL CHECKBOX POR UN TEXTO DE SOLO LECTURA -->
                 <div class="col-md-4">
-                  <div class="form-check ms-1">
-                    {{ form.perecible }}
-                    <label class="form-check-label" for="id_perecible">Perecible (tiene vencimiento)</label>
+                  <label class="form-label">Atributo del producto</label>
+                  <div id="perecible-status" class="form-control-plaintext fw-semibold">
+                    Selecciona un producto para ver su estado.
                   </div>
-                  {% include 'transacciones/partials/field_errors.html' with field=form.perecible %}
+                  <!-- El input original se oculta, solo para que el form no falle -->
+                  <div style="display: none;">{{ form.perecible }}</div>
                 </div>
               </div>
 
@@ -169,7 +179,9 @@
                   {{ form.serie }}
                   {% include 'transacciones/partials/field_errors.html' with field=form.serie %}
                 </div>
-                <div class="col-md-4">
+                
+                <!-- ENVOLVEMOS EL CAMPO DE FECHA EN UN DIV CON ID -->
+                <div class="col-md-4" id="fecha-vencimiento-wrapper">
                   <label class="form-label">Fecha de vencimiento</label>
                   {{ form.fecha_vencimiento }}
                   {% include 'transacciones/partials/field_errors.html' with field=form.fecha_vencimiento %}
@@ -285,19 +297,56 @@
     </div>
   </footer>
 
+  <!-- 1. CARGA JQUERY PRIMERO -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+  <!-- 2. LUEGO CARGA LOS SCRIPTS DEL FORMULARIO -->
+  {{ form.media.js }}
+
+  <!-- 3. FINALMENTE, CARGA BOOTSTRAP Y TU SCRIPT PERSONALIZADO -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+  <!-- AÑADE ESTE BLOQUE PARA APLICAR EL TEMA DE BOOTSTRAP A SELECT2 -->
+  <script>
+    $(document).ready(function() {
+      // Esta línea le dice a todos los widgets de Select2 que usen el tema de Bootstrap 5
+      $.fn.select2.defaults.set("theme", "bootstrap-5");
+    });
+  </script>
+  <!-- FIN DE LA ADICIÓN -->
 
   <script>
+    // --- AÑADE ESTA FUNCIÓN ---
     function activarTab(id) {
       const tabEl = document.getElementById(id);
       if (!tabEl) return;
-      new bootstrap.Tab(tabEl).show();
-      const hidden = document.getElementById('active_tab');
-      if (hidden) hidden.value = id;
-    }
+      
+      // Usa la API de Bootstrap para mostrar la pestaña
+      const tab = new bootstrap.Tab(tabEl);
+      tab.show();
 
+      // Guarda la pestaña activa en el campo oculto para que el backend la recuerde si hay un error
+      document.getElementById('active_tab').value = id;
+    }
+    // --- FIN DE LA ADICIÓN ---
+
+    // AÑADE ESTE BLOQUE PARA MOSTRAR LOS MENSAJES DE ÉXITO/INFO COMO SWEETALERT
     document.addEventListener("DOMContentLoaded", function () {
+      {% for message in messages %}
+        {% if message.level == 25 or message.level == 20 %} // 25=SUCCESS, 20=INFO
+          Swal.fire({
+            icon: '{{ message.tags }}', // 'success', 'info', 'warning', 'error'
+            title: '{{ message }}',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true
+          });
+        {% endif %}
+      {% endfor %}
+
+      // El resto de tu script de "DOMContentLoaded" va aquí...
       // 1) Activar tab correcto (como en productos)
       var errorTab = null;
       const firstError = document.querySelector('.text-danger.small');
@@ -335,6 +384,66 @@
         tipoSelect.addEventListener('change', toggleBodegaDestino);
         toggleBodegaDestino();
       }
+
+      // REEMPLAZA EL BLOQUE DE LÓGICA PERECIBLE CON ESTE
+      // NUEVA LÓGICA PARA PRODUCTO PERECIBLE
+      const productoSelect = $('#id_producto');
+      const perecibleStatusDiv = $('#perecible-status'); // El nuevo div de texto
+      const perecibleHiddenInput = $('#id_perecible'); // El input oculto
+      const fechaVencimientoWrapper = $('#fecha-vencimiento-wrapper');
+      const fechaVencimientoInput = $('#id_fecha_vencimiento');
+
+      // Función para actualizar los campos
+      function actualizarCamposPerecible(esPerecible) {
+        // Actualizar el texto y el valor del input oculto
+        if (esPerecible) {
+          perecibleStatusDiv.text('Producto Perecible').removeClass('text-muted').addClass('text-success');
+          perecibleHiddenInput.prop('checked', true);
+        } else {
+          perecibleStatusDiv.text('Producto No Perecible').removeClass('text-success').addClass('text-muted');
+          perecibleHiddenInput.prop('checked', false);
+        }
+
+        if (esPerecible) {
+          // Si es perecible, mostrar campo de fecha y hacerlo obligatorio
+          fechaVencimientoWrapper.show();
+          fechaVencimientoInput.prop('required', true);
+        } else {
+          // Si no, ocultar campo, quitar 'required' y limpiar su valor
+          fechaVencimientoWrapper.hide();
+          fechaVencimientoInput.prop('required', false);
+          fechaVencimientoInput.val('');
+        }
+      }
+
+      // Ocultar el campo de fecha al inicio
+      fechaVencimientoWrapper.hide();
+
+      // Escuchar el evento 'select2:select' que se dispara al elegir un producto
+      productoSelect.on('select2:select', function (e) {
+        const data = e.params.data; // Datos del producto seleccionado
+        if (data && typeof data.es_perecible !== 'undefined') {
+          actualizarCamposPerecible(data.es_perecible);
+        }
+      });
+
+      // Escuchar cuando se limpia la selección de producto
+      productoSelect.on('select2:unselect', function (e) {
+        // Resetear los campos a su estado inicial
+        perecibleStatusDiv.text('Selecciona un producto para ver su estado.').removeClass('text-success text-muted');
+        perecibleHiddenInput.prop('checked', false);
+        fechaVencimientoWrapper.hide();
+        fechaVencimientoInput.prop('required', false);
+        fechaVencimientoInput.val('');
+      });
+      // FIN DE LA NUEVA LÓGICA
+
+      // 3.5) Hacer obligatoria la fecha de vencimiento si perecible está marcado
+      // (Este bloque ya no es necesario, la nueva lógica lo reemplaza)
+      /*
+      const perecibleCheckbox = document.getElementById('id_perecible');
+      ...
+      */
 
       // 4) Botón limpiar paso 1: resetea todo y vuelve al step1
       const resetPaso1 = document.getElementById('resetPaso1Btn');
@@ -414,6 +523,27 @@
               }
             }
           });
+
+          // Validación adicional: si perecible está marcado, fecha_vencimiento es obligatoria
+          const perecibleCheck = document.getElementById('id_perecible');
+          const fechaVenc = document.getElementById('id_fecha_vencimiento');
+          if (perecibleCheck && perecibleCheck.checked && fechaVenc && !fechaVenc.value) {
+            hasClientError = true;
+            fechaVenc.classList.add('is-invalid');
+            const wrapper = fechaVenc.closest('.col-md-3, .col-md-4, .col-md-6, .col-12, .col-md-2');
+            if (wrapper && !wrapper.querySelector('.client-error')) {
+              const err = document.createElement('div');
+              err.className = 'text-danger small client-error mt-1';
+              err.textContent = 'La fecha de vencimiento es obligatoria para productos perecibles.';
+              wrapper.appendChild(err);
+            }
+            if (!firstInvalidPane) {
+              const pane = fechaVenc.closest('.tab-pane');
+              if (pane && pane.id) {
+                firstInvalidPane = pane.id + '-tab';
+              }
+            }
+          }
 
           if (hasClientError) {
             e.preventDefault();

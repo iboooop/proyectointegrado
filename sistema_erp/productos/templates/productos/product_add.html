@@ -160,6 +160,13 @@
                     <div class="text-danger small">{{ form.modelo.errors.0 }}</div>
                   {% endif %}
                 </div>
+                <div class="col-md-4">
+                  <label class="form-label">Proveedor</label>
+                  {{ form.proveedor }}
+                  {% if form.proveedor.errors %}
+                    <div class="text-danger small">{{ form.proveedor.errors.0 }}</div>
+                  {% endif %}
+                </div>
               </div>
 
               <!-- unidades -->
@@ -539,4 +546,66 @@
   </script>
 
 </body>
-</html>
+
+{% if form.errors %}
+<script>
+  Swal.fire({
+    icon: 'error',
+    title: 'No se pudo guardar el producto',
+    text: 'Corrige los errores en el formulario y vuelve a intentar.',
+    confirmButtonText: 'Aceptar'
+  }).then(()=> {
+    const firstErr = document.querySelector('.is-invalid, .text-danger');
+    if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+</script>
+{% endif %}
+
+{% if messages or mensaje %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+
+  // Mensajes de django.contrib.messages (éxito / error)
+  {% if messages %}
+    {% for message in messages %}
+      {% if 'success' in message.tags %}
+        Swal.fire({
+          icon: 'success',
+          title: 'Producto creado',
+          text: '{{ message|escapejs }}',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      {% elif 'error' in message.tags %}
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: '{{ message|escapejs }}'
+        });
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  // Variable local 'mensaje' / 'mensaje_tipo' (si la usas) — sólo success / error
+  {% if mensaje %}
+    {% if mensaje_tipo == 'success' %}
+      Swal.fire({
+        icon: 'success',
+        title: 'Producto creado',
+        text: '{{ mensaje|escapejs }}',
+        timer: 1500,
+        showConfirmButton: false
+      });
+      document.querySelectorAll('.alert.alert-success, .alert.alert-{{ mensaje_tipo }}').forEach(el => el.remove());
+    {% elif mensaje_tipo == 'error' %}
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: '{{ mensaje|escapejs }}'
+      });
+    {% endif %}
+  {% endif %}
+
+});
+</script>
+{% endif %}
