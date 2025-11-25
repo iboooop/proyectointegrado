@@ -536,9 +536,11 @@ def usuarios_reset_password_view(request, id):
             thread.daemon = True
             thread.start()
             
-            # Marcar en sesión para mostrar SweetAlert
-            request.session['password_reset_success'] = True
-            request.session['password_reset_email'] = usuario.email
+            # Mensaje de éxito con el email del usuario
+            messages.success(
+                request, 
+                f"Contraseña restablecida. Se ha enviado un correo a {usuario.email} con la nueva contraseña provisional. El usuario deberá cambiarla obligatoriamente en su próximo inicio de sesión."
+            )
             return redirect(reverse('usuarios_detail', args=[perfil.id]))
         except Exception as e:
             messages.error(request, f"Error al resetear la contraseña: {str(e)}")

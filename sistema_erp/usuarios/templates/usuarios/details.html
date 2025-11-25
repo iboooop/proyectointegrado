@@ -42,6 +42,13 @@
     <div class="container my-4">
         <a href="{% url 'usuarios_list' %}" class="btn btn-outline-secondary mb-3">&larr; Volver al listado</a>
 
+        <!-- Mensajes de Django (ocultos, para SweetAlert) -->
+        {% if messages %}
+          {% for m in messages %}
+            <div class="d-none" data-swal-message="{{ m }}" data-swal-tag="{{ m.tags }}"></div>
+          {% endfor %}
+        {% endif %}
+
         <div class="card shadow-sm rounded-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -151,6 +158,37 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Mostrar mensajes con SweetAlert
+            const messageContainers = document.querySelectorAll('[data-swal-message]');
+            if (messageContainers.length > 0) {
+                const firstMessage = messageContainers[0];
+                const text = firstMessage.getAttribute('data-swal-message');
+                const tag = firstMessage.getAttribute('data-swal-tag');
+                
+                let icon = 'info';
+                let title = 'Información';
+                
+                if (tag === 'success') {
+                    icon = 'success';
+                    title = '¡Contraseña restablecida!';
+                } else if (tag === 'error' || tag === 'danger') {
+                    icon = 'error';
+                    title = 'Error';
+                } else if (tag === 'warning') {
+                    icon = 'warning';
+                    title = 'Advertencia';
+                }
+                
+                Swal.fire({
+                    icon: icon,
+                    title: title,
+                    html: text,
+                    confirmButtonColor: '#D10A11',
+                    confirmButtonText: 'Entendido'
+                });
+            }
+
+            // Confirmación de eliminación
             const formEliminar = document.getElementById('form-eliminar-usuario');
             if (!formEliminar) return;
 
