@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Tus apps locales
-    'transacciones',
+    'transacciones.apps.TransaccionesConfig',
     'productos',
     'proveedores',
     'usuarios',
