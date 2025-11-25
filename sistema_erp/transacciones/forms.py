@@ -1,3 +1,4 @@
+from dal import autocomplete
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import MovimientoInventario, Bodega
@@ -12,7 +13,14 @@ class MovimientoInventarioForm(forms.ModelForm):
             'doc_referencia_file', 'motivo', 'observaciones'
         ]
         widgets = {
-            'producto': forms.Select(attrs={'class': 'form-select'}),
+            'producto': autocomplete.ModelSelect2(
+                url='/productos/producto-autocomplete/', # <- CORRECCIÓN
+                attrs={
+                    # Atributos para personalizar el campo de búsqueda
+                    'data-placeholder': 'Busca un producto por nombre...',
+                    'data-minimum-input-length': 2, # Empezar a buscar después de 2 caracteres
+                }
+            ),
             'proveedor': forms.Select(attrs={'class': 'form-select'}),
             'bodega_origen': forms.Select(attrs={'class': 'form-select'}),
             'bodega_destino': forms.Select(attrs={'class': 'form-select'}),

@@ -15,6 +15,7 @@
   <!-- Usamos directamente el mismo CSS que productos -->
   <link href="{% static 'productos/css/styles.css' %}" rel="stylesheet">
 
+  {{ form.media.css }} {# <- AÑADE ESTA LÍNEA PARA LOS ESTILOS DEL WIDGET #}
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -276,10 +277,17 @@
     </div>
   </footer>
 
+  <!-- 1. CARGA JQUERY PRIMERO -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+  <!-- 2. LUEGO CARGA LOS SCRIPTS DEL FORMULARIO -->
+  {{ form.media.js }}
+
+  <!-- 3. FINALMENTE, CARGA BOOTSTRAP Y TU SCRIPT PERSONALIZADO -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-
   <script>
+    // Tu código JavaScript existente va aquí
     function activarTab(id) {
       const tabEl = document.getElementById(id);
       if (!tabEl) return;

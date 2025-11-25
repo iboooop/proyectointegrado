@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include, re_path
 from . import views
+from django.conf import settings  # <-- AÑADIR
+from django.conf.urls.static import static  # <-- AÑADIR
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -35,3 +37,10 @@ urlpatterns = [
 
 # Handler para errores HTTP personalizados
 handler404 = 'sistema_erp.views.custom_404_view'
+
+# CORRIGE EL BLOQUE ANTERIOR CON ESTE
+if settings.DEBUG:
+    # Añadimos las URLs para servir archivos estáticos y de medios en modo de desarrollo
+    # Se añaden al principio para que no sean capturadas por el re_path catch-all
+    urlpatterns = static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) + urlpatterns
+    urlpatterns = static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + urlpatterns

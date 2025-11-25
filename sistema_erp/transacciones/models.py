@@ -33,9 +33,11 @@ class Bodega(models.Model):
 
 class MovimientoInventario(models.Model):
     TIPO_MOVIMIENTO = [
-        ('ENTRADA', 'Entrada'),
+        ('INGRESO', 'Ingreso'),
         ('SALIDA', 'Salida'),
         ('VENTA', 'Venta'),
+        ('DEVOLUCION', 'Devolución'),
+        ('AJUSTE', 'Ajuste'),
         ('TRANSFERENCIA', 'Transferencia entre bodegas'),
     ]
     ESTADO_CHOICES = [

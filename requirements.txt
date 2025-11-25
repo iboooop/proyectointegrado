@@ -23,6 +23,7 @@ mysql-connector-python>=8.0
 # Exportación a Excel
 openpyxl>=3.1
 
+django-autocomplete-light>=3.9
 # ===============================================================
 # Para regenerar este archivo después de instalar paquetes:
 # pip freeze > requirements.txt
