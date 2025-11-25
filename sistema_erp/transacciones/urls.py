@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .autocomplete import BodegaAutocomplete # <- Importa la nueva vista
 
 urlpatterns = [
     path('', views.lista_transacciones, name='lista_transacciones'),
@@ -8,4 +9,5 @@ urlpatterns = [
     path('<int:id>/eliminar/', views.eliminar_transaccion, name='eliminar_transaccion'),
     path('agregar/', views.crear_transaccion, name='crear_transaccion'),
     path('exportar/', views.exportar_transacciones_excel, name='transacciones_export'),
+    path('bodega-autocomplete/', BodegaAutocomplete.as_view(), name='bodega-autocomplete'), # <- Añade esta línea
 ]

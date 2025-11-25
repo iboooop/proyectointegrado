@@ -14,27 +14,42 @@ class MovimientoInventarioForm(forms.ModelForm):
         ]
         widgets = {
             'producto': autocomplete.ModelSelect2(
-                url='/productos/producto-autocomplete/', # <- CORRECCIÓN
+                url='/productos/producto-autocomplete/',
                 attrs={
-                    # Atributos para personalizar el campo de búsqueda
                     'data-placeholder': 'Busca un producto por nombre...',
-                    'data-minimum-input-length': 2, # Empezar a buscar después de 2 caracteres
+                    'data-minimum-input-length': 2,
                 }
             ),
-            'proveedor': forms.Select(attrs={'class': 'form-select'}),
-            'bodega_origen': forms.Select(attrs={'class': 'form-select'}),
-            'bodega_destino': forms.Select(attrs={'class': 'form-select'}),
-            'fecha': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
-            'estado': forms.Select(attrs={'class': 'form-select'}),
+            'proveedor': autocomplete.ModelSelect2(
+                url='/proveedores/proveedor-autocomplete/',
+                attrs={
+                    'data-placeholder': 'Busca un proveedor por nombre...',
+                    'data-minimum-input-length': 2,
+                }
+            ),
+            'bodega_origen': autocomplete.ModelSelect2(
+                url='/transacciones/bodega-autocomplete/',
+                attrs={
+                    'data-placeholder': 'Busca una bodega...',
+                    'data-minimum-input-length': 1,
+                }
+            ),
+            'bodega_destino': autocomplete.ModelSelect2(
+                url='/transacciones/bodega-autocomplete/',
+                attrs={
+                    'data-placeholder': 'Busca una bodega...',
+                    'data-minimum-input-length': 1,
+                }
+            ),
+            'fecha': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
             'tipo': forms.Select(attrs={'class': 'form-select'}),
             'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
             'perecible': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'lote': forms.TextInput(attrs={'class': 'form-control'}),
             'serie': forms.TextInput(attrs={'class': 'form-control'}),
-            'fecha_vencimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'fecha_vencimiento': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'doc_referencia': forms.TextInput(attrs={'class': 'form-control'}),
-            'doc_referencia_file': forms.FileInput(attrs={'class': 'form-control'}),
-            'motivo': forms.TextInput(attrs={'class': 'form-control'}),
+            'motivo': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'observaciones': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
