@@ -318,6 +318,24 @@
         toggleBodegaDestino();
       }
 
+      // Hacer obligatoria la fecha de vencimiento si perecible está marcado
+      const perecibleCheckbox = document.getElementById('id_perecible');
+      const fechaVencimientoInput = document.getElementById('id_fecha_vencimiento');
+      
+      function toggleFechaVencimientoRequired() {
+        if (!perecibleCheckbox || !fechaVencimientoInput) return;
+        if (perecibleCheckbox.checked) {
+          fechaVencimientoInput.setAttribute('required', 'required');
+        } else {
+          fechaVencimientoInput.removeAttribute('required');
+        }
+      }
+      
+      if (perecibleCheckbox) {
+        perecibleCheckbox.addEventListener('change', toggleFechaVencimientoRequired);
+        toggleFechaVencimientoRequired();
+      }
+
       // botones limpiar por paso
       const resetPaso1 = document.getElementById('resetPaso1EditBtn');
       if (resetPaso1) {
@@ -374,6 +392,14 @@
             field.classList.remove('is-invalid');
           }
         });
+
+        // Validación adicional: si perecible está marcado, fecha_vencimiento es obligatoria
+        const perecibleCheck = document.getElementById('id_perecible');
+        const fechaVenc = document.getElementById('id_fecha_vencimiento');
+        if (perecibleCheck && perecibleCheck.checked && fechaVenc && !fechaVenc.value) {
+          hasClientError = true;
+          fechaVenc.classList.add('is-invalid');
+        }
 
         if (hasClientError) {
           e.preventDefault();

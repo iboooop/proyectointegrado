@@ -12,7 +12,9 @@ from .forms import MovimientoInventarioForm
 
 # ---------------- LISTA ----------------
 def lista_transacciones(request):
-    qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario')
+    qs = MovimientoInventario.objects.select_related(
+        'producto', 'proveedor', 'usuario', 'bodega_origen', 'bodega_destino'
+    )
 
     # Filtros de texto (SKU/nombre producto, proveedor, usuario, tipo, bodega, lote, serie, doc ref, motivo)
     q = (request.GET.get('q') or '').strip()
@@ -23,6 +25,10 @@ def lista_transacciones(request):
             | Q(proveedor__nombre__icontains=q)
             | Q(usuario__username__icontains=q)
             | Q(tipo__icontains=q)
+            | Q(bodega_origen__nombre__icontains=q)
+            | Q(bodega_origen__codigo__icontains=q)
+            | Q(bodega_destino__nombre__icontains=q)
+            | Q(bodega_destino__codigo__icontains=q)
             | Q(lote__icontains=q)
             | Q(serie__icontains=q)
             | Q(fecha_vencimiento__icontains=q)
@@ -47,6 +53,8 @@ def lista_transacciones(request):
         'tipo': 'tipo',
         'producto__nombre': 'producto__nombre',
         'proveedor__nombre': 'proveedor__nombre',
+        'bodega_origen__nombre': 'bodega_origen__nombre',
+        'bodega_destino__nombre': 'bodega_destino__nombre',
         'cantidad': 'cantidad',
         'usuario__username': 'usuario__username',
         'lote': 'lote',
@@ -142,7 +150,12 @@ def crear_transaccion(request):
 
 # ---------------- DETALLE ----------------
 def detalle_transaccion(request, id):
-    transaccion = get_object_or_404(MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario'), id=id)
+    transaccion = get_object_or_404(
+        MovimientoInventario.objects.select_related(
+            'producto', 'proveedor', 'usuario', 'bodega_origen', 'bodega_destino'
+        ), 
+        id=id
+    )
     return render(request, 'transacciones/transaccion_detail.html', {'transaccion': transaccion})
 
 
@@ -227,7 +240,9 @@ def exportar_transacciones_excel(request):
             status=500
         )
 
-    qs = MovimientoInventario.objects.select_related('producto', 'proveedor', 'usuario')
+    qs = MovimientoInventario.objects.select_related(
+        'producto', 'proveedor', 'usuario', 'bodega_origen', 'bodega_destino'
+    )
 
     q = (request.GET.get('q') or '').strip()
     if q:
@@ -236,6 +251,10 @@ def exportar_transacciones_excel(request):
             | Q(proveedor__nombre__icontains=q)
             | Q(usuario__username__icontains=q)
             | Q(tipo__icontains=q)
+            | Q(bodega_origen__nombre__icontains=q)
+            | Q(bodega_origen__codigo__icontains=q)
+            | Q(bodega_destino__nombre__icontains=q)
+            | Q(bodega_destino__codigo__icontains=q)
             | Q(lote__icontains=q)
             | Q(serie__icontains=q)
             | Q(doc_referencia__icontains=q)
@@ -249,6 +268,8 @@ def exportar_transacciones_excel(request):
         'tipo': 'tipo',
         'producto__nombre': 'producto__nombre',
         'proveedor__nombre': 'proveedor__nombre',
+        'bodega_origen__nombre': 'bodega_origen__nombre',
+        'bodega_destino__nombre': 'bodega_destino__nombre',
         'cantidad': 'cantidad',
         'usuario__username': 'usuario__username',
         'lote': 'lote',
@@ -266,8 +287,8 @@ def exportar_transacciones_excel(request):
     ws.title = 'Movimientos'
 
     headers = [
-        'Fecha', 'Tipo', 'Producto', 'Proveedor', 'Usuario', 'Cantidad',
-        'Lote', 'Serie', 'Vence', 'Doc Ref', 'Motivo', 'Observaciones'
+        'Fecha', 'Tipo', 'Producto', 'Proveedor', 'Bodega Origen', 'Bodega Destino', 
+        'Usuario', 'Cantidad', 'Lote', 'Serie', 'Vence', 'Doc Ref', 'Motivo', 'Observaciones'
     ]
     header_fill = PatternFill(start_color='EAF2FF', end_color='EAF2FF', fill_type='solid')
     bold = Font(bold=True, color='1f2937')
@@ -291,6 +312,8 @@ def exportar_transacciones_excel(request):
             dict(MovimientoInventario.TIPO_MOVIMIENTO).get(m.tipo, m.tipo),
             getattr(m.producto, 'nombre', ''),
             getattr(m.proveedor, 'nombre', '') if m.proveedor else '',
+            getattr(m.bodega_origen, 'nombre', '') if m.bodega_origen else '',
+            getattr(m.bodega_destino, 'nombre', '') if m.bodega_destino else '',
             getattr(m.usuario, 'username', '') if m.usuario else '',
             m.cantidad,
             m.lote or '',

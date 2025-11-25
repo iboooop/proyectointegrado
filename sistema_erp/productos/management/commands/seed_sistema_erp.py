@@ -4,9 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from usuarios.models import Perfil, Module, Role, RoleModulePermission
 from proveedores.models import Proveedor
 from productos.models import Producto
-from transacciones.models import MovimientoInventario
-from bodegas.models import Bodega
-from clientes.models import Cliente
+from transacciones.models import MovimientoInventario, Bodega
 from datetime import datetime, timedelta
 
 class Command(BaseCommand):
@@ -34,8 +32,6 @@ class Command(BaseCommand):
             ('proveedores', 'Proveedores'),
             ('transacciones', 'Transacciones'),
             ('usuarios', 'Usuarios'),
-            ('bodegas', 'Bodegas'),
-            ('clientes', 'Clientes'),
         ]
         for code, name in modulos:
             Module.objects.get_or_create(code=code, name=name)
@@ -53,14 +49,12 @@ class Command(BaseCommand):
         proveedores_module = Module.objects.get(code='proveedores')
         transacciones_module = Module.objects.get(code='transacciones')
         usuarios_module = Module.objects.get(code='usuarios')
-        bodegas_module = Module.objects.get(code='bodegas')  # ← NUEVO
-        clientes_module = Module.objects.get(code='clientes')  # ← NUEVO
 
         # ------------------------------------------------------------
         # ADMIN: todos los permisos (se fuerza en cada ejecución)
         # ------------------------------------------------------------
         for module in [productos_module, proveedores_module, transacciones_module, 
-                      usuarios_module, bodegas_module, clientes_module]:  # ← Agregados módulos nuevos
+                      usuarios_module]:
             RoleModulePermission.objects.update_or_create(
                 role=admin_role,
                 module=module,
@@ -68,19 +62,18 @@ class Command(BaseCommand):
             )
 
         # ------------------------------------------------------------
-        # BODEGA: Transacciones y Bodegas (ver, agregar y modificar)
+        # BODEGA: Transacciones (ver, agregar y modificar)
         # ------------------------------------------------------------
-        for module in [transacciones_module, bodegas_module]:
-            RoleModulePermission.objects.update_or_create(
-                role=bodega_role,
-                module=module,
-                defaults={'can_view': True, 'can_add': True, 'can_change': True, 'can_delete': False}
-            )
+        RoleModulePermission.objects.update_or_create(
+            role=bodega_role,
+            module=transacciones_module,
+            defaults={'can_view': True, 'can_add': True, 'can_change': True, 'can_delete': False}
+        )
 
         # ------------------------------------------------------------
-        # COMPRAS: Productos, Proveedores y Bodegas (ver, agregar y modificar)
+        # COMPRAS: Productos y Proveedores (ver, agregar y modificar)
         # ------------------------------------------------------------
-        for module in [productos_module, proveedores_module, bodegas_module]:
+        for module in [productos_module, proveedores_module]:
             RoleModulePermission.objects.update_or_create(
                 role=compras_role,
                 module=module,
@@ -88,9 +81,9 @@ class Command(BaseCommand):
             )
 
         # ------------------------------------------------------------
-        # VENTAS: Clientes, Productos y Transacciones (ver, agregar y modificar)
+        # VENTAS: Productos y Transacciones (ver, agregar y modificar)
         # ------------------------------------------------------------
-        for module in [clientes_module, productos_module, transacciones_module]:
+        for module in [productos_module, transacciones_module]:
             RoleModulePermission.objects.update_or_create(
                 role=ventas_role,
                 module=module,
@@ -112,10 +105,6 @@ class Command(BaseCommand):
                 return MovimientoInventario
             if code == 'usuarios':
                 return User
-            if code == 'bodegas':
-                return Bodega
-            if code == 'clientes':
-                return Cliente
             return None
 
         # Para cada role (grupo) recogemos sus RoleModulePermission y asignamos
@@ -183,57 +172,42 @@ class Command(BaseCommand):
         # ============================================================
         # 6️⃣ Crear bodegas 🏭
         # ============================================================
-        self.stdout.write(self.style.SUCCESS('📦 Creando bodegas...'))
+        self.stdout.write(self.style.SUCCESS('🏭 Creando bodegas...'))
         
         bodegas_data = [
             {
                 "codigo": "BOD-001",
                 "nombre": "Bodega Central Santiago",
                 "direccion": "Av. Libertador Bernardo O'Higgins 1234, Santiago",
-                "telefono": "+56 2 2345 6789",
-                "responsable": "María González",
                 "capacidad_maxima": 10000,
-                "tipo": "PRINCIPAL",
                 "estado": "ACTIVO"
             },
             {
                 "codigo": "BOD-002",
                 "nombre": "Bodega Maipú",
                 "direccion": "Camino a Melipilla 5678, Maipú",
-                "telefono": "+56 2 2987 6543",
-                "responsable": "Pedro Sánchez",
                 "capacidad_maxima": 5000,
-                "tipo": "SECUNDARIA",
                 "estado": "ACTIVO"
             },
             {
                 "codigo": "BOD-003",
                 "nombre": "Bodega Puente Alto",
                 "direccion": "Av. Concha y Toro 9012, Puente Alto",
-                "telefono": "+56 2 2456 7890",
-                "responsable": "Carmen Silva",
                 "capacidad_maxima": 3000,
-                "tipo": "SECUNDARIA",
                 "estado": "ACTIVO"
             },
             {
                 "codigo": "BOD-004",
                 "nombre": "Bodega Tránsito Aeropuerto",
                 "direccion": "Av. Armando Cortínez 3000, Pudahuel",
-                "telefono": "+56 2 2678 9012",
-                "responsable": "Luis Martínez",
                 "capacidad_maxima": 1500,
-                "tipo": "TRANSITO",
                 "estado": "ACTIVO"
             },
             {
                 "codigo": "BOD-005",
-                "nombre": "Bodega La Florida (Mantenimiento)",
+                "nombre": "Bodega La Florida",
                 "direccion": "Av. Vicuña Mackenna 7890, La Florida",
-                "telefono": "+56 2 2345 1234",
-                "responsable": "Jorge Rojas",
                 "capacidad_maxima": 2000,
-                "tipo": "SECUNDARIA",
                 "estado": "MANTENIMIENTO"
             },
         ]
@@ -251,75 +225,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"  ⚠️  Bodega ya existe: {bodega.nombre}")
 
         # ============================================================
-        # 7️⃣ Crear clientes 👥
-        # ============================================================
-        self.stdout.write(self.style.SUCCESS('👥 Creando clientes...'))
-
-        clientes_data = [
-            {
-                "rut": "12345678-9",
-                "nombre": "Juan Pérez López",
-                "direccion": "Calle Los Aromos 123, Providencia",
-                "telefono": "+56 9 8765 4321",
-                "email": "juan.perez@email.com",
-                "estadoCondicion": "activo",  # ← Cambiar a minúscula según tu modelo
-            },
-            {
-                "rut": "98765432-1",
-                "nombre": "SuperMercado MegaCompras S.A.",
-                "direccion": "Av. Apoquindo 4500, Las Condes",
-                "telefono": "+56 2 2234 5678",
-                "email": "compras@megacompras.cl",
-                "estadoCondicion": "activo",
-            },
-            {
-                "rut": "11223344-5",
-                "nombre": "María García Torres",
-                "direccion": "Pasaje San José 456, Ñuñoa",
-                "telefono": "+56 9 1234 5678",
-                "email": "maria.garcia@email.com",
-                "estadoCondicion": "activo",
-            },
-            {
-                "rut": "55667788-9",
-                "nombre": "Minimarket Don José Ltda.",
-                "direccion": "Av. Grecia 2345, Peñalolén",
-                "telefono": "+56 2 2345 6789",
-                "email": "ventas@minimarketdonjose.cl",
-                "estadoCondicion": "activo",
-            },
-            {
-                "rut": "33445566-7",
-                "nombre": "Roberto Muñoz Díaz",
-                "direccion": "Calle Los Olivos 789, Maipú",
-                "telefono": "+56 9 9876 5432",
-                "email": "roberto.munoz@email.com",
-                "estadoCondicion": "suspendido",  # ← Cambiar a minúscula
-            },
-            {
-                "rut": "77889900-1",
-                "nombre": "Distribuidora Nacional SpA",
-                "direccion": "Camino a Lonquén 1500, San Bernardo",
-                "telefono": "+56 2 2987 6543",
-                "email": "contacto@distribuidoranacional.cl",
-                "estadoCondicion": "activo",
-            },
-        ]
-
-        clientes = []
-        for cliente_data in clientes_data:
-            cliente, created = Cliente.objects.get_or_create(
-                rut=cliente_data["rut"],
-                defaults=cliente_data
-            )
-            clientes.append(cliente)
-            if created:
-                self.stdout.write(f"  ✅ Cliente creado: {cliente.nombre}")
-            else:
-                self.stdout.write(f"  ⚠️  Cliente ya existe: {cliente.nombre}")
-
-        # ============================================================
-        # 8️⃣ Crear proveedores
+        # 7️⃣ Crear proveedores
         # ============================================================
         self.stdout.write(self.style.SUCCESS('🏭 Creando proveedores...'))
         
@@ -330,7 +236,7 @@ class Command(BaseCommand):
         proveedores = [Proveedor.objects.get_or_create(**p)[0] for p in proveedores_data]
 
         # ============================================================
-        # 9️⃣ Crear productos (ahora con bodega asignada)
+        # 8️⃣ Crear productos
         # ============================================================
         self.stdout.write(self.style.SUCCESS('📦 Creando productos...'))
 
@@ -356,7 +262,6 @@ class Command(BaseCommand):
                 "control_por_lote": True,
                 "control_por_serie": False,
                 "proveedor": proveedores[0],
-                "bodega": bodegas[0],
                 "imagen_url": "https://ejemplo.com/galleta-choco.jpg",
                 "ficha_tecnica_url": "https://ejemplo.com/galleta-choco.pdf",
                 "stock_actual": 500,
@@ -382,7 +287,6 @@ class Command(BaseCommand):
                 "control_por_lote": True,
                 "control_por_serie": False,
                 "proveedor": proveedores[1],
-                "bodega": bodegas[1],
                 "imagen_url": "https://ejemplo.com/alfajor-dulce.jpg",
                 "ficha_tecnica_url": "https://ejemplo.com/alfajor-dulce.pdf",
                 "stock_actual": 300,
@@ -408,7 +312,6 @@ class Command(BaseCommand):
                 "control_por_lote": False,
                 "control_por_serie": False,
                 "proveedor": proveedores[0],
-                "bodega": bodegas[0],
                 "imagen_url": "https://ejemplo.com/chocolate-amargo.jpg",
                 "ficha_tecnica_url": "https://ejemplo.com/chocolate-amargo.pdf",
                 "stock_actual": 150,
@@ -434,7 +337,6 @@ class Command(BaseCommand):
                 "control_por_lote": False,
                 "control_por_serie": False,
                 "proveedor": proveedores[0],
-                "bodega": bodegas[2],
                 "imagen_url": "https://ejemplo.com/caramelos-masticables.jpg",
                 "ficha_tecnica_url": "https://ejemplo.com/caramelos-masticables.pdf",
                 "stock_actual": 1000,
@@ -443,14 +345,15 @@ class Command(BaseCommand):
         productos = [Producto.objects.get_or_create(sku=prod["sku"], defaults=prod)[0] for prod in productos_data]
 
         # ============================================================
-        # 🔟 Crear movimientos de inventario (con bodegas y clientes)
+        # 9️⃣ Crear movimientos de inventario
         # ============================================================
         self.stdout.write(self.style.SUCCESS('📊 Creando movimientos de inventario...'))
         
         movimientos_data = [
             {
                 "producto": productos[0], 
-                "proveedor": proveedores[0], 
+                "proveedor": proveedores[0],
+                "bodega_origen": bodegas[0],
                 "usuario": User.objects.get(username="admin"), 
                 "perfil": perfiles[0], 
                 "tipo": "ENTRADA", 
@@ -458,25 +361,28 @@ class Command(BaseCommand):
                 "observaciones": "Ingreso inicial a Bodega Central"
             },
             {
-                "producto": productos[1], 
-                "cliente": clientes[0],
+                "producto": productos[1],
+                "bodega_origen": bodegas[0],
                 "usuario": User.objects.get(username="ventas"), 
                 "perfil": perfiles[3], 
-                "tipo": "VENTA", 
+                "tipo": "SALIDA", 
                 "cantidad": 50, 
-                "observaciones": f"Venta a {clientes[0].nombre}"
+                "observaciones": "Salida de mercancía desde Bodega Central"
             },
             {
                 "producto": productos[2], 
-                "proveedor": proveedores[0], 
+                "proveedor": proveedores[0],
+                "bodega_origen": bodegas[1],
                 "usuario": User.objects.get(username="compras"), 
                 "perfil": perfiles[2], 
                 "tipo": "ENTRADA", 
                 "cantidad": 150, 
-                "observaciones": "Compra de chocolates"
+                "observaciones": "Compra de chocolates a Bodega Maipú"
             },
             {
-                "producto": productos[0], 
+                "producto": productos[0],
+                "bodega_origen": bodegas[0],
+                "bodega_destino": bodegas[2],
                 "usuario": User.objects.get(username="bodega"), 
                 "perfil": perfiles[1], 
                 "tipo": "TRANSFERENCIA", 
@@ -484,13 +390,13 @@ class Command(BaseCommand):
                 "observaciones": "Transferencia de Bodega Central a Puente Alto"
             },
             {
-                "producto": productos[3], 
-                "cliente": clientes[1],
+                "producto": productos[3],
+                "bodega_origen": bodegas[1],
                 "usuario": User.objects.get(username="ventas"), 
                 "perfil": perfiles[3], 
-                "tipo": "VENTA", 
+                "tipo": "SALIDA", 
                 "cantidad": 200, 
-                "observaciones": f"Venta mayorista a {clientes[1].razon_social if hasattr(clientes[1], 'razon_social') else clientes[1].nombre}"
+                "observaciones": "Salida mayorista desde Bodega Maipú"
             },
         ]
         
@@ -503,7 +409,7 @@ class Command(BaseCommand):
             )
 
         # ============================================================
-        # 1️⃣1️⃣ Final
+        # 🔟 Final
         # ============================================================
         self.stdout.write(self.style.SUCCESS(''))
         self.stdout.write(self.style.SUCCESS('=' * 70))
@@ -512,7 +418,6 @@ class Command(BaseCommand):
         self.stdout.write(f"📊 Resumen:")
         self.stdout.write(f"   - Usuarios: {len(usuarios)}")
         self.stdout.write(f"   - Bodegas: {len(bodegas)}")
-        self.stdout.write(f"   - Clientes: {len(clientes)}")
         self.stdout.write(f"   - Proveedores: {len(proveedores)}")
         self.stdout.write(f"   - Productos: {len(productos)}")
         self.stdout.write(f"   - Movimientos: {len(movimientos_data)}")
