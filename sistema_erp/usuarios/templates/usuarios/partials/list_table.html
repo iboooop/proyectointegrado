@@ -41,7 +41,7 @@
                         Estado {% if sort == 'estado' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
                     </a>
                 </th>
-
+                <th class="text-center" title="Debe cambiar contraseña">🔑</th>
                 <th class="text-center">
                     <a href="?{{ qs_base }}&sort=usuario__last_login&dir={% if sort == 'usuario__last_login' and dir == 'asc' %}desc{% else %}asc{% endif %}">
                         Último acceso {% if sort == 'usuario__last_login' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
@@ -82,6 +82,13 @@
                         <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle px-3 py-1 rounded-pill">Bloqueado</span>
                     {% endif %}
                 </td>
+                <td class="text-center">
+                    {% if perfil.debe_cambiar_clave %}
+                        <span class="badge bg-warning text-dark" title="Debe cambiar contraseña en próximo inicio de sesión" style="font-size: 1.1rem;">🚩</span>
+                    {% else %}
+                        <span class="text-muted" style="font-size: 0.9rem;">—</span>
+                    {% endif %}
+                </td>
                 <td class="text-center">{{ perfil.usuario.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</td>
                 <td class="text-center">
                     <a href="{% url 'usuarios_detail' perfil.id %}" class="btn btn-sm btn-outline-primary">Ver detalle</a>
@@ -91,7 +98,7 @@
             {% empty %}
             <tr>
 
-                <td colspan="9" class="text-center text-muted py-4">No hay usuarios registrados.</td>
+                <td colspan="10" class="text-center text-muted py-4">No hay usuarios registrados.</td>
 
             </tr>
             {% endfor %}
