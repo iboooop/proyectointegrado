@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
-from .views import login_view, registro_view, logout_view
+from .views import login_view, registro_view, logout_view, cambiar_password_view
 from .forms import CustomSetPasswordForm
 
 urlpatterns = [
@@ -43,4 +43,7 @@ urlpatterns = [
             template_name='autenticacion/password_reset_complete.html'
         ),
         name='password_reset_complete'),
+
+    # Cambiar contraseña
+    path('cambiar/', cambiar_password_view, name='cambiar_password'),
 ]
