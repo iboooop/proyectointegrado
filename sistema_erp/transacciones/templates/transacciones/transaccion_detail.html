@@ -58,6 +58,26 @@
               <div class="detail-value">{{ transaccion.proveedor|default:'—' }}</div>
             </div>
             <div class="mb-2">
+              <div class="detail-label">Bodega origen</div>
+              <div class="detail-value">
+                {% if transaccion.bodega_origen %}
+                  <div class="fw-semibold">{{ transaccion.bodega_origen.nombre }}</div>
+                  <small class="text-muted">{{ transaccion.bodega_origen.codigo }} - {{ transaccion.bodega_origen.direccion }}</small>
+                {% else %}
+                  —
+                {% endif %}
+              </div>
+            </div>
+            {% if transaccion.bodega_destino %}
+            <div class="mb-2">
+              <div class="detail-label">Bodega destino</div>
+              <div class="detail-value">
+                <div class="fw-semibold">{{ transaccion.bodega_destino.nombre }}</div>
+                <small class="text-muted">{{ transaccion.bodega_destino.codigo }} - {{ transaccion.bodega_destino.direccion }}</small>
+              </div>
+            </div>
+            {% endif %}
+            <div class="mb-2">
               <div class="detail-label">Usuario</div>
               <div class="detail-value">{{ transaccion.usuario.username|default:'—' }}</div>
             </div>
@@ -70,10 +90,6 @@
             <div class="mb-2">
               <div class="detail-label">Fecha</div>
               <div class="detail-value">{{ transaccion.fecha|date:"d/m/Y H:i" }}</div>
-            </div>
-            <div class="mb-2">
-              <div class="detail-label">Bodega origen / destino</div>
-              <div class="detail-value">{{ transaccion.bodega_origen|default:'—' }}{% if transaccion.bodega_destino %} → {{ transaccion.bodega_destino }}{% endif %}</div>
             </div>
           </div>
         </div>

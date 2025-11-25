@@ -75,11 +75,18 @@ def crear_proveedor(request):
     if request.method == 'POST':
         form = ProveedorForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('lista_proveedores')
+            proveedor = form.save()
+            messages.success(request, f"Proveedor '{proveedor.razon_social}' creado exitosamente.")
+            return redirect('lista_proveedores') # O a donde quieras redirigir
+        else:
+            messages.error(request, 'El formulario contiene errores. Por favor, revísalo.')
     else:
         form = ProveedorForm()
-    return render(request, 'proveedores/proveedor_add.html', {'form': form})
+
+    context = {
+        'form': form
+    }
+    return render(request, 'proveedores/proveedor_add.html', context)
 
 def detalle_proveedor(request, id):
     proveedor = get_object_or_404(Proveedor, id=id)
@@ -95,15 +102,29 @@ def detalle_proveedor(request, id):
 
 def editar_proveedor(request, id):
     proveedor = get_object_or_404(Proveedor, id=id)
+
     if request.method == 'POST':
         form = ProveedorForm(request.POST, instance=proveedor)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Cambios guardados")
+            if form.has_changed():
+                form.save()
+                messages.success(request, 'Los cambios se guardaron correctamente.')
+            else:
+                messages.info(request, 'No se detectaron cambios en el formulario.')
+            
             return redirect('editar_proveedor', id=proveedor.id)
+        else:
+            # Si el formulario no es válido, se añade el mensaje de error
+            # y se vuelve a renderizar la plantilla, sin redirigir.
+            messages.error(request, 'Por favor, corrige los errores marcados en rojo.')
     else:
         form = ProveedorForm(instance=proveedor)
-    return render(request, 'proveedores/proveedor_edit.html', {'form': form, 'proveedor': proveedor})
+
+    context = {
+        'form': form,
+        'proveedor': proveedor
+    }
+    return render(request, 'proveedores/proveedor_edit.html', context)
 
 def eliminar_proveedor(request, id):
     proveedor = get_object_or_404(Proveedor, id=id)
