@@ -31,6 +31,11 @@
           </a>
         </th>
         <th>
+          <a href="?{{ qs_base }}&sort=tipo&dir={% if sort == 'tipo' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Tipo {% if sort == 'tipo' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th>
           <a href="?{{ qs_base }}&sort=producto__nombre&dir={% if sort == 'producto__nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}">
             Producto {% if sort == 'producto__nombre' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
           </a>
@@ -38,6 +43,16 @@
         <th>
           <a href="?{{ qs_base }}&sort=proveedor__nombre&dir={% if sort == 'proveedor__nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}">
             Proveedor {% if sort == 'proveedor__nombre' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th>
+          <a href="?{{ qs_base }}&sort=bodega_origen__nombre&dir={% if sort == 'bodega_origen__nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Bodega Origen {% if sort == 'bodega_origen__nombre' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
+          </a>
+        </th>
+        <th>
+          <a href="?{{ qs_base }}&sort=bodega_destino__nombre&dir={% if sort == 'bodega_destino__nombre' and dir == 'asc' %}desc{% else %}asc{% endif %}">
+            Bodega Destino {% if sort == 'bodega_destino__nombre' %}<span>{% if dir == 'asc' %}▲{% else %}▼{% endif %}</span>{% endif %}
           </a>
         </th>
         <th class="text-end">
@@ -78,6 +93,19 @@
       {% for t in transacciones %}
       <tr>
         <td>{{ t.fecha|date:"d M Y H:i" }}</td>
+        <td>
+          {% if t.tipo == 'ENTRADA' %}
+            <span class="badge bg-success-subtle text-success-emphasis border border-success-subtle px-2 py-1 rounded-pill">Entrada</span>
+          {% elif t.tipo == 'SALIDA' %}
+            <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle px-2 py-1 rounded-pill">Salida</span>
+          {% elif t.tipo == 'VENTA' %}
+            <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-2 py-1 rounded-pill">Venta</span>
+          {% elif t.tipo == 'TRANSFERENCIA' %}
+            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 rounded-pill">Transferencia</span>
+          {% else %}
+            <span class="badge bg-secondary-subtle text-secondary-emphasis border border-secondary-subtle px-2 py-1 rounded-pill">{{ t.get_tipo_display }}</span>
+          {% endif %}
+        </td>
         <td>{{ t.producto.nombre }}</td>
         {% if t.proveedor %}
           <td>{{ t.proveedor.nombre }}</td>
@@ -85,11 +113,22 @@
           <td>—</td>
         {% endif %}
         {% if t.bodega_origen %}
-          <td>{{ t.bodega_origen.nombre }}</td>
+          <td>
+            <div class="fw-semibold" style="font-size: 0.9rem;">{{ t.bodega_origen.nombre }}</div>
+            <small class="text-muted">{{ t.bodega_origen.codigo }}</small>
+          </td>
         {% else %}
           <td>—</td>
         {% endif %}
-        <td>{{ t.cantidad }}</td>
+        {% if t.bodega_destino %}
+          <td>
+            <div class="fw-semibold" style="font-size: 0.9rem;">{{ t.bodega_destino.nombre }}</div>
+            <small class="text-muted">{{ t.bodega_destino.codigo }}</small>
+          </td>
+        {% else %}
+          <td class="text-muted">—</td>
+        {% endif %}
+        <td class="text-end">{{ t.cantidad }}</td>
         <td>{{ t.lote|default:"—" }}</td>
         <td>{{ t.serie|default:"—" }}</td>
         <td>{{ t.fecha_vencimiento|date:"d/m/Y"|default:"—" }}</td>
@@ -109,7 +148,7 @@
       </tr>
       {% empty %}
       <tr>
-        <td colspan="12" class="text-center text-muted py-4">No hay transacciones registradas.</td>
+        <td colspan="14" class="text-center text-muted py-4">No hay transacciones registradas.</td>
       </tr>
       {% endfor %}
     </tbody>
