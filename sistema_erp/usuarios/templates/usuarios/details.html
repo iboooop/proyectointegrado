@@ -115,6 +115,9 @@
                         <a href="{% url 'usuarios_edit' perfil.id %}" class="btn btn-outline-secondary">Editar</a>
                     {% endif %}
                     {% if request.user.perfil.rol == 'ADMIN' %}
+                        <a href="{% url 'usuarios_reset_password' perfil.id %}" class="btn btn-warning">
+                            <i class="bi bi-arrow-clockwise"></i> Resetear Contraseña
+                        </a>
                         <form action="{% url 'usuarios_delete' perfil.id %}" method="post" id="form-eliminar-usuario">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-danger">Eliminar</button>

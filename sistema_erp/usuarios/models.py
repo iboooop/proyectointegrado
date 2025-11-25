@@ -30,6 +30,7 @@ class Perfil(models.Model):
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True, verbose_name='Avatar')
     sesiones_activas = models.IntegerField(default=0)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
+    debe_cambiar_clave = models.BooleanField(default=False, verbose_name='Debe cambiar contraseña')
 
     def __str__(self):
         return f"{self.usuario.username} ({self.rol})"

@@ -7,17 +7,6 @@ import re
 
 # ------------------ FORMULARIO USUARIO ------------------
 class UsuarioForm(forms.ModelForm):
-    password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la contraseña'}),
-        required=False,
-        label="Contraseña"
-    )
-    confirm_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirme la contraseña'}),
-        required=False,
-        label="Confirmar Contraseña"
-    )
-
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name', 'last_name']
@@ -54,9 +43,12 @@ class UsuarioForm(forms.ModelForm):
 
     def clean_email(self):
         email = (self.cleaned_data.get('email') or '').strip()
+        if not email:
+            raise ValidationError("El correo electrónico es obligatorio.")
         # Si está editando y no cambió el email, no forzar validación extra
         if self.instance.pk and email.lower() == (getattr(self.instance, 'email', '') or '').lower():
             return email
+        # Verificar que el email no esté en uso por usuarios activos
         qs = User.objects.filter(email__iexact=email)
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
@@ -69,9 +61,9 @@ class UsuarioForm(forms.ModelForm):
         # Si está editando y no cambió, permitir el valor tal cual
         if self.instance.pk and first_name == (self.instance.first_name or '').strip():
             return first_name
-        # No permitir números en el nombre
-        if re.search(r"\d", first_name or ''):
-            raise ValidationError("El nombre no debe contener números.")
+        # No permitir números ni símbolos en el nombre (solo letras, espacios, acentos y ñ)
+        if not re.match(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$', first_name or ''):
+            raise ValidationError("El nombre solo debe contener letras y espacios.")
         if len(first_name) < 3:
             raise ValidationError("El nombre debe tener al menos 3 caracteres.")
         return first_name
@@ -81,44 +73,15 @@ class UsuarioForm(forms.ModelForm):
         # Si está editando y no cambió, permitir el valor tal cual
         if self.instance.pk and last_name == (self.instance.last_name or '').strip():
             return last_name
-        # No permitir números en el apellido
-        if re.search(r"\d", last_name or ''):
-            raise ValidationError("El apellido no debe contener números.")
+        # No permitir números ni símbolos en el apellido (solo letras, espacios, acentos y ñ)
+        if not re.match(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$', last_name or ''):
+            raise ValidationError("El apellido solo debe contener letras y espacios.")
         if len(last_name) < 3:
             raise ValidationError("El apellido debe tener al menos 3 caracteres.")
         return last_name
 
-    def clean(self):
-        cleaned_data = super().clean()
-        password = cleaned_data.get('password')
-        confirm = cleaned_data.get('confirm_password')
-
-        # Solo exigir contraseña en creación
-        if not self.instance.pk and not password:
-            raise ValidationError({'password': "Debe ingresar una contraseña para crear el usuario."})
-
-        # Validaciones mínimas para cambio de contraseña (solo si se intenta cambiar)
-        if password or confirm:
-            if password != confirm:
-                raise ValidationError({'confirm_password': "Las contraseñas no coinciden."})
-            if len(password or '') < 8:
-                raise ValidationError({'password': "La contraseña debe tener al menos 8 caracteres."})
-            if not re.search(r'[A-Z]', password or ''):
-                raise ValidationError({'password': "Debe incluir al menos una letra mayúscula."})
-            if not re.search(r'[0-9]', password or ''):
-                raise ValidationError({'password': "Debe incluir al menos un número."})
-        return cleaned_data
-
     def save(self, commit=True):
         user = super().save(commit=False)
-        password = self.cleaned_data.get('password')
-
-        if password:
-            # Establecer password solo si se envió
-            user.set_password(password)
-        elif not self.instance.pk:
-            raise ValidationError("Debe establecer una contraseña para el usuario.")
-
         if commit:
             user.save()
         return user

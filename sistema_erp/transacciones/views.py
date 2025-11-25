@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from django.utils import timezone
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 
 from .models import MovimientoInventario
 from .forms import MovimientoInventarioForm
@@ -11,6 +12,7 @@ from .forms import MovimientoInventarioForm
 
 
 # ---------------- LISTA ----------------
+@login_required
 def lista_transacciones(request):
     qs = MovimientoInventario.objects.select_related(
         'producto', 'proveedor', 'usuario', 'bodega_origen', 'bodega_destino'
@@ -115,6 +117,7 @@ def lista_transacciones(request):
 
 
 # ---------------- CREAR ----------------
+@login_required
 def crear_transaccion(request):
     mensaje = None
     mensaje_tipo = None
@@ -149,6 +152,7 @@ def crear_transaccion(request):
 
 
 # ---------------- DETALLE ----------------
+@login_required
 def detalle_transaccion(request, id):
     transaccion = get_object_or_404(
         MovimientoInventario.objects.select_related(
@@ -160,6 +164,7 @@ def detalle_transaccion(request, id):
 
 
 # ---------------- EDITAR ----------------
+@login_required
 def editar_transaccion(request, id):
     transaccion = get_object_or_404(MovimientoInventario, id=id)
 
@@ -211,6 +216,7 @@ def editar_transaccion(request, id):
 
 
 # ---------------- ELIMINAR ----------------
+@login_required
 def eliminar_transaccion(request, id):
     transaccion = get_object_or_404(MovimientoInventario, id=id)
     if request.method == 'POST':
@@ -232,6 +238,7 @@ except ImportError:
     Workbook = None
 
 
+@login_required
 def exportar_transacciones_excel(request):
     """Exporta los movimientos filtrados/ordenados a un archivo XLSX con detalles."""
     if Workbook is None:

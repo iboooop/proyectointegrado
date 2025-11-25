@@ -26,6 +26,14 @@
 
         <h5 class="mb-4 fw-semibold">Crear Usuario</h5>
 
+        {% if messages %}
+          {% for m in messages %}
+            {% if m.tags == 'error' or m.tags == 'warning' or m.tags == 'danger' %}
+              <div class="alert alert-{{ m.tags }} mb-2">{{ m }}</div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+
         <form method="post" enctype="multipart/form-data" novalidate>
           {% csrf_token %}
           {% if usuario_form.non_field_errors %}
@@ -99,21 +107,8 @@
             </div>
           </div>
 
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="password" class="form-label">Contraseña</label>
-              {{ usuario_form.password }}
-              {% if usuario_form.password.errors %}
-              <div class="text-danger">{{ usuario_form.password.errors|join:", " }}</div>
-              {% endif %}
-            </div>
-            <div class="col-md-6">
-              <label for="confirm_password" class="form-label">Confirmar Contraseña</label>
-              {{ usuario_form.confirm_password }}
-              {% if usuario_form.confirm_password.errors %}
-              <div class="text-danger">{{ usuario_form.confirm_password.errors|join:", " }}</div>
-              {% endif %}
-            </div>
+          <div class="alert alert-info" role="alert">
+            <strong>📧 Nota importante:</strong> El sistema generará automáticamente una contraseña provisoria robusta que será enviada al correo electrónico del usuario. El usuario deberá cambiarla en su primer inicio de sesión.
           </div>
 
           <h6 class="fw-semibold mb-3">Estado y acceso</h6>
