@@ -11,6 +11,11 @@ from django.contrib import messages
 from usuarios.models import Perfil
 from .forms import LoginForm, RegistroForm
 import os
+from django.core.cache import cache
+from django.utils import timezone
+from datetime import timedelta
+from django.contrib import messages
+from .forms import LoginForm
 
 # ------------------------------
 # Función para registrar un nuevo usuario
@@ -48,51 +53,75 @@ def registro_view(request):
 # Función para iniciar sesión
 # ------------------------------
 def login_view(request):
+    """
+    Login con límite de intentos por IP:
+    - 3 intentos fallidos → bloqueo temporal de 3 minutos
+    - Se muestra remaining_seconds en la plantilla para el timer JS
+    """
+    MAX_ATTEMPTS = 3
+    BLOCK_SECONDS = 3 * 60  # 3 minutos
+
+    ip = request.META.get('REMOTE_ADDR', 'unknown')
+    key_attempts = f'login_attempts:ip:{ip}'
+    key_block = f'login_block:ip:{ip}'
+
+    # comprobar bloqueo por IP
+    remaining_seconds = 0
+    block_until = cache.get(key_block)
+    now = timezone.now()
+    if block_until and block_until > now:
+        remaining_seconds = int((block_until - now).total_seconds())
+
     if request.method == 'POST':
-        # Usar nuestro LoginForm personalizado (usuario o email)
         form = LoginForm(request.POST)
-        if form.is_valid():
-            usuario_o_email = form.cleaned_data.get('usuario_o_email')
-            password = form.cleaned_data.get('password')
+        # si está bloqueado, no procesar credenciales
+        if remaining_seconds > 0:
+            minutes = remaining_seconds // 60
+            seconds = remaining_seconds % 60
+            messages.error(request, f"Has superado los intentos. Intenta nuevamente en {minutes}m {seconds}s.")
+            return render(request, 'autenticacion/login.html', {'form': form, 'remaining_seconds': remaining_seconds})
 
-            # Intentar autenticar por username
-            user = authenticate(request, username=usuario_o_email, password=password)
+        username_or_email = request.POST.get('usuario_o_email', '').strip()
+        password = request.POST.get('password', '')
 
-            # Si no se autenticó por username, intentar buscar por email
-            if not user:
-                try:
-                    user_obj = User.objects.get(email=usuario_o_email)
-                    user = authenticate(request, username=user_obj.username, password=password)
-                except User.DoesNotExist:
-                    user = None
-
-            if user is not None:
-                login(request, user)
-                perfil = Perfil.objects.filter(usuario=user).first()
-                request.session['usuario'] = user.username
-                request.session['rol'] = perfil.rol if perfil else "Sin rol"
-                
-                # RQ-USR-04: Verificar si debe cambiar clave provisoria
-                if perfil and perfil.debe_cambiar_clave:
-                    print(f"DEBUG: Usuario {user.username} debe cambiar clave, redirigiendo a /autenticacion/cambiar/")
-                    messages.warning(request, 'Por seguridad, debes cambiar tu contraseña provisoria antes de continuar.')
-                    return redirect('cambiar_password')
-                
-                print(f"DEBUG: Usuario {user.username} autenticado correctamente, redirigiendo a dashboard")
-                # No agregamos mensaje de bienvenida aquí, se mostrará en el dashboard
-                return redirect('dashboard')
+        # Ajusta authenticate si permites login por email
+        user = authenticate(request, username=username_or_email, password=password)
+        if user is None:
+            # intento fallido: incrementar contador
+            attempts = cache.get(key_attempts, 0) + 1
+            cache.set(key_attempts, attempts, timeout=BLOCK_SECONDS)
+            if attempts >= MAX_ATTEMPTS:
+                block_until = now + timedelta(seconds=BLOCK_SECONDS)
+                cache.set(key_block, block_until, timeout=BLOCK_SECONDS)
+                cache.delete(key_attempts)
+                remaining_seconds = BLOCK_SECONDS
+                messages.error(request, f"Has superado {MAX_ATTEMPTS} intentos. Bloqueado por 3 minutos.")
             else:
-                # Añadir error al formulario (non-field error) para mostrarlo inline en la plantilla
-                form.add_error(None, 'Nombre de usuario o contraseña incorrectos.')
-        else:
-            # Form inválido: los errores del formulario se mostrarán en la plantilla
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, error)
+                rest = MAX_ATTEMPTS - attempts
+                messages.error(request, f"Usuario o contraseña incorrectos. Te quedan {rest} intento(s).")
+            return render(request, 'autenticacion/login.html', {'form': form, 'remaining_seconds': remaining_seconds})
+
+        # login correcto: limpiar contadores y redirigir
+        cache.delete(key_attempts)
+        cache.delete(key_block)
+        login(request, user)
+        perfil = Perfil.objects.filter(usuario=user).first()
+        request.session['usuario'] = user.username
+        request.session['rol'] = perfil.rol if perfil else "Sin rol"
+        
+        # RQ-USR-04: Verificar si debe cambiar clave provisoria
+        if perfil and perfil.debe_cambiar_clave:
+            print(f"DEBUG: Usuario {user.username} debe cambiar clave, redirigiendo a /autenticacion/cambiar/")
+            messages.warning(request, 'Por seguridad, debes cambiar tu contraseña provisoria antes de continuar.')
+            return redirect('cambiar_password')
+        
+        print(f"DEBUG: Usuario {user.username} autenticado correctamente, redirigiendo a dashboard")
+        # No agregamos mensaje de bienvenida aquí, se mostrará en el dashboard
+        return redirect('dashboard')
     else:
         form = LoginForm()
 
-    return render(request, 'autenticacion/login.html', {'form': form})
+    return render(request, 'autenticacion/login.html', {'form': form, 'remaining_seconds': remaining_seconds})
 
 # ------------------------------
 # Función para recuperar contraseña (envía un enlace por correo)
