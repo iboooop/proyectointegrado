@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import Producto
 from .forms import ProductoForm
@@ -324,3 +324,16 @@ def exportar_productos_excel(request):
     response['Content-Disposition'] = f'attachment; filename="productos_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx"'
     wb.save(response)
     return response
+
+
+def get_producto_json(request, pk):
+    try:
+        producto = Producto.objects.get(pk=pk)
+        data = {
+            'id': producto.id,
+            'text': str(producto),
+            'es_perecible': producto.perishable 
+        }
+        return JsonResponse(data)
+    except Producto.DoesNotExist:
+        return JsonResponse({'error': 'Producto no encontrado'}, status=404)

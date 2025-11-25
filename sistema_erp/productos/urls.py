@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from .autocomplete import ProductoAutocomplete
+from .views import get_producto_json
 
 # app_name = 'productos' # <- ELIMINA O COMENTA ESTA LÍNEA
 
@@ -12,4 +13,5 @@ urlpatterns = [
     path('<int:id>/editar/', views.editar_producto, name='editar_producto'),
     path('<int:id>/eliminar/', views.eliminar_producto, name='eliminar_producto'),
     path('agregar/', views.crear_producto, name='producto_agregar'),
+    path('api/get-producto/<int:pk>/', get_producto_json, name='get_producto_json'),
 ]
