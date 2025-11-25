@@ -4,6 +4,13 @@ from .models import Producto, CategoriaProducto
 from proveedores.models import Proveedor
 
 class ProductoForm(forms.ModelForm):
+    proveedor = forms.ModelChoiceField(
+        queryset=Proveedor.objects.none(),  # se setea en __init__
+        required=True,
+        empty_label="Seleccione un proveedor",  # muestra texto en lugar de "---------"
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
+
     class Meta:
         model = Producto
         fields = [
@@ -123,6 +130,24 @@ class ProductoForm(forms.ModelForm):
     # --------- Validaciones ---------
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # usar solo proveedores activos si existe el campo 'estado', sino todos
+        try:
+            prov_fields = {f.name for f in Proveedor._meta.get_fields()}
+            if "estado" in prov_fields:
+                qs = Proveedor.objects.filter(estado="ACTIVO").order_by("nombre")
+            else:
+                qs = Proveedor.objects.all().order_by("nombre")
+        except Exception:
+            qs = Proveedor.objects.all().order_by("nombre")
+
+        # por defecto mostrar todos los proveedores (activos si aplica)
+        self.fields["proveedor"].queryset = qs
+
+        # Asegurar que en el select se muestre el nombre (por si __str__ no lo hace)
+        try:
+            self.fields["proveedor"].label_from_instance = lambda obj: getattr(obj, "nombre", str(obj))
+        except Exception:
+            pass
 
         categoria_obj = None
 
@@ -134,13 +159,12 @@ class ProductoForm(forms.ModelForm):
             categoria_obj = CategoriaProducto.objects.filter(codigo=self.instance.categoria).first()
 
         if categoria_obj:
-            self.fields["proveedor"].queryset = Proveedor.objects.filter(
-                categorias=categoria_obj,
-                estado="ACTIVO",
-            ).distinct()
-        else:
-            # Sin categoría elegida, no mostramos proveedores todavía
-            self.fields["proveedor"].queryset = Proveedor.objects.none()
+            # si hay categoría, limitar a proveedores asociados a esa categoría
+            filt = {"categorias": categoria_obj}
+            if "estado" in prov_fields:
+                filt["estado"] = "ACTIVO"
+            self.fields["proveedor"].queryset = Proveedor.objects.filter(**filt).distinct()
+        # si no hay categoría, dejamos el queryset por defecto (qs) para que se muestren todos los proveedores
 
     def clean_sku(self):
         sku = self.cleaned_data["sku"]
@@ -170,14 +194,15 @@ class ProductoForm(forms.ModelForm):
         return ean_upc
 
     def clean_nombre(self):
-        nombre = self.cleaned_data["nombre"]
+        nombre = (self.cleaned_data.get("nombre") or "").strip()
         if not nombre or len(nombre) < 3:
             raise ValidationError("El nombre debe tener al menos 3 caracteres.")
         if len(nombre) > 255:
             raise ValidationError("El nombre no puede superar los 255 caracteres.")
         import re
-        if not re.match(r'^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$', nombre):
-            raise ValidationError("Ingrese solo letras y espacios en el nombre.")
+        # Permitir letras (incluye acentos y Ñ), números y espacios
+        if not re.match(r'^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9 ]+$', nombre):
+            raise ValidationError("Ingrese solo letras, números y espacios en el nombre.")
         return nombre
 
     def clean_descripcion(self):

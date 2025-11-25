@@ -27,13 +27,11 @@
               1. Identificación y contacto
             </button>
           </li>
-
           <li class="nav-item">
             <button class="nav-link" id="paso2-tab" data-bs-toggle="pill" data-bs-target="#paso2" type="button">
               2. Dirección y comercial
             </button>
           </li>
-
           <li class="nav-item">
             <button class="nav-link" id="paso3-tab" data-bs-toggle="pill" data-bs-target="#paso3" type="button">
               3. Relación con productos
@@ -45,126 +43,134 @@
           {% csrf_token %}
 
           {% if form.non_field_errors %}
-            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            <div class="alert alert-danger p-2">{{ form.non_field_errors|striptags }}</div>
           {% endif %}
 
           <div class="tab-content">
 
             <!-- TAB 1: Identificación y contacto -->
             <div class="tab-pane fade show active" id="paso1">
-
               <h6 class="fw-semibold mb-2">Identificación legal y contacto</h6>
-
               <div class="row g-3">
-                <div class="col-md-3">
-                  <label class="form-label">ID (PK)</label>
-                  <input type="text" class="form-control" value="(autogenerado)" disabled>
-                  <div class="form-text">Se genera automáticamente</div>
-                </div>
-
-                <div class="col-md-5">
-                  <label class="form-label">RUT <span class="text-danger">*</span></label>
-                  <input type="text" name="rut" class="form-control" placeholder="76.543.210-5" required>
-                  <div class="form-text">Requerido, único</div>
+                <div class="col-md-12">
+                  <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                  <input type="text" name="nombre" class="form-control {% if form.nombre.errors %}is-invalid{% endif %}" value="{{ form.nombre.value|default:'' }}" required>
+                  {% if form.nombre.errors %}
+                    <div class="invalid-feedback">{{ form.nombre.errors|striptags }}</div>
+                  {% else %}
+                    <div class="form-text">Nombre principal o de referencia del proveedor. Requerido.</div>
+                  {% endif %}
                 </div>
               </div>
-
               <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                  <label class="form-label">RUT <span class="text-danger">*</span></label>
+                  <input type="text" name="rut" class="form-control {% if form.rut.errors %}is-invalid{% endif %}" value="{{ form.rut.value|default:'' }}" required>
+                  {% if form.rut.errors %}
+                    <div class="invalid-feedback">{{ form.rut.errors|striptags }}</div>
+                  {% else %}
+                    <div class="form-text">Requerido, único</div>
+                  {% endif %}
+                </div>
                 <div class="col-md-6">
                   <label class="form-label">Razón Social <span class="text-danger">*</span></label>
-                  <input type="text" name="razon_social" class="form-control" placeholder="Proveedor S.A." required>
-                  <div class="form-text">Requerido</div>
+                  <input type="text" name="razon_social" class="form-control {% if form.razon_social.errors %}is-invalid{% endif %}" value="{{ form.razon_social.value|default:'' }}" required>
+                  {% if form.razon_social.errors %}
+                    <div class="invalid-feedback">{{ form.razon_social.errors|striptags }}</div>
+                  {% else %}
+                    <div class="form-text">Requerido</div>
+                  {% endif %}
                 </div>
-
+              </div>
+              <div class="row g-3 mt-1">
                 <div class="col-md-6">
                   <label class="form-label">Nombre de Fantasía</label>
-                  <input type="text" name="nombre_fantasia" class="form-control" placeholder="ProveeMax">
-                  <div class="form-text">Opcional</div>
+                  <input type="text" name="nombre_fantasia" class="form-control {% if form.nombre_fantasia.errors %}is-invalid{% endif %}" value="{{ form.nombre_fantasia.value|default:'' }}">
+                  {% if form.nombre_fantasia.errors %}
+                    <div class="invalid-feedback">{{ form.nombre_fantasia.errors|striptags }}</div>
+                  {% endif %}
                 </div>
-              </div>
-
-              <div class="row g-3 mt-1">
-                <div class="col-md-4">
+                <div class="col-md-6">
                   <label class="form-label">Email <span class="text-danger">*</span></label>
-                  <input type="email" name="email" class="form-control" placeholder="contacto@proveedor.cl" required>
-                  <div class="form-text">Requerido</div>
-                </div>
-
-                <div class="col-md-4">
-                  <label class="form-label">Teléfono</label>
-                  <input type="text" name="telefono" class="form-control" placeholder="+56 2 2345 6789">
-                  <div class="form-text">Opcional</div>
-                </div>
-
-                <div class="col-md-4">
-                  <label class="form-label">Sitio Web</label>
-                  <input type="url" name="sitio_web" class="form-control" placeholder="https://proveedor.cl">
-                  <div class="form-text">Opcional</div>
+                  <input type="email" name="correo" class="form-control {% if form.correo.errors %}is-invalid{% endif %}" value="{{ form.correo.value|default:'' }}" required>
+                  {% if form.correo.errors %}
+                    <div class="invalid-feedback">{{ form.correo.errors|striptags }}</div>
+                  {% else %}
+                    <div class="form-text">Requerido</div>
+                  {% endif %}
                 </div>
               </div>
-
+              <div class="row g-3 mt-1">
+                <div class="col-md-6">
+                  <label class="form-label">Teléfono</label>
+                  <input type="text" name="telefono" class="form-control {% if form.telefono.errors %}is-invalid{% endif %}" value="{{ form.telefono.value|default:'' }}">
+                  {% if form.telefono.errors %}
+                    <div class="invalid-feedback">{{ form.telefono.errors|striptags }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Sitio Web</label>
+                  <input type="url" name="sitio_web" class="form-control {% if form.sitio_web.errors %}is-invalid{% endif %}" value="{{ form.sitio_web.value|default:'' }}">
+                  {% if form.sitio_web.errors %}
+                    <div class="invalid-feedback">{{ form.sitio_web.errors|striptags }}</div>
+                  {% endif %}
+                </div>
+              </div>
               <div class="d-flex justify-content-end gap-2 mt-4">
                 <button type="reset" class="btn btn-outline-secondary">Limpiar</button>
                 <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('paso2-tab').click()">Siguiente &rarr;</button>
               </div>
             </div>
-            <!-- fin tab1 -->
 
             <!-- TAB 2: Dirección y comercial -->
             <div class="tab-pane fade" id="paso2">
-
-              <h6 class="fw-semibold mb-2">Dirección comercial</h6>
-
+              <h6 class="fw-semibold mb-2">Dirección y condiciones</h6>
               <div class="row g-3">
-                <div class="col-md-8">
+                <div class="col-md-6">
                   <label class="form-label">Dirección</label>
-                  <input type="text" name="direccion" class="form-control" placeholder="Av. Ejemplo 123, Oficina 456">
+                  <input type="text" name="direccion" class="form-control {% if form.direccion.errors %}is-invalid{% endif %}" value="{{ form.direccion.value|default:'' }}">
+                  {% if form.direccion.errors %}
+                    <div class="invalid-feedback">{{ form.direccion.errors|striptags }}</div>
+                  {% endif %}
                 </div>
-
-                <div class="col-md-4">
+                <div class="col-md-3">
                   <label class="form-label">Ciudad</label>
-                  <input type="text" name="ciudad" class="form-control" placeholder="Santiago">
+                  <input type="text" name="ciudad" class="form-control {% if form.ciudad.errors %}is-invalid{% endif %}" value="{{ form.ciudad.value|default:'' }}">
+                   {% if form.ciudad.errors %}
+                    <div class="invalid-feedback">{{ form.ciudad.errors|striptags }}</div>
+                  {% endif %}
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">País</label>
+                  {{ form.pais }}
+                  {% if form.pais.errors %}
+                    <div class="invalid-feedback d-block">{{ form.pais.errors|striptags }}</div>
+                  {% endif %}
                 </div>
               </div>
-
               <div class="row g-3 mt-1">
                 <div class="col-md-4">
-                  <label class="form-label">País</label>
-                  <input type="text" name="pais" class="form-control" placeholder="Chile" value="Chile">
-                </div>
-              </div>
-
-              <h6 class="fw-semibold mt-4 mb-2">Condiciones comerciales</h6>
-
-              <div class="row g-3">
-                <div class="col-md-4">
                   <label class="form-label">Plazo de pago</label>
-                  <select name="plazo_pago" class="form-select">
-                    <option value="">Seleccionar</option>
-                    <option value="contado">Contado</option>
-                    <option value="30">30 días</option>
-                    <option value="60">60 días</option>
-                    <option value="90">90 días</option>
-                  </select>
-                  <div class="form-text">Días de crédito</div>
+                  {{ form.plazo_pago }}
+                  {% if form.plazo_pago.errors %}
+                    <div class="invalid-feedback d-block">{{ form.plazo_pago.errors|striptags }}</div>
+                  {% endif %}
                 </div>
-
                 <div class="col-md-4">
                   <label class="form-label">Moneda</label>
-                  <select name="moneda" class="form-select">
-                    <option value="CLP" selected>CLP (Peso chileno)</option>
-                    <option value="USD">USD (Dólar)</option>
-                    <option value="EUR">EUR (Euro)</option>
-                  </select>
+                  {{ form.moneda }}
+                  {% if form.moneda.errors %}
+                    <div class="invalid-feedback d-block">{{ form.moneda.errors|striptags }}</div>
+                  {% endif %}
                 </div>
-
                 <div class="col-md-4">
                   <label class="form-label">Descuento (%)</label>
-                  <input type="number" name="descuento" class="form-control" placeholder="0" step="0.01" min="0" max="100">
-                  <div class="form-text">Descuento general si aplica</div>
+                  <input type="number" name="descuento" class="form-control {% if form.descuento.errors %}is-invalid{% endif %}" value="{{ form.descuento.value|default:'0' }}" step="0.01" min="0" max="100">
+                  {% if form.descuento.errors %}
+                    <div class="invalid-feedback">{{ form.descuento.errors|striptags }}</div>
+                  {% endif %}
                 </div>
               </div>
-
               <div class="d-flex justify-content-between gap-2 mt-4">
                 <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('paso1-tab').click()">&larr; Anterior</button>
                 <div class="d-flex gap-2">
@@ -173,38 +179,34 @@
                 </div>
               </div>
             </div>
-            <!-- fin tab2 -->
 
             <!-- TAB 3: Relación con productos -->
             <div class="tab-pane fade" id="paso3">
-
               <h6 class="fw-semibold mb-2">Relación con productos</h6>
-
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label">Proveedor preferente</label>
-                  <select name="preferente" class="form-select">
-                    <option value="0">No</option>
-                    <option value="1">Sí</option>
-                  </select>
-                  <div class="form-text">Marca este proveedor como preferente para compras</div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" name="proveedor_preferente" id="id_proveedor_preferente" value="true" {% if form.proveedor_preferente.value %}checked{% endif %} style="transform: scale(1.3); margin-left: -1.5em;">
+                    <label class="form-check-label" for="id_proveedor_preferente" style="padding-left: 0.5em;">
+                      Sí, marcar como preferente
+                    </label>
+                  </div>
                 </div>
-
                 <div class="col-md-6">
                   <label class="form-label">Lead Time (días)</label>
-                  <input type="number" name="lead_time" class="form-control" placeholder="7" min="0">
-                  <div class="form-text">Tiempo estimado de entrega en días</div>
+                  <input type="number" name="lead_time" class="form-control {% if form.lead_time.errors %}is-invalid{% endif %}" value="{{ form.lead_time.value|default:'7' }}" min="0">
+                  {% if form.lead_time.errors %}
+                    <div class="invalid-feedback">{{ form.lead_time.errors|striptags }}</div>
+                  {% endif %}
                 </div>
               </div>
-
               <div class="row g-3 mt-1">
                 <div class="col-md-12">
-                  <label class="form-label">Costos adicionales / Observaciones</label>
-                  <textarea name="observaciones" class="form-control" rows="4" placeholder="Información adicional sobre costos, condiciones especiales, etc."></textarea>
-                  <div class="form-text">Opcional</div>
+                  <label class="form-label">Observaciones</label>
+                  <textarea name="observaciones" class="form-control" rows="4">{{ form.observaciones.value|default:'' }}</textarea>
                 </div>
               </div>
-
               <div class="d-flex justify-content-between gap-2 mt-4">
                 <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('paso2-tab').click()">&larr; Anterior</button>
                 <div class="d-flex gap-2">
@@ -213,13 +215,8 @@
                 </div>
               </div>
             </div>
-            <!-- fin tab3 -->
-
           </div>
-          <!-- fin tab-content -->
-
         </form>
-
       </div>
     </div>
   </div>
@@ -245,5 +242,26 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Manejar únicamente el caso de error de validación en esta página
+      const hasErrors = document.querySelector('.is-invalid');
+      if (hasErrors) {
+        let errorMessage = 'El formulario contiene errores. Por favor, revísalo.';
+        {% for message in messages %}
+          {% if 'error' in message.tags %}
+            errorMessage = '{{ message|escapejs }}';
+          {% endif %}
+        {% endfor %}
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de validación',
+          text: errorMessage
+        });
+      }
+    });
+  </script>
 </body>
 </html>

@@ -5,7 +5,7 @@ from .models import Producto
 from .forms import ProductoForm
 from transacciones.models import MovimientoInventario
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Avg
 
 try:
     from openpyxl import Workbook
@@ -21,21 +21,20 @@ def lista_productos(request):
 
     qs = Producto.objects.select_related("proveedor").all()
 
-
     q = (request.GET.get("q") or "").strip()
     if q:
-        qs = qs.filter(
-            Q(nombre__icontains=q)
-            | Q(sku__icontains=q)
-            | Q(proveedor__nombre__icontains=q)
-            | Q(stock_actual__icontains=q)
-            | Q(categoria__icontains=q)
-        )
+        # Buscar solo en campos de texto; tratar "activo"/"inactivo" por separado
+        q_lower = q.lower()
+        filters = Q(nombre__icontains=q) | Q(sku__icontains=q) | Q(proveedor__nombre__icontains=q) | Q(categoria__icontains=q)
+        if q_lower in ("activo", "activos"):
+            filters |= Q(activo=True)
+        elif q_lower in ("inactivo", "inactivos"):
+            filters |= Q(activo=False)
+        qs = qs.filter(filters)
 
     sort = (request.GET.get("sort") or "nombre").strip()
     direction = (request.GET.get("dir") or "asc").strip().lower()
 
-    # Normalizar campos permitidos para evitar errores de ordenación
     allowed_sorts = {
         "sku": "sku",
         "nombre": "nombre",
@@ -47,10 +46,11 @@ def lista_productos(request):
         sort_field = f"-{sort_field}"
     qs = qs.order_by(sort_field)
 
-    allowed_sizes = [5, 10, 20, 50]
+    # tamaños permitidos coherentes con los selects del template
+    allowed_sizes = [10, 25, 50, 100]
     try:
         page_size = int(
-            request.GET.get("page") or request.session.get("producto_page_size") or 10
+            request.GET.get("page_size") or request.session.get("producto_page_size") or 10
         )
     except ValueError:
         page_size = 10
@@ -134,6 +134,12 @@ def detalle_producto(request, id):
         .select_related("proveedor", "usuario")
         .order_by("-fecha")
     )
+    # promedio del costo_estandar entre productos de la misma categoría
+    costo_promedio = (
+        Producto.objects.filter(categoria=producto.categoria)
+        .aggregate(avg_costo=Avg('costo_estandar'))
+        .get('avg_costo')
+    )
 
     return render(
         request,
@@ -141,6 +147,7 @@ def detalle_producto(request, id):
         {
             "producto": producto,
             "movimientos": movimientos,
+            "costo_promedio_categoria": costo_promedio,
         },
     )
 

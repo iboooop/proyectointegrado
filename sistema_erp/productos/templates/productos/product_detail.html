@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
@@ -44,7 +43,7 @@
         </div>
 
         <div class="row mb-3">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <div class="mb-2">
               <div class="detail-label">Categoría</div>
               <div class="detail-value">{{ producto.get_categoria_display }}</div>
@@ -58,7 +57,7 @@
               <div class="detail-value">{{ producto.proveedor|default:'—' }}</div>
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-4">
             <div class="mb-2">
               <div class="detail-label">Unidad compra / venta</div>
               <div class="detail-value">{{ producto.get_uom_compra_display }} / {{ producto.get_uom_venta_display }}</div>
@@ -70,6 +69,28 @@
             <div class="mb-2">
               <div class="detail-label">IVA</div>
               <div class="detail-value">{{ producto.impuesto_iva }}%</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="mb-2">
+              <div class="detail-label">Código EAN/UPC</div>
+              <div class="detail-value">{{ producto.ean_upc|default:"—" }}</div>
+            </div>
+
+            <div class="mb-2">
+              <div class="detail-label">Costo promedio (categoría)</div>
+              <div class="detail-value">
+                {% if costo_promedio_categoria %}
+                  ${{ costo_promedio_categoria|floatformat:2 }}
+                {% else %}
+                  —
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <div class="detail-label">Descripción</div>
+              <div class="detail-value">{{ producto.descripcion|default:"—" }}</div>
             </div>
           </div>
         </div>
@@ -104,8 +125,6 @@
             <div class="detail-value">
               {% if producto.control_por_lote %}Por lote{% elif producto.control_por_serie %}Por serie{% else %}Sin control especial{% endif %}
             </div>
-            <div class="detail-label mt-2">Bodega</div>
-            <div class="detail-value">{{ producto.bodega.nombre|default:'—' }}</div>
           </div>
         </div>
 
