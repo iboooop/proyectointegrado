@@ -160,6 +160,13 @@
                     <div class="text-danger small">{{ form.modelo.errors.0 }}</div>
                   {% endif %}
                 </div>
+                <div class="col-md-4">
+                  <label class="form-label">Proveedor</label>
+                  {{ form.proveedor }}
+                  {% if form.proveedor.errors %}
+                    <div class="text-danger small">{{ form.proveedor.errors.0 }}</div>
+                  {% endif %}
+                </div>
               </div>
 
               <!-- unidades -->

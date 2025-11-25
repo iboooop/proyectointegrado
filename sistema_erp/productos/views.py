@@ -4,7 +4,7 @@ from .models import Producto
 from .forms import ProductoForm
 from transacciones.models import MovimientoInventario
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Avg
 
 try:
     from openpyxl import Workbook
@@ -130,6 +130,12 @@ def detalle_producto(request, id):
         .select_related("proveedor", "usuario")
         .order_by("-fecha")
     )
+    # promedio del costo_estandar entre productos de la misma categoría
+    costo_promedio = (
+        Producto.objects.filter(categoria=producto.categoria)
+        .aggregate(avg_costo=Avg('costo_estandar'))
+        .get('avg_costo')
+    )
 
     return render(
         request,
@@ -137,6 +143,7 @@ def detalle_producto(request, id):
         {
             "producto": producto,
             "movimientos": movimientos,
+            "costo_promedio_categoria": costo_promedio,
         },
     )
 
