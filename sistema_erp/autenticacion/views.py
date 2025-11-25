@@ -15,7 +15,7 @@ from django.core.cache import cache
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib import messages
-from .forms import LoginForm
+from .forms import LoginForm, RegistroForm
 
 # ------------------------------
 # Función para registrar un nuevo usuario
@@ -56,7 +56,7 @@ def login_view(request):
     """
     Login con límite de intentos por IP:
     - 3 intentos fallidos → bloqueo temporal de 3 minutos
-    - Se muestra remaining_seconds en la plantilla para el timer JS
+    - Muestra remaining_seconds en la plantilla para el timer JS
     """
     MAX_ATTEMPTS = 3
     BLOCK_SECONDS = 3 * 60  # 3 minutos
@@ -72,8 +72,13 @@ def login_view(request):
     if block_until and block_until > now:
         remaining_seconds = int((block_until - now).total_seconds())
 
+    # inicializar form (mantener en contexto siempre)
     if request.method == 'POST':
         form = LoginForm(request.POST)
+    else:
+        form = LoginForm()
+
+    if request.method == 'POST':
         # si está bloqueado, no procesar credenciales
         if remaining_seconds > 0:
             minutes = remaining_seconds // 60
@@ -81,11 +86,16 @@ def login_view(request):
             messages.error(request, f"Has superado los intentos. Intenta nuevamente en {minutes}m {seconds}s.")
             return render(request, 'autenticacion/login.html', {'form': form, 'remaining_seconds': remaining_seconds})
 
-        username_or_email = request.POST.get('usuario_o_email', '').strip()
-        password = request.POST.get('password', '')
+        if not form.is_valid():
+            # mostrar errores de validación del form
+            return render(request, 'autenticacion/login.html', {'form': form, 'remaining_seconds': remaining_seconds})
 
-        # Ajusta authenticate si permites login por email
-        user = authenticate(request, username=username_or_email, password=password)
+        usuario_or_email = form.cleaned_data.get('usuario_o_email', '').strip()
+        password = form.cleaned_data.get('password', '')
+
+        # Ajusta aquí si permites login por email -> ejemplo simple usa username
+        user = authenticate(request, username=usuario_or_email, password=password)
+
         if user is None:
             # intento fallido: incrementar contador
             attempts = cache.get(key_attempts, 0) + 1
@@ -98,29 +108,35 @@ def login_view(request):
                 messages.error(request, f"Has superado {MAX_ATTEMPTS} intentos. Bloqueado por 3 minutos.")
             else:
                 rest = MAX_ATTEMPTS - attempts
-                messages.error(request, f"Usuario o contraseña incorrectos. Te quedan {rest} intento(s).")
+                # mensaje genérico para no revelar si usuario existe o no
+                messages.error(request, f"Nombre de usuario o contraseña incorrectos. Te quedan {rest} intento(s).")
             return render(request, 'autenticacion/login.html', {'form': form, 'remaining_seconds': remaining_seconds})
 
-        # login correcto: limpiar contadores y redirigir
+        # user autenticado correctamente -> verificar perfil y estado
+        perfil = Perfil.objects.filter(usuario=user).first()
+        if perfil and perfil.estado in ['BLOQUEADO', 'INACTIVO']:
+            if perfil.estado == 'BLOQUEADO':
+                mensaje_error = 'Tu cuenta ha sido bloqueada. Por favor, comunícate con el administrador del sistema para resolver esta situación.'
+            else:
+                mensaje_error = 'Tu cuenta está inactiva. Por favor, comunícate con el administrador del sistema para activarla.'
+            form.add_error(None, mensaje_error)
+            return render(request, 'autenticacion/login.html', {'form': form})
+
+        # limpiar contadores y loguear
         cache.delete(key_attempts)
         cache.delete(key_block)
         login(request, user)
-        perfil = Perfil.objects.filter(usuario=user).first()
         request.session['usuario'] = user.username
         request.session['rol'] = perfil.rol if perfil else "Sin rol"
-        
-        # RQ-USR-04: Verificar si debe cambiar clave provisoria
-        if perfil and perfil.debe_cambiar_clave:
-            print(f"DEBUG: Usuario {user.username} debe cambiar clave, redirigiendo a /autenticacion/cambiar/")
+
+        # si debe cambiar clave provisional -> redirigir (asegúrate que exista la ruta 'cambiar_password')
+        if perfil and getattr(perfil, 'debe_cambiar_clave', False):
             messages.warning(request, 'Por seguridad, debes cambiar tu contraseña provisoria antes de continuar.')
             return redirect('cambiar_password')
-        
-        print(f"DEBUG: Usuario {user.username} autenticado correctamente, redirigiendo a dashboard")
-        # No agregamos mensaje de bienvenida aquí, se mostrará en el dashboard
-        return redirect('dashboard')
-    else:
-        form = LoginForm()
 
+        return redirect('dashboard')
+
+    # GET
     return render(request, 'autenticacion/login.html', {'form': form, 'remaining_seconds': remaining_seconds})
 
 # ------------------------------

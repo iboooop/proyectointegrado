@@ -86,14 +86,14 @@
                     </div>
                     <div class="d-flex gap-2">
                         <a href="{% url 'usuarios_export' %}" class="btn btn-outline-secondary btn-outline-danger-soft">Exportar Excel</a>
-                        {% if request.user.perfil.rol == 'ADMIN' or request.user.perfil.rol == 'EDITOR' %}
+                        {% if request.user.perfil.rol == 'ADMIN' %}
                             <a href="{% url 'usuarios_create' %}" class="btn btn-danger">+ Crear usuario</a>
                         {% endif %}
                     </div>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                     <form id="searchForm" class="flex-grow-1 me-3" onsubmit="return false;">
-                        <input type="text" id="searchInput" class="form-control" placeholder="Buscar por nombre, apellido, username o email..." value="{{ q }}">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Buscar por nombre, apellido, username, email, teléfono, rol, cargo o estado..." value="{{ q }}">
                     </form>
 
                     <form id="pageSizeForm" class="d-flex align-items-center gap-2" onsubmit="return false;">

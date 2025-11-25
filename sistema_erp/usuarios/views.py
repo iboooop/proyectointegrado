@@ -187,6 +187,7 @@ def usuarios_list_view(request):
         'usuario__last_name': 'usuario__last_name',
         'telefono': 'telefono',
         'rol': 'rol',
+        'cargo': 'cargo',
         'estado': 'estado',
         'mfa_habilitado': 'mfa_habilitado',
         'usuario__last_login': 'usuario__last_login',
@@ -201,6 +202,9 @@ def usuarios_list_view(request):
             | Q(usuario__username__icontains=q)
             | Q(usuario__email__icontains=q)
             | Q(telefono__icontains=q)
+            | Q(rol__icontains=q)
+            | Q(cargo__icontains=q)
+            | Q(estado__icontains=q)
         )
 
     order_field = sort_map.get(sort, 'usuario__username')
@@ -249,7 +253,8 @@ def usuarios_create_view(request):
     
     # Solo ADMIN puede crear usuarios
     if rol_admin != 'ADMIN':
-        return HttpResponseForbidden("Solo los administradores pueden crear usuarios.")
+        from django.shortcuts import render
+        return render(request, '404.html', status=404)
     
     if request.method == 'POST':
         usuario_form = UsuarioForm(request.POST)
@@ -536,9 +541,11 @@ def usuarios_reset_password_view(request, id):
             thread.daemon = True
             thread.start()
             
-            # Marcar en sesión para mostrar SweetAlert
-            request.session['password_reset_success'] = True
-            request.session['password_reset_email'] = usuario.email
+            # Mensaje de éxito con el email del usuario
+            messages.success(
+                request, 
+                f"Contraseña restablecida. Se ha enviado un correo a {usuario.email} con la nueva contraseña provisional. El usuario deberá cambiarla obligatoriamente en su próximo inicio de sesión."
+            )
             return redirect(reverse('usuarios_detail', args=[perfil.id]))
         except Exception as e:
             messages.error(request, f"Error al resetear la contraseña: {str(e)}")
