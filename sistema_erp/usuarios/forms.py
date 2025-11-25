@@ -61,9 +61,9 @@ class UsuarioForm(forms.ModelForm):
         # Si está editando y no cambió, permitir el valor tal cual
         if self.instance.pk and first_name == (self.instance.first_name or '').strip():
             return first_name
-        # No permitir números en el nombre
-        if re.search(r"\d", first_name or ''):
-            raise ValidationError("El nombre no debe contener números.")
+        # No permitir números ni símbolos en el nombre (solo letras, espacios, acentos y ñ)
+        if not re.match(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$', first_name or ''):
+            raise ValidationError("El nombre solo debe contener letras y espacios.")
         if len(first_name) < 3:
             raise ValidationError("El nombre debe tener al menos 3 caracteres.")
         return first_name
@@ -73,9 +73,9 @@ class UsuarioForm(forms.ModelForm):
         # Si está editando y no cambió, permitir el valor tal cual
         if self.instance.pk and last_name == (self.instance.last_name or '').strip():
             return last_name
-        # No permitir números en el apellido
-        if re.search(r"\d", last_name or ''):
-            raise ValidationError("El apellido no debe contener números.")
+        # No permitir números ni símbolos en el apellido (solo letras, espacios, acentos y ñ)
+        if not re.match(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$', last_name or ''):
+            raise ValidationError("El apellido solo debe contener letras y espacios.")
         if len(last_name) < 3:
             raise ValidationError("El apellido debe tener al menos 3 caracteres.")
         return last_name

@@ -73,9 +73,11 @@ def login_view(request):
                 
                 # RQ-USR-04: Verificar si debe cambiar clave provisoria
                 if perfil and perfil.debe_cambiar_clave:
+                    print(f"DEBUG: Usuario {user.username} debe cambiar clave, redirigiendo a /autenticacion/cambiar/")
                     messages.warning(request, 'Por seguridad, debes cambiar tu contraseña provisoria antes de continuar.')
                     return redirect('cambiar_password')
                 
+                print(f"DEBUG: Usuario {user.username} autenticado correctamente, redirigiendo a dashboard")
                 # No agregamos mensaje de bienvenida aquí, se mostrará en el dashboard
                 return redirect('dashboard')
             else:

@@ -17,7 +17,7 @@ class PasswordChangeRequiredMiddleware:
 	
 	def __init__(self, get_response):
 		self.get_response = get_response
-		self.change_password_url = '/autenticacion/cambiar_password/'
+		self.change_password_url = '/autenticacion/cambiar/'
 		
 		self._exempt_patterns = [
 			re.compile(r'^static/.*'),
@@ -25,7 +25,7 @@ class PasswordChangeRequiredMiddleware:
 			re.compile(r'^admin/.*'),
 			re.compile(r'^autenticacion/login/?$'),
 			re.compile(r'^autenticacion/logout/?$'),
-			re.compile(r'^autenticacion/cambiar_password/?$'),
+			re.compile(r'^autenticacion/cambiar/?$'),
 		]
 	
 	def __call__(self, request):
