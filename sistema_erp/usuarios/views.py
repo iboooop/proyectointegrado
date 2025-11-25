@@ -202,6 +202,9 @@ def usuarios_list_view(request):
             | Q(usuario__username__icontains=q)
             | Q(usuario__email__icontains=q)
             | Q(telefono__icontains=q)
+            | Q(rol__icontains=q)
+            | Q(cargo__icontains=q)
+            | Q(estado__icontains=q)
         )
 
     order_field = sort_map.get(sort, 'usuario__username')
