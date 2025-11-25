@@ -172,6 +172,21 @@ MESSAGE_TAGS = {
 LOGIN_URL = '/autenticacion/login/'
 
 # ===========================
+# EMAIL CONFIGURATION
+# ===========================
+# Configuración de correo para Gmail
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# IMPORTANTE: Usa CLAVE DE APLICACIÓN (no tu contraseña real)
+EMAIL_HOST_USER = 'rm434308@gmail.com'
+EMAIL_HOST_PASSWORD = 'eoab fqrd kgyr hrki'
+
+DEFAULT_FROM_EMAIL = 'rm434308@gmail.com'
+
+# ===========================
 # DEFAULT
 # ===========================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
