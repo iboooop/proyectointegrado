@@ -67,8 +67,20 @@ def login_view(request):
                     user = None
 
             if user is not None:
-                login(request, user)
+                # Verificar el estado del perfil del usuario
                 perfil = Perfil.objects.filter(usuario=user).first()
+                
+                # Validar estado del usuario (BLOQUEADO o INACTIVO)
+                if perfil and perfil.estado in ['BLOQUEADO', 'INACTIVO']:
+                    if perfil.estado == 'BLOQUEADO':
+                        mensaje_error = 'Tu cuenta ha sido bloqueada. Por favor, comunícate con el administrador del sistema para resolver esta situación.'
+                    else:  # INACTIVO
+                        mensaje_error = 'Tu cuenta está inactiva. Por favor, comunícate con el administrador del sistema para activarla.'
+                    
+                    form.add_error(None, mensaje_error)
+                    return render(request, 'autenticacion/login.html', {'form': form})
+                
+                login(request, user)
                 request.session['usuario'] = user.username
                 request.session['rol'] = perfil.rol if perfil else "Sin rol"
                 
