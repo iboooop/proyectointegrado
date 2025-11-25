@@ -253,7 +253,6 @@ def usuarios_create_view(request):
     
     # Solo ADMIN puede crear usuarios
     if rol_admin != 'ADMIN':
-        from django.shortcuts import render
         return render(request, '404.html', status=404)
     
     if request.method == 'POST':
