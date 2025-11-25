@@ -7,10 +7,10 @@ from proveedores.models import Proveedor
 from productos.models import Producto
 from usuarios.models import Perfil
 
-CATEGORIES = ['ALFAJORES', 'CONFITERIA', 'CHOCOLATES', 'GALLETAS']
-
+CATEGORIES = ['ALFAJORES', 'CONFITERIA', 'CHOCOLATES', 'GALLETAS', 'REGALOS CORPORATIVOS']
 ROLES = ['ADMIN', 'BODEGA', 'VENTAS', 'COMPRAS', 'EDITOR', 'LECTOR']
-
+CIUDADES = ['Santiago', 'Valparaíso', 'Concepción', 'La Serena', 'Antofagasta']
+PLAZOS_PAGO = ['Contado', '30 días', '60 días', '90 días']
 
 class Command(BaseCommand):
     help = "Seed mínima para Lilis: usuarios, perfiles, productos y proveedores."
@@ -18,8 +18,8 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--force', action='store_true', help='Ignora conteos existentes.')
         parser.add_argument('--usuarios', type=int, default=100)
-        parser.add_argument('--proveedores', type=int, default=100)
-        parser.add_argument('--productos', type=int, default=100)
+        parser.add_argument('--proveedores', type=int, default=7456)
+        parser.add_argument('--productos', type=int, default=8645)
 
     def handle(self, *args, **options):
         force = options["force"]
@@ -41,7 +41,6 @@ class Command(BaseCommand):
     # USUARIOS ESPECIALES
     # ==============================
     def _seed_usuarios_especiales(self):
-
         # ADMIN
         admin, created = User.objects.get_or_create(
             username="admin_lilis",
@@ -135,6 +134,14 @@ class Command(BaseCommand):
 
         lista = []
         for i in range(1, cantidad + 1):
+            razon_social = f"Proveedor S.A. {i:03d}"
+            nombre_fantasia = f"ProveMax {i:03d}"
+            ciudad = random.choice(CIUDADES)
+            plazo_pago = random.choice(PLAZOS_PAGO)  # Selecciona aleatoriamente el plazo de pago
+            descuento = round(random.uniform(0, 20), 2)  # Descuento entre 0% y 20%
+            proveedor_preferente = random.choice([True, False])  # Algunos preferentes, otros no
+            lead_time = random.randint(1, 30)  # Lead time entre 1 y 30 días
+
             lista.append(
                 Proveedor(
                     nombre=f"Lilis Proveedor {i:03d}",
@@ -142,7 +149,15 @@ class Command(BaseCommand):
                     contacto=f"Contacto {i:03d}",
                     telefono=f"+56 9 {random.randint(20000000,99999999)}",
                     correo=f"proveedor{i:03d}@lilis.cl",
-                    direccion=f"Calle Dulce {i:03d}, Santiago",
+                    direccion=f"Calle Dulce {i:03d}, {ciudad}",
+                    razon_social=razon_social,
+                    nombre_fantasia=nombre_fantasia,
+                    ciudad=ciudad,
+                    pais='Chile', # Añadido el campo país
+                    plazo_pago=plazo_pago,
+                    descuento=descuento,
+                    proveedor_preferente=proveedor_preferente,
+                    lead_time=lead_time,
                     estado="ACTIVO",
                 )
             )
@@ -165,34 +180,55 @@ class Command(BaseCommand):
 
         productos = []
 
+        unidades = ['UN', 'CAJA', 'KG', 'GR', 'LT', 'PAQ']  # Opciones válidas según el modelo
+        marcas = ['Lilis', 'DulceArte', 'ManosDulces', 'CasaChoco', 'MarcaEjemplo']
+        modelos = ['Estándar', 'Premium', 'Eco', 'Clásico', 'Edición Limitada']
+
+        proveedores_list = list(Proveedor.objects.all()) if Proveedor.objects.exists() else []
+
         for i in range(1, cantidad + 1):
-            categoria = random.choice(CATEGORIES)
+            categoria = random.choice(['ALFAJORES', 'CONFITERIA', 'CHOCOLATES', 'GALLETAS', 'REGALOS CORPORATIVOS'])
             nombre_base = {
                 'ALFAJORES': 'Alfajor Artesanal',
                 'CONFITERIA': 'Dulce Artesanal',
                 'CHOCOLATES': 'Chocolate Fino',
-                'GALLETAS': 'Galleta Tradicional'
+                'GALLETAS': 'Galleta Tradicional',
+                'REGALOS CORPORATIVOS': 'Regalo Corporativo'
             }[categoria]
 
-            # Campos adaptados a modelos típicos; evitan valores vacíos y duplicados en SKU
-            kwargs = {
-                "nombre": f"{nombre_base} Lilis {i:03d}",
-                "categoria": categoria,
-                "descripcion": f"Producto {nombre_base.lower()} hecho a mano.",
-                "precio_venta": round(random.uniform(500, 5000), 2),
-                "stock_actual": random.randint(0, 300),
-                "lote": f"L{i:04d}",
-                "proveedor": random.choice(list(Proveedor.objects.all())) if Proveedor.objects.exists() else None,
-                "stock": random.choice(['ALTO','BAJO']) if "stock" in [f.name for f in Producto._meta.get_fields()] else None,
-                "sku": f"SKU{i:05d}",
-                "ean_upc": str(random.randint(10**12, 10**13 - 1)),
-            }
+            precio_venta = round(random.uniform(500, 5000), 2)
+            costo_estandar = round(precio_venta * random.uniform(0.35, 0.85), 2)
 
-            # Limpiar None keys que no existan en el modelo
-            model_fields = {f.name for f in Producto._meta.get_fields()}
-            clean_kwargs = {k: v for k, v in kwargs.items() if k in model_fields and v is not None}
+            unidad_compra = random.choice(unidades)
+            unidad_venta = random.choice(unidades)
 
-            productos.append(Producto(**clean_kwargs))
+            perecible_default = categoria not in ['REGALOS CORPORATIVOS']
+            estado = random.random() < 0.8  # 80% activos
+
+            productos.append(
+                Producto(
+                    sku=f"SKU{i:05d}",
+                    ean_upc=str(random.randint(10**12, 10**13 - 1)),
+                    nombre=f"{nombre_base} Lilis {i:03d}",
+                    descripcion=f"Producto {nombre_base.lower()} hecho a mano.",
+                    categoria=categoria,
+                    marca=random.choice(marcas),
+                    modelo=random.choice(modelos),
+                    uom_compra=unidad_compra,
+                    uom_venta=unidad_venta,
+                    factor_conversion=1.0,
+                    costo_estandar=costo_estandar,
+                    precio_venta=precio_venta,
+                    impuesto_iva=19.0,
+                    stock_minimo=0,
+                    stock_maximo=random.randint(50, 300),
+                    punto_reorden=random.randint(10, 50),
+                    perishable=perecible_default,
+                    control_por_lote=True,
+                    activo=estado,
+                    proveedor=random.choice(proveedores_list) if proveedores_list else None,
+                )
+            )
 
         Producto.objects.bulk_create(productos)
         self.stdout.write(f"✔ {len(productos)} productos creados.")
