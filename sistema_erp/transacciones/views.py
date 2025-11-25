@@ -14,9 +14,19 @@ from .forms import MovimientoInventarioForm
 # ---------------- LISTA ----------------
 @login_required
 def lista_transacciones(request):
+    # qs = MovimientoInventario.objects.select_related(
+    #     'producto', 'proveedor', 'usuario', 'bodega_origen', 'bodega_destino'
+    # )
+
+    # --- SOLUCIÓN ---
+    # Usamos prefetch_related para los campos que pueden ser NULOS (bodegas)
+    # y select_related para los que no.
     qs = MovimientoInventario.objects.select_related(
-        'producto', 'proveedor', 'usuario', 'bodega_origen', 'bodega_destino'
+        'producto', 'proveedor', 'usuario'
+    ).prefetch_related(
+        'bodega_origen', 'bodega_destino'
     )
+    # ----------------
 
     # Filtros de texto (SKU/nombre producto, proveedor, usuario, tipo, bodega, lote, serie, doc ref, motivo)
     q = (request.GET.get('q') or '').strip()
