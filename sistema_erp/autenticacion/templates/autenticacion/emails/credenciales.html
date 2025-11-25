@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credenciales de Acceso - Lilis ERP</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px 0;">
+        <tr>
+            <td align="center">
+                <!-- Container principal -->
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    <!-- Header con logo y fondo rojo -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #D10A11 0%, #8B0A0E 100%); padding: 40px 30px; text-align: center;">
+                            <img src="{% static 'assets/logolilis_ver1.png' %}" alt="Lilis" style="max-width: 120px; height: auto; margin-bottom: 10px;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">Bienvenido a Lilis ERP</h1>
+                        </td>
+                    </tr>
+                    
+                    <!-- Contenido -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <p style="color: #333; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+                                Hola <strong>{{ nombre }}</strong>,
+                            </p>
+                            
+                            <p style="color: #555; font-size: 15px; line-height: 1.6; margin: 0 0 25px;">
+                                Se ha creado tu cuenta en el sistema ERP Lilis. A continuación encontrarás tus credenciales de acceso:
+                            </p>
+                            
+                            <!-- Caja de credenciales -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6; margin-bottom: 25px;">
+                                <tr>
+                                    <td style="padding: 25px;">
+                                        <p style="margin: 0 0 15px; color: #333; font-size: 14px; font-weight: 600;">
+                                            📧 Usuario:
+                                        </p>
+                                        <p style="margin: 0 0 20px; color: #D10A11; font-size: 18px; font-weight: bold;">
+                                            {{ username }}
+                                        </p>
+                                        
+                                        <p style="margin: 0 0 15px; color: #333; font-size: 14px; font-weight: 600;">
+                                            🔑 Contraseña provisoria:
+                                        </p>
+                                        <p style="margin: 0; background-color: #fff; padding: 12px; border-radius: 5px; border: 2px dashed #D10A11; color: #D10A11; font-size: 20px; font-weight: bold; font-family: 'Courier New', monospace; letter-spacing: 2px;">
+                                            {{ password }}
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Advertencia de seguridad -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px; margin-bottom: 25px;">
+                                <tr>
+                                    <td style="padding: 15px;">
+                                        <p style="margin: 0; color: #856404; font-size: 14px; line-height: 1.5;">
+                                            ⚠️ <strong>Importante:</strong> Por seguridad, deberás cambiar tu contraseña en el primer inicio de sesión. No compartas estas credenciales con nadie.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Botón de acceso -->
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td align="center" style="padding: 10px 0 25px;">
+                                        <a href="{{ url_login }}" style="display: inline-block; background: linear-gradient(135deg, #D10A11 0%, #8B0A0E 100%); color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 25px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 10px rgba(209, 10, 17, 0.3);">
+                                            Acceder al Sistema
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="color: #777; font-size: 13px; line-height: 1.6; margin: 0;">
+                                Si el botón no funciona, copia y pega este enlace en tu navegador:<br>
+                                <a href="{{ url_login }}" style="color: #D10A11; word-break: break-all;">{{ url_login }}</a>
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8f9fa; padding: 25px 30px; border-top: 1px solid #dee2e6;">
+                            <p style="margin: 0 0 10px; color: #666; font-size: 13px; text-align: center;">
+                                <strong>Lilis</strong><br>
+                                Móvil: +569 6226 1712<br>
+                                Email: ventas@lilis.cl
+                            </p>
+                            <p style="margin: 0; color: #999; font-size: 12px; text-align: center;">
+                                Paseo San Ramón - Waldo Alcalde 401, local 8, San Ramón, Coquimbo
+                            </p>
+                            <p style="margin: 15px 0 0; color: #999; font-size: 11px; text-align: center;">
+                                © 2025 Lilis. Todos los derechos reservados.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -60,36 +60,63 @@ def generar_password_robusta():
     return ''.join(password)
 
 
-def enviar_correo_clave_provisoria(usuario, password_provisoria):
+def enviar_correo_clave_provisoria(usuario, password_provisoria, es_reset=False):
     """
-    Envía un correo al usuario con su contraseña provisoria.
+    Envía un correo al usuario con su contraseña provisoria usando template HTML.
     Usa timeout corto para no bloquear la respuesta.
+    
+    Args:
+        usuario: Objeto User de Django
+        password_provisoria: Contraseña temporal generada
+        es_reset: True si es un reset de contraseña, False si es creación de usuario
     """
     try:
-        asunto = 'Bienvenido - Credenciales de acceso'
-        mensaje = f"""Hola {usuario.first_name or usuario.username},
-
-Se ha creado tu cuenta en el sistema ERP Lilis.
-
-Tus credenciales de acceso son:
-- Usuario: {usuario.username}
-- Contraseña provisoria: {password_provisoria}
-
-Por seguridad, deberás cambiar tu contraseña en el primer inicio de sesión.
-
-Accede al sistema en: http://127.0.0.1:8000/login/
-
-Saludos,
-Equipo Lilis
-"""
-        # Enviar con timeout de 5 segundos y fail_silently para no bloquear
-        from django.core.mail import EmailMessage
-        email = EmailMessage(
+        from django.template.loader import render_to_string
+        from django.utils.html import strip_tags
+        from email.mime.image import MIMEImage
+        import os
+        
+        # Determinar el template y asunto según el tipo de correo
+        if es_reset:
+            template_name = 'autenticacion/emails/reset_password.html'
+            asunto = 'Contraseña Restablecida - Lilis ERP'
+        else:
+            template_name = 'autenticacion/emails/credenciales.html'
+            asunto = 'Bienvenido - Credenciales de Acceso - Lilis ERP'
+        
+        # Contexto para el template
+        context = {
+            'nombre': usuario.first_name or usuario.username,
+            'username': usuario.username,
+            'password': password_provisoria,
+            'url_login': 'http://127.0.0.1:8000/autenticacion/login/',
+        }
+        
+        # Renderizar el template HTML
+        html_message = render_to_string(template_name, context)
+        # Crear versión de texto plano
+        plain_message = strip_tags(html_message)
+        
+        # Enviar con timeout de 3 segundos y fail_silently para no bloquear
+        from django.core.mail import EmailMultiAlternatives
+        email = EmailMultiAlternatives(
             asunto,
-            mensaje,
+            plain_message,
             settings.DEFAULT_FROM_EMAIL,
             [usuario.email]
         )
+        email.attach_alternative(html_message, "text/html")
+        
+        # Adjuntar logo como imagen embebida
+        logo_path = os.path.join(settings.BASE_DIR, 'autenticacion', 'static', 'assets', 'logolilis_ver2.png')
+        if os.path.exists(logo_path):
+            with open(logo_path, 'rb') as f:
+                logo_data = f.read()
+                logo = MIMEImage(logo_data)
+                logo.add_header('Content-ID', '<logo>')
+                logo.add_header('Content-Disposition', 'inline', filename='logo.png')
+                email.attach(logo)
+        
         email.send(fail_silently=True)
         return True
     except Exception as e:
@@ -348,7 +375,16 @@ def usuarios_edit_view(request, id):
 @login_required
 def usuarios_detail_view(request, id):
     perfil = get_object_or_404(Perfil, id=id)
-    return render(request, 'usuarios/details.html', {'perfil': perfil})
+    
+    # Verificar si se reseteo la contraseña exitosamente
+    show_reset_alert = request.session.pop('password_reset_success', False)
+    reset_email = request.session.pop('password_reset_email', '')
+    
+    return render(request, 'usuarios/details.html', {
+        'perfil': perfil,
+        'show_reset_alert': show_reset_alert,
+        'reset_email': reset_email,
+    })
 
 
 # ---------------- ELIMINAR ----------------
@@ -459,13 +495,6 @@ def export_usuarios_excel(request):
     return response
 
 
-# ---------------- DETALLE ----------------
-@login_required
-def usuarios_detail_view(request, id):
-    perfil = get_object_or_404(Perfil, id=id)
-    return render(request, 'usuarios/details.html', {'perfil': perfil})
-
-
 # ---------------- RESETEAR CONTRASEÑA (RQ-USR-06) ----------------
 @login_required
 def usuarios_reset_password_view(request, id):
@@ -496,15 +525,21 @@ def usuarios_reset_password_view(request, id):
                 perfil.debe_cambiar_clave = True
                 perfil.save()
                 
-                # Enviar correo con la nueva clave
-                correo_enviado = enviar_correo_clave_provisoria(usuario, password_provisoria)
-                
-                if correo_enviado:
-                    messages.success(request, f"Contraseña reseteada exitosamente. Se envió un correo a {usuario.email} con la nueva clave provisoria.")
-                else:
-                    messages.warning(request, f"Contraseña reseteada, pero hubo un error al enviar el correo. Nueva clave: {password_provisoria}")
-                
-                return redirect(reverse('usuarios_detail', args=[perfil.id]))
+            # Enviar correo en segundo plano con el template de reset
+            def enviar_correo_background():
+                try:
+                    enviar_correo_clave_provisoria(usuario, password_provisoria, es_reset=True)
+                except:
+                    pass  # Silenciar errores en el thread
+            
+            thread = threading.Thread(target=enviar_correo_background)
+            thread.daemon = True
+            thread.start()
+            
+            # Marcar en sesión para mostrar SweetAlert
+            request.session['password_reset_success'] = True
+            request.session['password_reset_email'] = usuario.email
+            return redirect(reverse('usuarios_detail', args=[perfil.id]))
         except Exception as e:
             messages.error(request, f"Error al resetear la contraseña: {str(e)}")
             return redirect(reverse('usuarios_detail', args=[perfil.id]))

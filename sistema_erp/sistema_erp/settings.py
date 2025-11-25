@@ -180,7 +180,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_TIMEOUT = 5  # Timeout de 5 segundos para evitar bloqueos largos
+EMAIL_TIMEOUT = 3  # Timeout de 3 segundos para envío más rápido
 
 # IMPORTANTE: Usa CLAVE DE APLICACIÓN (no tu contraseña real)
 EMAIL_HOST_USER = 'rm434308@gmail.com'

@@ -137,6 +137,11 @@ def restablecer_password_view(request, uidb64, token):
 # ------------------------------
 @login_required
 def cambiar_password_view(request):
+    # Limpiar mensajes antiguos al cargar la vista en GET
+    if request.method == 'GET':
+        storage = messages.get_messages(request)
+        storage.used = True
+    
     perfil = Perfil.objects.filter(usuario=request.user).first()
     es_cambio_obligatorio = perfil.debe_cambiar_clave if perfil else False
     
